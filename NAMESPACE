@@ -1,0 +1,10 @@
+
+import( methods, graphics, MASS, splines, lattice, IRanges )
+
+export( readBins, mosaicsFit, mosaicsPeak )
+
+export( show, print, plot )
+
+export( estimates )
+
+export( export )
