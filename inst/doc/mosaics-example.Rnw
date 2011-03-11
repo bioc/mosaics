@@ -106,11 +106,11 @@ Bin-level data can be imported to the R environment with the command:
 
 <<ts-readbin>>=
 exampleBinData <- readBins( type=c("chip","input","M","GC","N"),
-    fileName=c( system.file("extdata/chip_chr21.txt", package="mosaicsExample"),
-    system.file("extdata/input_chr21.txt", package="mosaicsExample"),
-    system.file("extdata/M_chr21.txt", package="mosaicsExample"),
-    system.file("extdata/GC_chr21.txt", package="mosaicsExample"),
-    system.file("extdata/N_chr21.txt", package="mosaicsExample") ) )
+    fileName=c( system.file( file.path("extdata","chip_chr21.txt"), package="mosaicsExample"),
+    system.file( file.path("extdata","input_chr21.txt"), package="mosaicsExample"),
+    system.file( file.path("extdata","M_chr21.txt"), package="mosaicsExample"),
+    system.file( file.path("extdata","GC_chr21.txt"), package="mosaicsExample"),
+    system.file( file.path("extdata","N_chr21.txt"), package="mosaicsExample") ) )
 @
 
 For the  `\texttt{type}' argument, \texttt{"chip"}, \texttt{"input"},
@@ -376,11 +376,11 @@ peak. Peak calling results can be exported in TXT, BED, and GFF file formats,
 respectively, by the commands:
 
 <<ts-mosaicspeak-export>>=
-export( examplePeak, type="txt", fileLoc="./",
+export( examplePeak, type="txt", fileLoc=".",
  fileName="TSpeakList.txt", chrID="chr21" )
-export( examplePeak, type="bed", fileLoc="./",
+export( examplePeak, type="bed", fileLoc=".",
  fileName="TSpeakList.bed", chrID="chr21" )
-export( examplePeak, type="gff", fileLoc="./", 
+export( examplePeak, type="gff", fileLoc=".", 
  fileName="TSpeakList.gff", chrID="chr21" )
 @
 
@@ -400,10 +400,10 @@ the one-sample analysis can be imported to the R environment with the command:
 
 <<os-readbin>>=
 OneSampleBinData <- readBins( type=c("chip","M","GC","N"),
-    fileName=c( system.file("extdata/chip_chr21.txt", package="mosaicsExample"),
-    system.file("extdata/M_chr21.txt", package="mosaicsExample"),
-    system.file("extdata/GC_chr21.txt", package="mosaicsExample"),
-    system.file("extdata/N_chr21.txt", package="mosaicsExample") ) )
+    fileName=c( system.file( file.path("extdata","chip_chr21.txt"), package="mosaicsExample"),
+    system.file( file.path("extdata","M_chr21.txt"), package="mosaicsExample"),
+    system.file( file.path("extdata","GC_chr21.txt"), package="mosaicsExample"),
+    system.file( file.path("extdata","N_chr21.txt"), package="mosaicsExample") ) )
 @
 
 Note that you don't need to provide `\texttt{"input"}' in `\texttt{type}' and
@@ -443,8 +443,8 @@ with the commands:
 
 <<io-readbin>>=
 inputOnlyBinData <- readBins( type=c("chip","input"),
-    fileName=c( system.file("extdata/chip_chr21.txt", package="mosaicsExample"),
-    system.file("extdata/input_chr21.txt", package="mosaicsExample") ) )
+    fileName=c( system.file( file.path("extdata","chip_chr21.txt"), package="mosaicsExample"),
+    system.file( file.path("extdata","input_chr21.txt"), package="mosaicsExample") ) )
 @
 <<io-mosaicsfit-io-readbin,eval=FALSE>>=
 inputOnlyFit <- mosaicsFit( inputOnlyBinData, analysisType="IO" )
