@@ -215,7 +215,10 @@ setMethod(
             
             plot( log10(YVal+1), log10(YFreq), type='l', axes=FALSE, 
                 ylab='Frequency', xlab='Tag count', main='Histogram of tag count' )
-            points( log10(XVal+1), log10(XFreq), type='l', col='darkgray' )
+            
+	    if ( length(x@input)>0 ) {                       
+	       points( log10(XVal+1), log10(XFreq), type='l', col='darkgray' )
+	    }
             axis(1,0:6,10^c(0:6)-1)
             axis(2,0:10,10^c(0:10))
             
