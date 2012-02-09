@@ -13,14 +13,15 @@ a statistical framework to analyze one-sample or two-sample ChIP-seq data.
 \tabular{ll}{
 Package: \tab mosaics\cr
 Type: \tab Package\cr
-Version: \tab 1.0.1\cr
-Date: \tab 2011-05-05\cr
+Version: \tab 1.3.0\cr
+Date: \tab 2012-02-15\cr
 License: \tab GPL (>= 2)\cr
 LazyLoad: \tab yes\cr
 }
 This package contains three main classes, \code{BinData}, \code{MosaicsFit}, and \code{MosaicsPeak},
 which represent bin-level ChIP-seq data, MOSAiCS model fit, and MOSAiCS peak calling results, respectively.
 This package contains three main methods,\code{readBins}, \code{mosaicsFit}, and \code{mosaicsPeak}.
+\code{constructBins} method constructs bin-level files from the aligned read file.
 \code{readBins} method imports bin-level data and construct \code{BinData} class object.
 \code{mosaicsFit} method fits MOSAiCS model using \code{BinData} class object and
  constructs \code{MosaicsFit} class object.
@@ -43,12 +44,13 @@ Dongjun Chung, Pei Fen Kuan, Sunduz Keles
 Maintainer: Dongjun Chung <chungdon@stat.wisc.edu>
 }
 \references{
-Kuan, PF, D Chung, JA Thomson, R Stewart, and S Keles (2010), "A Statistical Framework
-for the Analysis of ChIP-Seq Data", submitted (\url{http://works.bepress.com/sunduz_keles/19/}).
+Kuan, PF, D Chung, G Pan, JA Thomson, R Stewart, and S Keles (2011), 
+"A Statistical Framework for the Analysis of ChIP-Seq Data", 
+\emph{Journal of the American Statistical Association}, Vol. 106, pp. 891-903.
 }
 \keyword{ package }
 \seealso{
-\code{\link{readBins}}, \code{\link{mosaicsFit}}, \code{\link{mosaicsPeak}} ,
+\code{\link{constructBins}}, \code{\link{readBins}}, \code{\link{mosaicsFit}}, \code{\link{mosaicsPeak}} ,
 \code{\linkS4class{BinData}}, \code{\linkS4class{MosaicsFit}}, \code{\linkS4class{MosaicsPeak}}.
 }
 \examples{
@@ -80,8 +82,8 @@ examplePeak <- mosaicsPeak( exampleFit, signalModel = "2S", FDR = 0.05 )
 
 examplePeak
 print(examplePeak)[1:10, ]
-export( examplePeak, type = "txt", fileLoc = "./", fileName = "TSpeakList.txt", chrID = "chr21" )
-export( examplePeak, type = "bed", fileLoc = "./", fileName = "TSpeakList.bed", chrID = "chr21" )
-export( examplePeak, type = "gff", fileLoc = "./", fileName = "TSpeakList.gff", chrID = "chr21" )
+export( examplePeak, type = "txt", fileLoc = "./", fileName = "TSpeakList.txt" )
+export( examplePeak, type = "bed", fileLoc = "./", fileName = "TSpeakList.bed" )
+export( examplePeak, type = "gff", fileLoc = "./", fileName = "TSpeakList.gff" )
 }
 }

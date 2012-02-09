@@ -3,7 +3,7 @@
 # Z1 with mixture of 2 signal components
 #########################################################
 
-.mosaicsZ1_2S <- function( MOSAiCS_Z0, Y, k=3 )
+.mosaicsZ1_2S <- function( MOSAiCS_Z0, Y, pNfit, k=3 )
 {
     ##################################################################
     ### initialization of the main EM
@@ -41,14 +41,15 @@
         # risk level = extremely high
         stop( "over-estimation of background detected. Please tune the parameters!" )
     } else if ( Y_bd[which.max(Y_bd[,2]),2] / sum(Y_bd[,2]) >= 0.90 ) {
-    		# almost nothing left after background are excluded from the data
+        # almost nothing left after background are excluded from the data
         # risk level = very high
         stop( "over-estimation of background detected. Please tune the parameters!" )
     } else if ( Y_bd[which.max(Y_bd[,2]),2] / sum(Y_bd[,2]) >= 0.80 ) {
-    		# still not much left after background are excluded from the data
-    		# rick level = medium high
-    		warning( "there is some possibility of background over-estimation.\n" )
-    		warning( "parameter tuning might provide better fits.\n" )
+        # still not much left after background are excluded from the data
+        # rick level = medium high
+        warning( "there is some possibility of background over-estimation.\n" )
+        warning( "parameter tuning might provide better fits.\n" )
+        Y_bd_all <- rep(Y_bd[,1],Y_bd[,2])
     } else {
         Y_bd_all <- rep(Y_bd[,1],Y_bd[,2])
     }    
@@ -169,8 +170,9 @@
     
     # Initialization of the main EM calculation
     
-    PYZ0 <- dnbinom( Y_ori, a, b_est_Z1/(b_est_Z1+1) )
-    pNfit <- .calcPN( Y_ori, k, a, mu_est_Z1 ) 
+    #PYZ0 <- dnbinom( Y_ori, a, b_est_Z1/(b_est_Z1+1) )
+    PYZ0 <- pNfit$PYZ0
+    #pNfit <- .calcPN( Y_ori, k, a, mu_est_Z1 ) 
     PYZ1 <- .margDistZ1_2S( Y_ori, pNfit, b1_init, c1_init, b2_init, c2_init )
 
     PYZ1G1 <- PYZ1$MDG1
@@ -181,6 +183,7 @@
     b2_iter <- b2_init
     c2_iter <- c2_init
     p1 <- p1_init
+    p1_iter <- p1_init
     
     
     # main EM iteration
@@ -217,8 +220,9 @@
         
         # stop iteration if assumptions are not satisfied
         
-        if ( b1<0 | c1<0 | b2<0 | c2<0 )
+        if ( p1<0.01 | b1<0 | c1<0 | b2<0 | c2<0 )
         {
+            p1 <- p1_iter[(iter-1)]
             b1 <- b1_iter[(iter-1)]
             c1 <- c1_iter[(iter-1)]
             b2 <- b2_iter[(iter-1)]
@@ -227,6 +231,8 @@
         }
         
         # calculate P(Y|Z=1,G=1) and P(Y|Z=1,G=2)
+        
+        #print( "calculate P(Y|Z=1,G=1) and P(Y|Z=1,G=2)" )
 
         PYZ1 <- .margDistZ1_2S( Y_ori, pNfit, b1, c1, b2, c2)
 
@@ -236,7 +242,17 @@
         # update iteration
 
         logLik_t <- sum( log( pi0*PYZ0 + (1-pi0)*( p1*PYZ1G1 + (1-p1)*PYZ1G2) ) )
+        if ( is.na(logLik_t) | is.nan(logLik_t) ) {
+            p1 <- p1_iter[(iter-1)]
+            b1 <- b1_iter[(iter-1)]
+            c1 <- c1_iter[(iter-1)]
+            b2 <- b2_iter[(iter-1)]
+            c2 <- c2_iter[(iter-1)]
+            logLik_t <- logLik[(iter-1)]
+            break
+        }
         logLik <- c( logLik, logLik_t )
+        p1_iter <- c(p1_iter, p1)
         b1_iter <- c(b1_iter, b1)
         c1_iter <- c(c1_iter, c1)
         b2_iter <- c(b2_iter, b2)
@@ -272,19 +288,23 @@
     pS1 <- dnbinom( 0:Ymax, b1, c1/(c1+1) )
     pS2 <- dnbinom( 0:Ymax, b2, c2/(c2+1) )
     MDG <- matrix( 0, length(Y), 2 )            
-    MDGfit <- apply( cbind( Y, mu_round )[ ind_ge_k, ], 1, 
-        function(x) {
-            Y.i <- x[1]
-            mu.i <- x[2]
-            pN.i <- pN[ mu_round_U==mu.i, 1:(Y.i+1) ]     
-            
-            returnVal <- c( 
-                sum( rev(pS1[1:(Y.i+1)]) * pN.i ), 
-                sum( rev(pS2[1:(Y.i+1)]) * pN.i ) )
-            
-            return( returnVal )
-        }
-    )
+    #MDGfit <- apply( cbind( Y, mu_round )[ ind_ge_k, ], 1, 
+    #    function(x) {
+    #        Y.i <- x[1]
+    #        mu.i <- x[2]
+    #        pN.i <- pN[ mu_round_U==mu.i, 1:(Y.i+1) ]     
+    #        
+    #        returnVal <- c( 
+    #            sum( rev(pS1[1:(Y.i+1)]) * pN.i ), 
+    #            sum( rev(pS2[1:(Y.i+1)]) * pN.i ) )
+    #        
+    #        return( returnVal )
+    #    }
+    #)
+    
+    MDGfit <- conv_2S( y=Y[ind_ge_k], mu_round=mu_round[ind_ge_k],
+        mu_round_U=mu_round_U, pN=pN, pS1=pS1, pS2=pS2 )
+    MDGfit <- matrix( MDGfit, nrow=2 )  
     MDG[ ind_ge_k, ] <- t(MDGfit)
     
     return( list( MDG1 = MDG[,1], MDG2 = MDG[,2] ) )

@@ -1,6 +1,11 @@
 
 # generic methods for "BinData" class
 
+setGeneric( "chrID",
+    function( object, ... )
+    standardGeneric("chrID")
+)
+
 setGeneric( "coord",
     function( object, ... )
     standardGeneric("coord")

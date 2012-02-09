@@ -40,14 +40,14 @@ setMethod(
         cat( "setting: FDR = ", FDR, ", maxgap = ", maxgap,
             ", minsize = ", minsize, ", thres = ", thres, "\n", sep="" )
         if ( length( object@peakList$peakStart ) > 0 ) {
-		        cat( "# of peaks = ", nrow(object@peakList), "\n", sep="" )
-		        cat( "median peak width = ", median(object@peakList$peakSize), "\n", sep="" )
-		        cat( "empirical FDR = ", round(empFDR(object)*10000)/10000, "\n", sep="" )
-		    } else {
-		        # exception handling (no peak case)
-						
-						cat( "(no peak detected)\n" )
-		    }
+            cat( "# of peaks = ", nrow(object@peakList), "\n", sep="" )
+            cat( "median peak width = ", median(object@peakList$peakSize), "\n", sep="" )
+            cat( "empirical FDR = ", round(empFDR(object)*10000)/10000, "\n", sep="" )
+        } else {
+            # exception handling (no peak case)
+                    
+            cat( "(no peak detected)\n" )
+        }
         cat( "--------------------------------------------------\n" )
     }
 )
@@ -59,20 +59,20 @@ setMethod(
         peakList <- x@peakList
         
         if ( nrow(peakList) > 0 ) {
-		        printForm <- x@peakList
-		        return(printForm)
-		    } else {
-		        # exception handling (no peak case)
-		        
-		        message( "Info: no peak detected. Nothing can be returned." )		    
-		    }
+            printForm <- x@peakList
+            return(printForm)
+        } else {
+            # exception handling (no peak case)
+            
+            message( "Info: no peak detected. Nothing can be returned." )           
+        }
     }
 )
 
 setMethod(
     f="export",
     signature="MosaicsPeak",
-    definition=function( object, type=NA, fileLoc=NA, fileName=NA, chrID=NA ) {
+    definition=function( object, type=NA, fileLoc=NA, fileName=NA ) {
         # error treatment: check invalid type
         
         if ( is.na(type) )
@@ -117,37 +117,28 @@ setMethod(
             fileName <- paste("peakList.",type,sep="")
         }
         
-        # error treatment: 'chrID' not specified
-        
-        if ( is.na(chrID) )
-        {
-            message( "Info: 'chrID' is not specified by the user." )
-            message( "Info: 'chrID' is specified as 'chrNA' instead." )
-            chrID <- "chrNA"
-        }
-        
         # export peak lists
         
         peakList <- object@peakList
         
         if ( nrow(object@peakList) > 0 ) {        
-		        message( "Info: exporting the peak list..." )
-		        switch( type,
-		            "gff" = {
-		                .exportGFF( peakList=peakList, fileLoc=fileLoc, fileName=fileName, chrID=chrID )
-		            },
-		            "bed" = {
-		                .exportBED( peakList=peakList, fileLoc=fileLoc, fileName=fileName, chrID=chrID )
-		            },
-		            "txt" = {
-		                .exportTXT( peakList=peakList, fileLoc=fileLoc, fileName=fileName, chrID=chrID )
-		            }
-		        )
-		    } else {
-		        # exception handling (no peak case)
-		        
-		        message( "Info: no peak detected. Nothing exported." )
-		    }
+                message( "Info: exporting the peak list..." )
+                switch( type,
+                    "gff" = {
+                        .exportGFF( peakList=peakList, fileLoc=fileLoc, fileName=fileName )
+                    },
+                    "bed" = {
+                        .exportBED( peakList=peakList, fileLoc=fileLoc, fileName=fileName )
+                    },
+                    "txt" = {
+                        .exportTXT( peakList=peakList, fileLoc=fileLoc, fileName=fileName )
+                    }
+                )
+            } else {
+                # exception handling (no peak case)
+                
+                message( "Info: no peak detected. Nothing exported." )
+            }
     }
 )
 

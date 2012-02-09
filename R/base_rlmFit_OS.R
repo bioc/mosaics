@@ -11,8 +11,11 @@
         stop( "insufficient # of proper strata! Cannot proceed!" )
     }
     
+    # do not excluded estimtes from MOM (ver 1.0.2) 
+    
     #idNA <- unique( c( which(is.na(parEst$a_u)==TRUE), which(as.character(parEst$ty_u)=='MM') ) )
-    idNA <- which( is.na(parEst$a_u) | as.character(parEst$ty_u)=='MM' )
+    #idNA <- which( is.na(parEst$a_u) | as.character(parEst$ty_u)=='MM' )
+    idNA <- which( is.na(parEst$a_u) )
     if ( length(idNA)>0 ) {
         a_u <- parEst$a_u[-idNA]
         mu_u <- parEst$a_u[-idNA] / parEst$b_u[-idNA]
@@ -33,30 +36,37 @@
     
     
     # exclude mu>Yhat points
-
-    id_bigmean <- which( ( mu_u - mean0 ) > mean_thres )
-    if( length(id_bigmean)>0 ) {
-        a_u <- a_u[-id_bigmean]
-        mu_u <- mu_u[-id_bigmean]
-        M_u <- M_u[-id_bigmean]
-        GC_u <- GC_u[-id_bigmean]
-        n_u <- n_u[-id_bigmean]
-        mean0 <- mean0[-id_bigmean]
-        var0 <- var0[-id_bigmean]
+    
+    Y_freq <- table(Y)
+    
+    if( sum(Y_freq[ as.numeric(names(Y_freq))<=2 ])/sum(Y_freq) > 0.5 ) {    
+	id_bigmean <- which( ( mu_u - mean0 ) > mean_thres )
+	if( length(id_bigmean)>0 ) {
+		a_u <- a_u[-id_bigmean]
+		mu_u <- mu_u[-id_bigmean]
+		M_u <- M_u[-id_bigmean]
+		GC_u <- GC_u[-id_bigmean]
+		n_u <- n_u[-id_bigmean]
+		mean0 <- mean0[-id_bigmean]
+		var0 <- var0[-id_bigmean]
+	}
     }
     
     
     # estimators of a
 
-    t_n_sq <- length(a_u)
-    
-    idNA <- which( a_u>quantile(a_u,prob=0.95) | a_u<quantile(a_u,prob=0.05) )
-    if(length(idNA)>0){
-        a_u_wq <- a_u[-idNA]
-        n_u_wq <- n_u[-idNA]
-        a_wq_strata <- sum(n_u_wq*a_u_wq) / sum(n_u_wq)
-    }    
-    
+    if( sum(Y_freq[ as.numeric(names(Y_freq))<=2 ])/sum(Y_freq) > 0.5 ) {
+	t_n_sq <- length(a_u)
+	
+	idNA <- which( a_u>quantile(a_u,prob=0.95) | a_u<quantile(a_u,prob=0.05) )
+	if(length(idNA)>0){
+		a_u_wq <- a_u[-idNA]
+		n_u_wq <- n_u[-idNA]
+		a_wq_strata <- sum(n_u_wq*a_u_wq) / sum(n_u_wq)
+	}    
+    } else {
+    	a_wq_strata <- sum(n_u*a_u)/sum(n_u)
+    }
     
     # sample size weighted rlm fit    
     

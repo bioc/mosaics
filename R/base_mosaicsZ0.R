@@ -1,13 +1,16 @@
 
-.mosaicsZ0 <- function( Y, analysisType=NA, X=NA, M=NA, GC=NA, truncProb=0.9999 )
+#.mosaicsZ0 <- function( Y, analysisType=NA, X=NA, M=NA, GC=NA, truncProb=0.9999, Y_freq )
+.mosaicsZ0 <- function( Y, bgEst=NA, analysisType=NA, 
+    X=NA, M=NA, GC=NA, inputTrunc=NA, Y_freq )
 {    
     #library(MASS)    
     
     # truncate X for input only analysis
     
     if ( analysisType=="IO" ) {
-        trunc <- quantile( X, prob=truncProb )
-        X[which(X>trunc)] <- trunc
+        #trunc <- quantile( X, prob=truncProb )
+        #X[which(X>trunc)] <- trunc
+        X[which(X>inputTrunc)] <- inputTrunc
     }
     
     # construct unique M/GC pair
@@ -28,13 +31,14 @@
     if ( analysisType=="IO" ) {
         indStrata <- as.numeric(as.vector(names(ySubList)))
     } else {
-        indStrata <- apply( as.matrix(names(ySubList)), 1, function(x){as.numeric(strsplit(x, ":")[[1]])} )
+        indStrata <- apply( as.matrix(names(ySubList)), 1, 
+            function(x){as.numeric(strsplit(x, ":")[[1]])} )
         indStrata <- t(indStrata)    
     }
     
     # calculate strata-specific parameters
     
-    yParamList <- lapply( ySubList, .getParamZ0 )
+    yParamList <- lapply( ySubList, function(x) .getParamZ0( x, bgEst=bgEst, Y_freq=Y_freq ) )
     yParamMat <- matrix( unlist(yParamList), ncol = 9, byrow = TRUE )
     
     # decode ty
@@ -67,7 +71,7 @@
         },
         IO = {
             parEstZ0$X_u <- indStrata
-            parEstZ0$trunc <- trunc      
+            #parEstZ0$trunc <- trunc      
         }
     )
         

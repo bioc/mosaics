@@ -3,7 +3,7 @@
 # Z1 with 1 signal component
 #########################################################
 
-.mosaicsZ1_1S <- function( MOSAiCS_Z0, Y, k=3 )
+.mosaicsZ1_1S <- function( MOSAiCS_Z0, Y, pNfit, k=3 )
 {
     ##################################################################
     ### initialization of the main EM
@@ -19,6 +19,8 @@
     
     
     # Initialization for initial EM iteration
+    
+    #print( "initialization" )
     
     #Eyz0 <- Y_Z1_tmp <- rep(0,length(Y_u))
     Eyz0 <- rep(0,length(Y_u))                  # N_Z0(y)
@@ -41,14 +43,15 @@
         # risk level = extremely high
         stop( "over-estimation of background detected. Please tune the parameters!" )
     } else if ( Y_bd[which.max(Y_bd[,2]),2] / sum(Y_bd[,2]) >= 0.90 ) {
-    		# almost nothing left after background are excluded from the data
+        # almost nothing left after background are excluded from the data
         # risk level = very high
         stop( "over-estimation of background detected. Please tune the parameters!" )
     } else if ( Y_bd[which.max(Y_bd[,2]),2] / sum(Y_bd[,2]) >= 0.80 ) {
-    		# still not much left after background are excluded from the data
-    		# rick level = medium high
-    		warning( "there is some possibility of background over-estimation." )
-    		warning( "parameter tuning might provide better fits." )
+        # still not much left after background are excluded from the data
+        # rick level = medium high
+        warning( "there is some possibility of background over-estimation." )
+        warning( "parameter tuning might provide better fits." )
+        Y_bd_all <- rep(Y_bd[,1],Y_bd[,2])
     } else {
         Y_bd_all <- rep(Y_bd[,1],Y_bd[,2])
     }        
@@ -92,6 +95,8 @@
     ### The main EM calculation: iterate till convergence
     ##################################################################
     
+    #print( "initialization for EM" )
+    
     # calculate EN and vanN
     # (redefine EN after heuristic EN adjustment for initialization)
 
@@ -113,8 +118,9 @@
     
     # Initialization of the main EM calculation
     
-    PYZ0 <- dnbinom( Y_ori, a, b_est_Z1/(b_est_Z1+1) )
-    pNfit <- .calcPN( Y_ori, k, a, mu_est_Z1 ) 
+    #PYZ0 <- dnbinom( Y_ori, a, b_est_Z1/(b_est_Z1+1) )
+    PYZ0 <- pNfit$PYZ0
+    #pNfit <- .calcPN( Y_ori, k, a, mu_est_Z1 ) 
     PYZ1 <- .margDistZ1_1S( Y_ori, pNfit, b_init, c_init )
 
     b_iter <- b_init
@@ -129,6 +135,8 @@
     logLik1 <- sum( log( pi0*PYZ0 + (1-pi0)*PYZ1 ) )
     logLik <- c( -Inf, logLik1 )
     iter <- 2
+    
+    #print( "simulation" )
     
     while( abs(logLik[iter]-logLik[iter-1])>eps & iter < 10 )
     {
@@ -155,12 +163,20 @@
         
         # calculate P(Y|Z=1)
         
+        #print( "calculate P(Y|Z=1)" )
+        
         PYZ1 <- .margDistZ1_1S( Y_ori, pNfit, b, c )
         
         # update iteration
         
         #logLik <- c(logLik, sum(log(pi0*PYZ0 + (1-pi0)*PYZ1)))
         logLik_t <- sum( log( pi0*PYZ0 + (1-pi0)*PYZ1 ) )
+        if ( is.na(logLik_t) | is.nan(logLik_t) ) {
+            b <- b_iter[(iter-1)]
+            c <- c_iter[(iter-1)]
+            logLik_t <- logLik[(iter-1)]
+            break
+        }
         logLik <- c( logLik, logLik_t )
         b_iter <- c(b_iter, b)
         c_iter <- c(c_iter, c)
@@ -183,36 +199,6 @@
         b = b, c = c ) )
 }
 
-
-# calculate P(Y|Z=1) for the current parameters
-
-.calcPN <- function( Yori, k, a, mu_est ) 
-{    
-    # process Y
-    
-    Y <- Yori - k        # use only Y >= k
-    if(length(which(Y<0))>0 ) Y[which(Y<0)] <- -1       
-    
-    # round mu
-
-    mu_round <- round(mu_est,2)
-    if(length(which(Y<0))>0 ) mu_round[which(Y<0)] <- 0
-    mu_round_U <- unique(mu_round)  
-    
-    # prob of N (using rounding mu for prob of S)
-     
-    Ymax <- max(Y)
-    pN <- apply( as.matrix(mu_round_U), 1, 
-        function(x) {
-            b_round <- a / x
-            return( dnbinom( 0:Ymax, a, b_round/(b_round+1) ) )
-        }
-    )
-    pN <- t(pN)
-    
-    return( list( k=k, pN=pN, mu_round=mu_round, mu_round_U=mu_round_U ) )
-}
-
 .margDistZ1_1S <- function( Yori, pNfit, b, c )
 {     
     k <- pNfit$k
@@ -227,18 +213,21 @@
     Ymax <- max(Y)
     ind_ge_k <- which(Y>=0)
     
-    # prob of S
+    # prob of S    
     
     pS <- dnbinom( 0:Ymax, b, c/(c+1) )   
     MDZ1 <- rep( 0, length(Y) )            
-    MDZ1[ ind_ge_k ] <- apply( cbind( Y, mu_round )[ ind_ge_k, ], 1, 
-        function(x) {
-            Y.i <- x[1]
-            mu.i <- x[2]
-            pN.i <- pN[ mu_round_U==mu.i, 1:(Y.i+1) ]     
-            return( sum( rev(pS[1:(Y.i+1)]) * pN.i ) )
-        }
-    )
+    #MDZ1[ ind_ge_k ] <- apply( cbind( Y, mu_round )[ ind_ge_k, ], 1, 
+    #    function(x) {
+    #        Y.i <- x[1]
+    #        mu.i <- x[2]
+    #        pN.i <- pN[ mu_round_U==mu.i, 1:(Y.i+1) ]     
+    #        return( sum( rev(pS[1:(Y.i+1)]) * pN.i ) )
+    #    }
+    #)
+    
+    MDZ1[ ind_ge_k ] <- conv_1S( y=Y[ind_ge_k], mu_round=mu_round[ind_ge_k],
+        mu_round_U=mu_round_U, pN=pN, pS=pS )
     
     return(MDZ1)   
 }

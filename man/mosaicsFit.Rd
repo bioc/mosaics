@@ -9,8 +9,8 @@ Fit one-sample or two-sample MOSAiCS model with one signal component and two sig
 }
 \usage{
 mosaicsFit( object, ... )
-\S4method{mosaicsFit}{BinData}( object, analysisType=NULL, k=3,
-        meanThres=NA, s=2, d=0.25, truncProb=0.9999 )
+\S4method{mosaicsFit}{BinData}( object, analysisType=NULL, bgEst=NA,
+    k=3, meanThres=NA, s=2, d=0.25, truncProb=0.999 )
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -21,8 +21,14 @@ mosaicsFit( object, ... )
         "TS" (two-sample analysis using mappability and GC content), and 
         "IO" (two-sample analysis without using mappability and GC content).
         If \code{analysisType} is not specified,
-				this method tries to guess its best for \code{analysisType}, 
-				based on the data provided. }
+                this method tries to guess its best for \code{analysisType}, 
+                based on the data provided. }
+    \item{bgEst}{Parameter to determine background estimation approach.
+        Possible values are "matchLow" (estimation using bins with low tag counts) and
+        "rMOM" (estimation using robust method of moment (MOM)).
+        If \code{bgEst} is not specified,
+                this method tries to guess its best for \code{bgEst}, 
+                based on the data provided.}    
     \item{k}{Parameter for estimating background distribution.
         It is not recommended for user to change this value. }    
     \item{meanThres}{Parameter for estimating background distribution.
@@ -60,8 +66,9 @@ Do not change \code{k} or \code{truncProb}.
 Construct \code{MosaicsFit} class object.
 }
 \references{
-Kuan, PF, D Chung, JA Thomson, R Stewart, and S Keles (2010), "A Statistical Framework
-for the Analysis of ChIP-Seq Data", submitted (\url{http://works.bepress.com/sunduz_keles/19/}).
+Kuan, PF, D Chung, JA Thomson, R Stewart, and S Keles (2011), 
+"A Statistical Framework for the Analysis of ChIP-Seq Data", 
+\emph{Journal of the American Statistical Association}, Vol. 106, pp. 891-903.
 }
 \author{ Dongjun Chung, Pei Fen Kuan, Sunduz Keles }
 \seealso{

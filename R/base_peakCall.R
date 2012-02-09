@@ -69,13 +69,14 @@
 
     betapH <- postProb$pH0
     betapH_s <- sort(betapH)
-    sbetapH <- cumsum(betapH_s) / c(1:length(betapH))		# expected rate of false discoveries
+    sbetapH <- cumsum(betapH_s) / c(1:length(betapH))       # expected rate of false discoveries
     id <- which( sbetapH <= FDR )
     
     if(length(id)>0)
     {
         #################### if peaks exist
         
+        chrID <- dataSet$chrID
         coord <- dataSet$coord
         Y <- dataSet$Y
         switch( analysisType,
@@ -113,159 +114,212 @@
             #cat( "Info: empirical FDR (after thresholding) = ", 
             #    round(1000*empFDR_thres)/1000, "\n", sep="" )
             
+            # process peaks for each chromosome
             
-            # generate initial peak list
-      
-            bd_ID <- which(bd_bin==1)           # initial peak (bin-level)
-            indRanges <- IRanges( start=bd_ID, end=bd_ID+1 )
-            reducedRanges <- reduce(indRanges)  # merge nearby peaks
+            chrList <- sort(unique(chrID))
+            final_peakset <- c()
             
-            binsize <- coord[2] - coord[1]
-            peak_start <- coord[ start(reducedRanges) ]
-            peak_stop <- coord[ end(reducedRanges)-1 ] + binsize - 1
-            
-            
-            # merge close peaks if distance<=maxgap
-            
-            coord_org <- IRanges( start=peak_start, end=peak_stop+maxgap )
-            coord_merged <- reduce(coord_org)
-            peak_start <- start(coord_merged)
-            peak_stop <- end(coord_merged) - maxgap
-            
-            
-            # filter peaks smaller than minsize & order by coordinates
-            
-            peaksize <- peak_stop - peak_start + 1
-            filterID = which( peaksize <= minsize )
-            if ( length(filterID) > 0 )
-            {
-                peak_start <- peak_start[ -filterID ]
-                peak_stop <- peak_stop[ -filterID ]
+            for ( chr in 1:length(chrList) ) {
+                # extract data for given chromosome
+                
+                bd_bin_chr <- bd_bin[ chrID == chrList[chr] ]
+                betapH_chr <- betapH[ chrID == chrList[chr] ]
+                coord_chr <- coord[ chrID == chrList[chr] ]
+                Y_chr <- Y[ chrID == chrList[chr] ]
+                switch( analysisType,
+                    OS = {
+                        M_chr <- M[ chrID == chrList[chr] ]
+                        GC_chr <- GC[ chrID == chrList[chr] ]
+                    },
+                    TS = {
+                        X_chr <- X[ chrID == chrList[chr] ]
+                        M_chr <- M[ chrID == chrList[chr] ]
+                        GC_chr <- GC[ chrID == chrList[chr] ]
+                    },
+                    IO = {
+                        X_chr <- X[ chrID == chrList[chr] ]
+                    }
+                ) 
+                
+                
+                # generate initial peak list
+          
+                bd_ID <- which(bd_bin_chr==1)           # initial peak (bin-level)
+                
+                if ( length(bd_ID) > 0 ) {
+                    # to take care of the case that there is no peak in this chromosome
+                
+                    indRanges <- IRanges( start=bd_ID, end=bd_ID+1 )
+                    reducedRanges <- reduce(indRanges)  # merge nearby peaks
+                    
+                    binsize <- coord_chr[2] - coord_chr[1]                
+                    peak_start <- coord_chr[ start(reducedRanges) ]
+                    peak_stop <- coord_chr[ end(reducedRanges)-1 ] + binsize - 1
+                    
+                    
+                    # merge close peaks if distance<=maxgap
+                    
+                    coord_org <- IRanges( start=peak_start, end=peak_stop+maxgap )
+                    coord_merged <- reduce(coord_org)
+                    peak_start <- start(coord_merged)
+                    peak_stop <- end(coord_merged) - maxgap
+                    
+                    
+                    # filter peaks smaller than minsize & order by coordinates
+                    
+                    peaksize <- peak_stop - peak_start + 1
+                    filterID = which( peaksize <= minsize )
+                    if ( length(filterID) > 0 )
+                    {
+                        peak_start <- peak_start[ -filterID ]
+                        peak_stop <- peak_stop[ -filterID ]
+                    }
+                    peak_start <- peak_start[ order(peak_start) ]        
+                    peak_stop <- peak_stop[ order(peak_start) ]
+                    peaksize <- peak_stop - peak_start + 1
+                    
+                    # calculate additional info
+                    
+                    switch( analysisType,
+                        OS = {        
+                            # extract info
+                            
+                            peak_info <- apply( cbind(peak_start,peak_stop), 1, 
+                                function(x) {
+                                    start_i <- x[1]
+                                    end_i <- x[2]
+                                    ind_i <- which( coord_chr>=start_i & coord_chr<=(end_i-binsize+1) )
+                                    betapH_i <- betapH_chr[ind_i]
+                                    aveP <- mean(betapH_i)
+                                    minP <- min(betapH_i)
+                                    aveChipCount <- mean(Y_chr[ind_i])
+                                    maxChipCount <- max(Y_chr[ind_i])
+                                    aveM <- mean(M_chr[ind_i])
+                                    aveGC <- mean(GC_chr[ind_i]) 
+                                    return( c( aveP, minP, aveChipCount, maxChipCount, aveM, aveGC ) )
+                                }
+                            )
+                            
+                            # combine all
+                                    
+                            final_peakset_chr <- data.frame( rep(chrList[chr],length(peak_start)),
+                                peak_start, peak_stop, peaksize, t(peak_info), 
+                                stringsAsFactors=FALSE )
+                            colnames(final_peakset_chr) <-
+                                c('chrID','peakStart','peakStop','peakSize','aveP','minP',
+                                'aveChipCount','maxChipCount','map','GC')
+                        },
+                        TS = {        
+                            # extract info
+                                    
+                            peak_info <- apply( cbind(peak_start,peak_stop), 1, 
+                                function(x) {
+                                    start_i <- x[1]
+                                    end_i <- x[2]
+                                    ind_i <- which( coord_chr>=start_i & coord_chr<=(end_i-binsize+1) )
+                                    betapH_i <- betapH_chr[ind_i]
+                                    aveP <- mean(betapH_i)
+                                    minP <- min(betapH_i)
+                                    aveChipCount <- mean(Y_chr[ind_i])
+                                    maxChipCount <- max(Y_chr[ind_i])
+                                    aveInputCount <- mean(X_chr[ind_i])
+                                    nRatio <- sum(Y) / sum(X)
+                                        # genome-wide sequencing depth adjustment
+                                    aveInputCountScaled <- aveInputCount * nRatio
+                                    aveLog2Ratio <- mean( log2( (Y_chr[ind_i]+1) / (X_chr[ind_i]*nRatio+1) ) )
+                                    aveM <- mean(M_chr[ind_i])
+                                    aveGC <- mean(GC_chr[ind_i]) 
+                                    return( c( aveP, minP, aveChipCount, maxChipCount, 
+                                        aveInputCount, aveInputCountScaled, aveLog2Ratio, aveM, aveGC ) )
+                                }
+                            )
+                            
+                            # combine all
+                                    
+                            final_peakset_chr <- data.frame( rep(chrList[chr],length(peak_start)),
+                                peak_start, peak_stop, peaksize, t(peak_info), 
+                                stringsAsFactors=FALSE )
+                            colnames(final_peakset_chr) <-
+                                c('chrID','peakStart','peakStop','peakSize','aveP','minP',
+                                'aveChipCount','maxChipCount',
+                                'aveInputCount','aveInputCountScaled','aveLog2Ratio','map','GC')
+                        },
+                        IO = {        
+                            # extract info
+                                    
+                            peak_info <- apply( cbind(peak_start,peak_stop), 1, 
+                                function(x) {
+                                    start_i <- x[1]
+                                    end_i <- x[2]
+                                    ind_i <- which( coord_chr>=start_i & coord_chr<=(end_i-binsize+1) )
+                                    betapH_i <- betapH_chr[ind_i]
+                                    aveP <- mean(betapH_i)
+                                    minP <- min(betapH_i)
+                                    aveChipCount <- mean(Y_chr[ind_i])
+                                    maxChipCount <- max(Y_chr[ind_i])
+                                    aveInputCount <- mean(X_chr[ind_i])
+                                    nRatio <- sum(Y) / sum(X)
+                                        # genome-wide sequencing depth adjustment
+                                    aveInputCountScaled <- aveInputCount * nRatio
+                                    aveLog2Ratio <- mean( log2( (Y_chr[ind_i]+1) / (X_chr[ind_i]*nRatio+1) ) )
+                                    return( c( aveP, minP, aveChipCount, maxChipCount, 
+                                        aveInputCount, aveInputCountScaled, aveLog2Ratio ) )
+                                }
+                            )
+                            
+                            # combine all
+                                    
+                            final_peakset_chr <- data.frame( rep(chrList[chr],length(peak_start)),
+                                peak_start, peak_stop, peaksize, t(peak_info), 
+                                stringsAsFactors=FALSE )
+                            colnames(final_peakset_chr) <-
+                                c('chrID','peakStart','peakStop','peakSize','aveP','minP',
+                                'aveChipCount','maxChipCount',
+                                'aveInputCount','aveInputCountScaled','aveLog2Ratio')
+                        }
+                    )
+                    
+                    final_peakset <- rbind( final_peakset, final_peakset_chr )  
+                }              
             }
-            peak_start <- peak_start[ order(peak_start) ]        
-            peak_stop <- peak_stop[ order(peak_start) ]
-            peaksize = peak_stop - peak_start
-            
-            
-            # calculate additional info
-            
-            switch( analysisType,
-                OS = {        
-                    # extract info
-                    
-                    peak_info <- apply( cbind(peak_start,peak_stop), 1, 
-                        function(x) {
-                            start_i <- x[1]
-                            end_i <- x[2]
-                            ind_i <- which( coord>=start_i & coord<=(end_i-binsize+1) )
-                            betapH_i <- betapH[ind_i]
-                            aveP <- mean(betapH_i)
-                            minP <- min(betapH_i)
-                            aveChipCount <- mean(Y[ind_i])
-                            maxChipCount <- max(Y[ind_i])
-                            aveM <- mean(M[ind_i])
-                            aveGC <- mean(GC[ind_i]) 
-                            return( c( aveP, minP, aveChipCount, maxChipCount, aveM, aveGC ) )
-                        }
-                    )
-                    
-                    # combine all
-                            
-                    final_peakset <- data.frame( peak_start, peak_stop, peaksize, t(peak_info) )
-                    colnames(final_peakset) =
-                        c('peakStart','peakStop','peakSize','aveP','minP',
-                        'aveChipCount','maxChipCount','map','GC')
-                },
-                TS = {        
-                    # extract info
-                            
-                    peak_info <- apply( cbind(peak_start,peak_stop), 1, 
-                        function(x) {
-                            start_i <- x[1]
-                            end_i <- x[2]
-                            ind_i <- which( coord>=start_i & coord<=(end_i-binsize+1) )
-                            betapH_i <- betapH[ind_i]
-                            aveP <- mean(betapH_i)
-                            minP <- min(betapH_i)
-                            aveChipCount <- mean(Y[ind_i])
-                            maxChipCount <- max(Y[ind_i])
-                            aveInputCount <- mean(X[ind_i])
-                            nRatio <- sum(Y) / sum(X)
-                            aveInputCountScaled <- aveInputCount * nRatio
-                            aveLog2Ratio <- mean( log2( (Y[ind_i]+1) / (X[ind_i]*nRatio+1) ) )
-                            aveM <- mean(M[ind_i])
-                            aveGC <- mean(GC[ind_i]) 
-                            return( c( aveP, minP, aveChipCount, maxChipCount, 
-                                aveInputCount, aveInputCountScaled, aveLog2Ratio, aveM, aveGC ) )
-                        }
-                    )
-                    
-                    # combine all
-                            
-                    final_peakset <- data.frame( peak_start, peak_stop, peaksize, t(peak_info) )
-                    colnames(final_peakset) =
-                    c('peakStart','peakStop','peakSize','aveP','minP',
-                    'aveChipCount','maxChipCount',
-                    'aveInputCount','aveInputCountScaled','aveLog2Ratio','map','GC')
-                },
-                IO = {        
-                    # extract info
-                            
-                    peak_info <- apply( cbind(peak_start,peak_stop), 1, 
-                        function(x) {
-                            start_i <- x[1]
-                            end_i <- x[2]
-                            ind_i <- which( coord>=start_i & coord<=(end_i-binsize+1) )
-                            betapH_i <- betapH[ind_i]
-                            aveP <- mean(betapH_i)
-                            minP <- min(betapH_i)
-                            aveChipCount <- mean(Y[ind_i])
-                            maxChipCount <- max(Y[ind_i])
-                            aveInputCount <- mean(X[ind_i])
-                            nRatio <- sum(Y) / sum(X)
-                            aveInputCountScaled <- aveInputCount * nRatio
-                            aveLog2Ratio <- mean( log2( (Y[ind_i]+1) / (X[ind_i]*nRatio+1) ) )
-                            return( c( aveP, minP, aveChipCount, maxChipCount, 
-                                aveInputCount, aveInputCountScaled, aveLog2Ratio ) )
-                        }
-                    )
-                    
-                    # combine all
-                            
-                    final_peakset <- data.frame( peak_start, peak_stop, peaksize, t(peak_info) )
-                    colnames(final_peakset) =
-                    c('peakStart','peakStop','peakSize','aveP','minP',
-                    'aveChipCount','maxChipCount',
-                    'aveInputCount','aveInputCountScaled','aveLog2Ratio')
-                }
-            )
             
             
             #################### if peaks exist
             
-            return( list( peakSet=final_peakset, bdBin=bd_bin, empFDR=empFDR ) )
+            bdBin <- data.frame( chrID, bd_bin, stringsAsFactors=FALSE )
+            colnames(bdBin) <- c("chrID","peak")
+            
+            return( list( peakSet=final_peakset, bdBin=bdBin, empFDR=empFDR ) )
         } else {
             # if we lose all peaks after tag count thresholding
              
             # empirical FDR
             
-            empFDR <- sum(betapH[which(betapH<=cutoff)]) / length(which(betapH<=cutoff))
-            empFDR_thres <- 0
-            message( "Info: no peaks remain after thresholding")
+            #empFDR <- sum(betapH[which(betapH<=cutoff)]) / length(which(betapH<=cutoff))
+            #empFDR_thres <- 0
+            #message( "Info: no peaks remain after thresholding")
             #message( "Info: empirical FDR (before thresholding) = ", round(1000*empFDR)/1000 )        
             #message( "Info: empirical FDR (after thresholding) = ", round(1000*empFDR_thres)/1000 )
             
+            chrID <- dataSet$chrID
             Y <- dataSet$Y
             
-            return( list( peakSet=NULL, bdBin=rep(0,length(Y)), empFDR=0 ) )
+            bdBin <- data.frame( chrID, rep(0,length(Y)), stringsAsFactors=FALSE )
+            colnames(bdBin) <- c("chrID","peak")
+            
+            return( list( peakSet=NULL, bdBin=bdBin, empFDR=0 ) )
         
         }
     } else
     {
         #################### if there is no peak
         
+        chrID <- dataSet$chrID
         Y <- dataSet$Y
+            
+        bdBin <- data.frame( chrID, rep(0,length(Y)), stringsAsFactors=FALSE )
+        colnames(bdBin) <- c("chrID","peak")
         
-        return( list( peakSet=NULL, bdBin=rep(0,length(Y)), empFDR=0 ) )  
+        return( list( peakSet=NULL, bdBin=bdBin, empFDR=0 ) )  
     }
 }

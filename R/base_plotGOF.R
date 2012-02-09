@@ -81,10 +81,12 @@
     points( log10(YsimVal_2S+1), log10(YsimFreq_2S), type='l', col='blue' )
 
     if ( analysisType=="TS" | analysisType=="IO" ) {
-        legend( 1, 5, c('Actual data (ChIP)','Actual data (Control)','Sim:N','Sim:N+S1','Sim:N+S1+S2'),
+        legend( 1, log10(max(YFreq)+1), 
+            c('Actual data (ChIP)','Actual data (Control)','Sim:N','Sim:N+S1','Sim:N+S1+S2'),
             col=c('black','darkgray','green','red','blue'),lty=c(1,1,1,1,1),bty='n')
     } else {
-        legend( 1, 5, c('Actual data','Sim:N','Sim:N+S1','Sim:N+S1+S2'),
+        legend( 1, log10(max(YFreq)+1), 
+            c('Actual data','Sim:N','Sim:N+S1','Sim:N+S1+S2'),
             col=c('black','green','red','blue'),lty=c(1,1,1,1),bty='n')
     }
     abline(v=log10(0+1),lty=2,col='gray')

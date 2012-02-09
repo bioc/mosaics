@@ -1,8 +1,10 @@
 \name{mosaics-internal}
 \title{Internal mosaics objects}
+\alias{.adapGridMosaicsZ0_IO}
 \alias{.adapGridMosaicsZ0_OS}
 \alias{.adapGridMosaicsZ0_TS}
 \alias{.calcModelBIC}
+\alias{.calcPN}
 \alias{.calMDZ1_2S}
 \alias{.computeStat}
 \alias{.emZ1_2S}
@@ -35,9 +37,12 @@
 \alias{.rlmFit_IO}
 \alias{.rlmFit_OS}
 \alias{.rlmFit_TS}
+\alias{.reportSummary}
 \alias{.validDataType}
 \alias{.validLocation}
 \alias{.validType}
+\alias{conv_1S}
+\alias{conv_2S}
 \description{Internal mosaics objects.}
 \details{These are not to be called by the user.}
 \keyword{internal}
