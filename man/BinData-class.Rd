@@ -2,6 +2,7 @@
 \Rdversion{1.1}
 \docType{class}
 \alias{BinData-class}
+\alias{chrID,BinData-method}
 \alias{coord,BinData-method}
 \alias{gcContent,BinData-method}
 \alias{input,BinData-method}
@@ -21,6 +22,8 @@ Objects can be created by calls of the form \code{new("BinData", ...)}.
 }
 \section{Slots}{
   \describe{
+    \item{\code{chrID}:}{Object of class \code{"character"}, 
+        a vector of chromosome IDs. }
     \item{\code{coord}:}{Object of class \code{"numeric"}, 
         a vector of coordinates. }
     \item{\code{tagCount}:}{Object of class \code{"numeric"}, 
@@ -44,8 +47,8 @@ Objects can be created by calls of the form \code{new("BinData", ...)}.
     \item{plot}{\code{signature(x = "BinData", y = "missing", plotType = NULL )}: 
         provide exploratory plots of mean ChIP tag counts.
         This method plots mean ChIP tag counts versus mappability score, GC content score,
-				and input tag counts, with 95\% confidence intervals,  
-				for \code{plotType="M"}, \code{plotType="GC"}, and \code{plotType="input"}, respectively.
+	and input tag counts, with 95\% confidence intervals,  
+	for \code{plotType="M"}, \code{plotType="GC"}, and \code{plotType="input"}, respectively.
         \code{plotType="M|input"} and \code{plotType="GC|input"} provide
         plots of mean ChIP tag counts versus mappability and GC content score, respectively,
         conditional on input tag counts. 
@@ -56,8 +59,9 @@ Objects can be created by calls of the form \code{new("BinData", ...)}.
      }
 }
 \references{
-Kuan, PF, D Chung, JA Thomson, R Stewart, and S Keles (2010), "A Statistical Framework
-for the Analysis of ChIP-Seq Data", submitted (\url{http://works.bepress.com/sunduz_keles/19/}).
+Kuan, PF, D Chung, G Pan, JA Thomson, R Stewart, and S Keles (2011), 
+"A Statistical Framework for the Analysis of ChIP-Seq Data", 
+\emph{Journal of the American Statistical Association}, Vol. 106, pp. 891-903.
 }
 \author{ Dongjun Chung, Pei Fen Kuan, Sunduz Keles }
 \seealso{

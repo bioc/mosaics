@@ -9,7 +9,7 @@ Export peak calling results to text files in TXT, BED, or GFF file format.
 }
 \usage{
 export(object, ...)
-\S4method{export}{MosaicsPeak}( object, type=NA, fileLoc=NA, fileName=NA, chrID=NA )
+\S4method{export}{MosaicsPeak}( object, type=NA, fileLoc=NA, fileName=NA )
 }
 \arguments{
     \item{object}{Object of class \code{MosaicsPeak},
@@ -17,15 +17,14 @@ export(object, ...)
     \item{type}{File format.
         Possible values are \code{"txt"}, \code{"bed"}, and \code{"gff"}. See Details. }
     \item{fileLoc}{Directory of the exported file. }    
-    \item{fileName}{Name of the exported file. }     
-    \item{chrID}{Chromosome ID, which is included in the first column in the exported file,
-        e.g. \code{chrID="chr21"}. }  
+    \item{fileName}{Name of the exported file. }    
     \item{...}{ Other parameters to be passed through to generic \code{export}.}
 }
 \details{
 TXT file format (\code{type="txt"}) exports peak calling results in the most informative way.
-Columns include peak start position, peak end position, peak width, average posterior probability, 
-minimum posterior probability, average ChIP tag count, maximum ChIP tag count, 
+Columns include chromosome ID, peak start position, peak end position, peak width, 
+average posterior probability, minimum posterior probability, 
+average ChIP tag count, maximum ChIP tag count, 
 average input tag count, average input tag count scaled by sequencing depth, 
 average log base 2 ratio of ChIP over input tag counts, average mappability score, 
 and average GC content score in each peak. 
@@ -34,8 +33,9 @@ respectively, where score is the average ChIP tag counts in each peak.
 If no peak is detected, files will not be exported.
 }
 \references{
-Kuan, PF, D Chung, JA Thomson, R Stewart, and S Keles (2010), "A Statistical Framework
-for the Analysis of ChIP-Seq Data", submitted (\url{http://works.bepress.com/sunduz_keles/19/}).
+Kuan, PF, D Chung, JA Thomson, R Stewart, and S Keles (2011), 
+"A Statistical Framework for the Analysis of ChIP-Seq Data", 
+\emph{Journal of the American Statistical Association}, Vol. 106, pp. 891-903.
 }
 \author{ Dongjun Chung, Pei Fen Kuan, Sunduz Keles }
 \seealso{
@@ -47,9 +47,9 @@ library(mosaicsExample)
 data(exampleFit)
 
 examplePeak <- mosaicsPeak( exampleFit, signalModel = "2S", FDR = 0.05 )
-export( examplePeak, type = "txt", fileLoc = "./", fileName = "TSpeakList.txt", chrID = "chr21" )
-export( examplePeak, type = "bed", fileLoc = "./", fileName = "TSpeakList.bed", chrID = "chr21" )
-export( examplePeak, type = "gff", fileLoc = "./", fileName = "TSpeakList.gff", chrID = "chr21" )
+export( examplePeak, type = "txt", fileLoc = "./", fileName = "TSpeakList.txt" )
+export( examplePeak, type = "bed", fileLoc = "./", fileName = "TSpeakList.bed" )
+export( examplePeak, type = "gff", fileLoc = "./", fileName = "TSpeakList.gff" )
 }
 }
 \keyword{models}

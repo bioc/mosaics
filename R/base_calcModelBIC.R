@@ -1,5 +1,5 @@
 
-.calcModelBIC <- function( fitZ1, Y, k=3, model="2S", type="BIC", npar )
+.calcModelBIC <- function( fitZ1, Y, pNfit, k=3, model="2S", type="BIC", npar )
 {       
     if ( model=="2S" )
     {
@@ -24,8 +24,9 @@
         
         # calculate log likelihood
         
-        PYZ0 <- dnbinom( Y_ori, a, b_est/(b_est+1) )     
-        pNfit <- .calcPN( Y_ori, k, a, mu_est ) 
+        #PYZ0 <- dnbinom( Y_ori, a, b_est/(b_est+1) )    
+        PYZ0 <- pNfit$PYZ0 
+        #pNfit <- .calcPN( Y_ori, k, a, mu_est ) 
         PYZ1 <- .margDistZ1_2S( Y_ori, pNfit, b1, c1, b2, c2 )
         PYZ1G1 <- PYZ1$MDG1
         PYZ1G2 <- PYZ1$MDG2    
@@ -52,8 +53,9 @@
         
         # calculate log likelihood
             
-        PYZ0 <- dnbinom( Y_ori, a, b_est/(b_est+1) )
-        pNfit <- .calcPN( Y_ori, k, a, mu_est ) 
+        #PYZ0 <- dnbinom( Y_ori, a, b_est/(b_est+1) )
+        PYZ0 <- pNfit$PYZ0
+        #pNfit <- .calcPN( Y_ori, k, a, mu_est ) 
         PYZ1 <- .margDistZ1_1S( Y_ori, pNfit, b, c )
             
         logLik0 <- log( pi0*PYZ0 + (1-pi0)*PYZ1 )

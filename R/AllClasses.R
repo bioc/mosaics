@@ -3,6 +3,7 @@
 
 setClass( Class="BinData",
     representation=representation(
+        chrID="character",
         coord="numeric",
         tagCount="numeric",
         mappability="numeric",
@@ -19,7 +20,8 @@ setClass( Class="MosaicsFitEst",
         pi0="numeric",
         a="numeric",
         betaEst="numeric",
-        muEst="numeric",
+        muEst="numeric",    
+        pNfit="list",
         b="numeric",
         c="numeric",
         p1="numeric",
@@ -27,6 +29,7 @@ setClass( Class="MosaicsFitEst",
         c1="numeric",
         b2="numeric",
         c2="numeric",
+        inputTrunc="numeric",
         analysisType="character"
     )
 )
@@ -44,6 +47,7 @@ setClass( Class="MosaicsFit",
     representation=representation(
         mosaicsEst="MosaicsFitEst",
         mosaicsParam="MosaicsFitParam",
+        chrID="character",
         coord="numeric",
         tagCount="numeric",
         mappability="numeric",
@@ -71,7 +75,7 @@ setClass( Class="MosaicsPeak",
     representation=representation(
         peakList="data.frame",
         peakParam="MosaicsPeakParam",
-        bdBin="numeric",
+        bdBin="data.frame",
         empFDR="numeric"
     )
 )

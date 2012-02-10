@@ -1,5 +1,5 @@
 
-.rlmFit_IO <- function( parEst, d=0.25, Y, X )
+.rlmFit_IO <- function( parEst, d=0.25, Y, X, inputTrunc )
 {    
     #library(MASS)
     
@@ -27,7 +27,7 @@
         mean0 <- parEst$mean0_u
         var0 <- parEst$var0_u    
     }
-    trunc <- parEst$trunc
+    #trunc <- parEst$trunc
     
     # estimators of a
 
@@ -36,7 +36,8 @@
     
     # sample size weighted rlm fit    
     
-    X[ which(X>trunc) ] <- trunc                  # [Note] we need truncation of X for input only analysis
+    #X[ which(X>trunc) ] <- trunc                  # [Note] we need truncation of X for input only analysis
+    X[ which(X>inputTrunc) ] <- inputTrunc
     
     Xtrans <- X_u^d    
     fit_trunc_adj <- rlm( log(mu_u) ~ Xtrans, weights=n_u/sum(n_u) )

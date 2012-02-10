@@ -21,6 +21,8 @@ Objects can be created by calls of the form \code{new("MosaicsFit", ...)}.
         representing estimates of MOSAiCS model fit. }
     \item{\code{mosaicsParam}:}{Object of class \code{"MosaicsFitParam"},
         representing tuning parameters for fitting MOSAiCS model. }
+    \item{\code{chrID}:}{Object of class \code{"character"},
+        a vector of chromosome IDs. }
     \item{\code{coord}:}{Object of class \code{"numeric"},
         a vector of coordinates. }
     \item{\code{tagCount}:}{Object of class \code{"numeric"},
@@ -47,7 +49,7 @@ Objects can be created by calls of the form \code{new("MosaicsFit", ...)}.
 }
 \references{
 Kuan, PF, D Chung, JA Thomson, R Stewart, and S Keles (2010), "A Statistical Framework
-for the Analysis of ChIP-Seq Data", submitted (\url{http://works.bepress.com/sunduz_keles/19/}).
+for the Analysis of ChIP-Seq Data", To appear in \emph{Journal of the American Statistical Association} (\url{http://pubs.amstat.org/doi/abs/10.1198/jasa.2011.ap09706}).
 }
 \author{ Dongjun Chung, Pei Fen Kuan, Sunduz Keles }
 \seealso{

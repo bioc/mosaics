@@ -32,8 +32,9 @@ Objects can be created by calls of the form \code{new("MosaicsPeak", ...)}.
      }
 }
 \references{
-Kuan, PF, D Chung, JA Thomson, R Stewart, and S Keles (2010), "A Statistical Framework
-for the Analysis of ChIP-Seq Data", submitted (\url{http://works.bepress.com/sunduz_keles/19/}).
+Kuan, PF, D Chung, G Pan, JA Thomson, R Stewart, and S Keles (2011), 
+"A Statistical Framework for the Analysis of ChIP-Seq Data", 
+\emph{Journal of the American Statistical Association}, Vol. 106, pp. 891-903.
 }
 \author{ Dongjun Chung, Pei Fen Kuan, Sunduz Keles }
 \seealso{
@@ -48,9 +49,9 @@ examplePeak <- mosaicsPeak( exampleFit, signalModel = "2S", FDR = 0.05 )
 
 examplePeak
 print(examplePeak)[1:10, ]
-export( examplePeak, type = "txt", fileLoc = "./", fileName = "TSpeakList.txt", chrID = "chr21" )
-export( examplePeak, type = "bed", fileLoc = "./", fileName = "TSpeakList.bed", chrID = "chr21" )
-export( examplePeak, type = "gff", fileLoc = "./", fileName = "TSpeakList.gff", chrID = "chr21" )
+export( examplePeak, type = "txt", fileLoc = "./", fileName = "TSpeakList.txt" )
+export( examplePeak, type = "bed", fileLoc = "./", fileName = "TSpeakList.bed" )
+export( examplePeak, type = "gff", fileLoc = "./", fileName = "TSpeakList.gff" )
 }
 }
 \keyword{classes}

@@ -11,8 +11,11 @@
         stop( "insufficient # of proper strata! Cannot proceed!" )
     }
     
+    # do not excluded estimtes from MOM (ver 1.0.2)
+    
     #idNA <- unique(c(which(is.na(parEst$a_u)==TRUE),which(as.character(parEst$ty_u)=='MM')))
-    idNA <- which( is.na(parEst$a_u) | as.character(parEst$ty_u)=='MM' )
+    #idNA <- which( is.na(parEst$a_u) | as.character(parEst$ty_u)=='MM' )
+    idNA <- which( is.na(parEst$a_u) )
     if ( length(idNA)>0 ) {
         a_u <- parEst$a_u[-idNA]
         mu_u <- parEst$a_u[-idNA] / parEst$b_u[-idNA]
@@ -69,6 +72,11 @@
     
     IX <- rep(0,length(X_u))
     IX[ X_u <= s ] <- 1
+    
+    # exception handling: no 0, 1, 2 counts in input
+    if ( length(which( IX==0 )) == length(IX) ) {
+        stop( paste("insufficient # of bins with counts <=", s, "in control sample. Please try input-only analysis!") )
+    }
     
     MX_u <- log2(M_u+1) * IX
     GC1X_u <- GC_bs[,1] * IX

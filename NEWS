@@ -1,0 +1,54 @@
+Changes in version 1.2.3:
+
+NEW FEATURES
+
+    o New model for deeply sequenced ChIP-seq data.
+    
+    o Genome-wide analysis of ChIP-seq data is now available.
+    
+    o Supports more aligned read file formats: eland_result, eland_extended, eland_export, bowtie, SAM, BED, CSEM.
+    
+    o Preprocessing of aligned read files can be done within the R environment using constructBins().
+    
+    o Easier model fitting for the two sample analysis using mosaicsRunAll().
+    
+    o Preprocessing and model fitting become much faster (Rcpp).
+    
+    o Parallel processing/computing is now supported (multicore).
+
+SIGNIFICANT USER-VISIBLE CHANGES
+    
+    o Add constructBins(): Preprocess aligned read files to bin-level files.
+    
+    o Add mosaicsRunAll(): Convenient two sample analysis.
+    
+    o Add bgEst argument in mosaicsFit(): Choose background estimation approach.
+    
+    o Add nCore argument in readBins(): Parallel processing.
+    
+    o Vignettes is now extensively updated.
+    
+    o Rcpp package is required and multicore package is suggested.
+
+DEPRECATED AND DEFUNCT
+
+    o Drop chrID argument in export().
+
+BUG FIXES
+
+    o Fix mosaicsPeak() for the case that no peak is called.
+    
+    o Fix export() by removing unnecessary spaces in output text files.
+    
+Changes in version 1.2.0:
+
+   o BioConductor release 2.9.
+   
+Changes in version 1.0.1:
+
+   o Fixes for 'plot' method of class 'binData'.
+   
+Changes in version 1.0.0:
+
+   o On BioConductor (release 2.8).
+

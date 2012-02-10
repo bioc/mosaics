@@ -5,10 +5,14 @@ setMethod(
     f="show",
     signature="BinData",
     definition=function( object ) {            
+        # genome-wide summary
+        
+        chrList <- sort(unique( chrID(object) ))
+        
         cat( "Summary: bin-level data (class: BinData)\n" )
         cat( "----------------------------------------\n" )
-        cat( "- # of coordinates = ", length(coord(object)), "\n", sep="" )
-        cat( "- total effective tag counts = ", sum(tagCount(object)), "\n", sep="" )
+        cat( "- # of chromosomes in the data: ", length(chrList), "\n", sep="" )
+        cat( "- total effective tag counts: ", sum(tagCount(object)), "\n", sep="" )
         cat( "  (sum of ChIP tag counts of all bins)\n" )
         if ( length(object@input)>0 )
         {
@@ -40,6 +44,24 @@ setMethod(
             }
         )
         cat( "----------------------------------------\n" )  
+        
+        # chromosome-wise summary
+        
+        if ( length(chrList) > 1 ) {
+            coordByChr <- split( coord(object), chrID(object) )
+            countByChr <- split( tagCount(object), chrID(object) )
+            
+            cat( "chrID:\t# of bins, total effective tag counts\n" )
+            for ( chr in 1:length(chrList) ) {
+                nCord <- length( coordByChr[[ chrList[chr] ]] )
+                nCount <- sum( countByChr[[ chrList[chr] ]] )
+                cat( chrList[chr],":\t",nCord,", ",nCount,"\n", sep="" )
+            }
+            cat( "----------------------------------------\n" )  
+            
+            rm( coordByChr, countByChr )
+            gc()
+        }
     }
 )
 
@@ -54,7 +76,7 @@ setMethod(
                 # two-sample analysis (with M & GC)
                 
                 printForm <- data.frame(
-                    coord=coord(x), tagCount=tagCount(x),
+                    chrID=chrID(x), coord=coord(x), tagCount=tagCount(x),
                     mappability=mappability(x), gcContent=gcContent(x),
                     input=input(x) )   
             } else
@@ -62,14 +84,15 @@ setMethod(
                 # two-sample analysis (Input only)
                 
                 printForm <- data.frame(
-                    coord=coord(x), tagCount=tagCount(x), input=input(x) )             
+                    chrID=chrID(x), coord=coord(x), tagCount=tagCount(x), 
+                    input=input(x) )             
             }
         } else
         {   
             # one-sample analysis
             
             printForm <- data.frame(
-                coord=coord(x), tagCount=tagCount(x),
+                chrID=chrID(x), coord=coord(x), tagCount=tagCount(x),
                 mappability=mappability(x), gcContent=gcContent(x) )  
         }
         return(printForm)
@@ -216,20 +239,28 @@ setMethod(
             plot( log10(YVal+1), log10(YFreq), type='l', axes=FALSE, 
                 ylab='Frequency', xlab='Tag count', main='Histogram of tag count' )
             
-	    if ( length(x@input)>0 ) {                       
-	       points( log10(XVal+1), log10(XFreq), type='l', col='darkgray' )
-	    }
+        if ( length(x@input)>0 ) {                       
+           points( log10(XVal+1), log10(XFreq), type='l', col='darkgray' )
+        }
             axis(1,0:6,10^c(0:6)-1)
             axis(2,0:10,10^c(0:10))
             
             if ( length(x@input)>0 ) {
-                legend( 1, 5, c('ChIP','control'),
+                legend( 1, log10(max(YFreq)+1), c('ChIP','control'),
                     col=c('black','darkgray'),lty=c(1,1),bty='n')
             } else {
-                legend( 1, 5, c('ChIP'),
+                legend( 1, log10(max(YFreq)+1), c('ChIP'),
                     col=c('black'),lty=1,bty='n')
             }
         }
+    }
+)
+
+setMethod(
+    f="chrID",
+    signature="BinData",
+    definition=function( object ) {
+        return(object@chrID)
     }
 )
 

@@ -1,7 +1,8 @@
+useDynLib(mosaics)
 
-import( methods, graphics, MASS, splines, lattice, IRanges )
+import( methods, graphics, Rcpp, MASS, splines, lattice, IRanges )
 
-export( readBins, mosaicsFit, mosaicsPeak )
+export( constructBins, readBins, mosaicsFit, mosaicsPeak, mosaicsRunAll )
 
 export( show, print, plot )
 
