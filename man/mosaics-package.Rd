@@ -13,7 +13,7 @@ a statistical framework to analyze one-sample or two-sample ChIP-seq data.
 \tabular{ll}{
 Package: \tab mosaics\cr
 Type: \tab Package\cr
-Version: \tab 1.2.3\cr
+Version: \tab 1.2.5\cr
 Date: \tab 2012-02-15\cr
 License: \tab GPL (>= 2)\cr
 LazyLoad: \tab yes\cr

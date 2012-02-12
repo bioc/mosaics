@@ -1,3 +1,7 @@
+Changes in version 1.2.5:
+
+    o Correct version number in DESCRIPTION and package?mosaics.
+
 Changes in version 1.2.4:
 
 SIGNIFICANT USER-VISIBLE CHANGES
@@ -63,4 +67,3 @@ Changes in version 1.0.1:
 Changes in version 1.0.0:
 
    o On BioConductor (release 2.8).
-
