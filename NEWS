@@ -1,3 +1,15 @@
+Changes in version 1.2.4:
+
+SIGNIFICANT USER-VISIBLE CHANGES
+    
+    o Add parallel argument in readBins().
+    
+    o Add parallel argument in mosaicsRunAll().
+
+BUG FIXES
+
+    o DESCRIPTION: 'multicore' package in 'Enhances' instead of 'Suggests'.
+
 Changes in version 1.2.3:
 
 NEW FEATURES

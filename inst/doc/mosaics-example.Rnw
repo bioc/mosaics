@@ -523,6 +523,7 @@ with the command:
          capping=0,
          bgEst=NA,
          signalModel="BIC",
+         parallel=TRUE,
          nCore=8 )
 @
 
@@ -579,9 +580,10 @@ Argument & \multicolumn{3}{l}{Explanation} \\
 \texttt{maxgap} & \multicolumn{3}{l}{Distance between initial peaks for merging.} \\
 \texttt{minsize} & \multicolumn{3}{l}{Minimum width to be called as a peak.} \\
 \texttt{thres} & \multicolumn{3}{l}{Minimum ChIP tag counts to be called as a peak.} \\
-\texttt{nCore} & \multicolumn{3}{l}{Number of CPUs used for parallel processing/computing. **} \\
+\texttt{parallel} & \multicolumn{3}{l}{Use \texttt{multicore} package for parallel computing?} \\
+\texttt{nCore} & \multicolumn{3}{l}{Number of CPUs used for parallel computing. **} \\
 \hline
-\multicolumn{4}{l}{** Relevant only when \texttt{multicore} package is installed.} \\
+\multicolumn{4}{l}{** Relevant only when \texttt{parallel=TRUE} and \texttt{multicore} package is installed.} \\
 \end{tabular}
 \end{center}
 \end{table}

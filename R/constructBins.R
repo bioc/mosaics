@@ -70,7 +70,6 @@ constructBins <- function( infileLoc=NULL, infileName=NULL, fileFormat=NULL,
     
     # get path to the perl code (unified script for all file formats)
     
-    require(mosaics)
     Fn.Path <- system.file( file.path("Perl",script), package="mosaics")
     
     

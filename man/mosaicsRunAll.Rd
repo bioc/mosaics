@@ -16,7 +16,7 @@ mosaicsRunAll( chipDir=NULL, chipFileName=NULL, chipFileFormat=NULL,
     reportGOF=FALSE, gofDir=NULL, gofFileName=NULL, byChr=FALSE,
     excludeChr=NULL, FDR=0.05, fragLen=200, binSize=fragLen, capping=0, 
     analysisType="IO", bgEst=NA, d=0.25, 
-    signalModel="BIC", maxgap=fragLen, minsize=50, thres=10, nCore=8 )
+    signalModel="BIC", maxgap=fragLen, minsize=50, thres=10, parallel=FALSE, nCore=8 )
 }
 \arguments{
   \item{chipDir}{
@@ -137,6 +137,11 @@ mosaicsRunAll( chipDir=NULL, chipFileName=NULL, chipFileFormat=NULL,
     Default is 50. }
   \item{thres}{A bin within initial peak is removed if its ChIP tag counts are less than \code{thres}.
     Default is 10. }
+  \item{parallel}{Utilize multiple CPUs for parallel computing 
+    using \code{"multicore"} package?
+    Possible values are \code{TRUE} (use \code{"multicore"}) 
+    or \code{FALSE} (not use \code{"multicore"}).
+    Default is \code{FALSE} (not use \code{"multicore"}).}
   \item{nCore}{Number of maximum number of CPUs used for the analysis. 
     Default is 8. }
 }
@@ -160,6 +165,11 @@ See the help of \code{mosaicsFit} for details of the options \code{analysisType}
 See the help of \code{mosaicsPeak} for details of the options \code{FDR}, 
 \code{signalModel}, \code{maxgap}, \code{minsize}, and \code{thres}.
 See the help of \code{export} for details of the option \code{peakFileFormat}.
+
+When the data contains multiple chromosomes, 
+parallel computing can be utilized for faster preprocessing and model fitting
+if \code{parallel=TRUE} and \code{multicore} package is installed.
+\code{nCore} determines number of CPUs used for parallel computing.
 }
 \value{
 Processed bin-level files are exported to the directory specified in \code{binfileDir}.
@@ -236,7 +246,9 @@ mosaicsRunAll(
     byChr=FALSE,
     FDR=0.05, 
     fragLen=200, 
-    capping=0 )
+    capping=0, 
+    parallel=FALSE, 
+    nCore=8 )
 }
 }
 \keyword{models}

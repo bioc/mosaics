@@ -7,7 +7,7 @@ mosaicsRunAll <- function(
     reportGOF=FALSE, gofDir=NULL, gofFileName=NULL, byChr=FALSE,
     excludeChr=NULL, FDR=0.05, fragLen=200, binSize=fragLen, capping=0, 
     analysisType="IO", bgEst=NA, d=0.25, 
-    signalModel="BIC", maxgap=fragLen, minsize=50, thres=10, nCore=8 ) {
+    signalModel="BIC", maxgap=fragLen, minsize=50, thres=10, parallel=FALSE, nCore=8 ) {
     
     # check options: input & output (required)
     
@@ -71,6 +71,18 @@ mosaicsRunAll <- function(
             stop( "Please specify 'exploratoryFileName'!" )
         }
     }
+    
+    # check options: parallel computing (optional)
+    
+    if ( parallel == TRUE ) {
+        message( "Use 'multicore' package for parallel computing." )
+        
+        if ( is.element( "multicore", installed.packages()[,1] ) ) {
+            library(multicore)
+        } else {
+            stop( "Please install 'multicore' package!" )
+        }
+    }
   
     # construction of bin-level files
 
@@ -81,9 +93,9 @@ mosaicsRunAll <- function(
     processSet[[2]] <- c( controlDir, controlFileName, controlFileFormat )
     
     
-    if ( is.element( "multicore", installed.packages()[,1] ) ) {
+    if ( parallel == TRUE ) {
         # if "multicore" package exists, utilize parallel computing with "mclapply"
-        library(multicore)
+        #require(multicore)
         
         mclapply( processSet, function(x) {
             constructBins( 
@@ -153,9 +165,9 @@ mosaicsRunAll <- function(
             nCore <- length(index_chip)
         }
         
-        if ( is.element( "multicore", installed.packages()[,1] ) ) {
+        if ( parallel == TRUE ) {
             # if "multicore" package exists, utilize parallel computing with "mclapply"
-            library(multicore)
+            #require(multicore)
             
             out <- mclapply( index_list, function(x) {    
                 # read in bin-level file
