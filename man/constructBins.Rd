@@ -7,14 +7,12 @@ Construct bin-level ChIP-sep data from an aligned read file
 Preprocess and construct bin-level ChIP-sep data from an aligned read file.
 }
 \usage{
-constructBins( infileLoc=NULL, infileName=NULL, fileFormat=NULL, outfileLoc=infileLoc, 
-    byChr=FALSE, fragLen=200, binSize=fragLen, capping=0, perl = "perl" )
+constructBins( infile=NULL, fileFormat=NULL, outfileLoc="./", 
+    byChr=FALSE, excludeChr=NULL, 
+    fragLen=200, binSize=200, capping=0, perl = "perl" )
 }
 \arguments{
-  \item{infileLoc}{
-    Directory of the aligned read file to be processed.
-}
-  \item{infileName}{
+  \item{infile}{
     Name of the aligned read file to be processed.
 }
   \item{fileFormat}{
@@ -26,18 +24,21 @@ constructBins( infileLoc=NULL, infileName=NULL, fileFormat=NULL, outfileLoc=infi
 }
   \item{outfileLoc}{
     Directory of processed bin-level files. 
-    By default, processed bin-level files are exported to the directory that the aligned read file is located. 
+    By default, processed bin-level files are exported to the current directory. 
 }
   \item{byChr}{
     Construct separate bin-level file for each chromosome? 
     Possible values are \code{TRUE} or \code{FALSE}.
     If \code{byChr=FALSE}, all chromosomes are exported into one file. Default is \code{FALSE}.
 }
+  \item{excludeChr}{
+    Vector of chromosomes that are excluded from the analysis.
+}  
   \item{fragLen}{
     Average fragment length. Default is 200.
 }
   \item{binSize}{
-    Size of bins. By default, bin size equals to \code{fragLen} (average fragment length).
+    Size of bins. Default is 200.
 }
   \item{capping}{
     Maximum number of reads allowed to start at each nucleotide position. 
@@ -55,7 +56,7 @@ Bin-level files are constructred from the aligned read file and exported to \cod
 If \code{byChr=FALSE}, bin-level files are named 
 as \code{[infileName]_fragL[fragLen]_bin[binSize].txt},
 If \code{byChr=TRUE}, bin-level files are named 
-as \code{[chrID]_[infileName]_fragL[fragLen]_bin[binSize].txt},
+as \code{[infileName]_fragL[fragLen]_bin[binSize]_[chrID].txt},
 where \code{[chrID]} is chromosome ID that reads align to.
 These chromosome IDs are extracted from the aligned read file.
 Constructed bin-level files can be loaded into the R environment using the method \code{readBins}.
@@ -81,10 +82,9 @@ Kuan, PF, D Chung, JA Thomson, R Stewart, and S Keles (2011),
 }
 \examples{
 \dontrun{
-constructBins( infileLoc="/scratch/eland/", 
-    infileName="STAT1_eland_results.txt",
-    fileFormat="eland_result", outfileLoc=infileLoc, 
-    byChr=FALSE, fragLen=200, binSize=fragLen, capping=0 )
+constructBins( infile="/scratch/eland/STAT1_eland_results.txt", 
+    fileFormat="eland_result", outfileLoc="/scratch/eland/", 
+    byChr=FALSE, excludeChr="chrM", fragLen=200, binSize=200, capping=0 )
 }
 }
 \keyword{models}

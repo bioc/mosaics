@@ -1,6 +1,7 @@
 
 #.adapGridMosaicsZ0_IO <- function( Y, X, min_n_X=50 )
-.adapGridMosaicsZ0_IO <- function( Y, X, bgEst=NA, inputTrunc, min_n_X=50 )
+.adapGridMosaicsZ0_IO <- function( Y, X, bgEst=NA, inputTrunc, min_n_X=50,
+    parallel=parallel, nCore=nCore )
 {        
     X_u <- a_u <- b_u <- mean0_u <- var0_u <-
         u0_u <- u1_u <- u2_u <- n_u <- ty_u <- c()
@@ -47,7 +48,8 @@
     # background fit
         
     par_est2 <- .mosaicsZ0( Y=Y, bgEst=bgEst, analysisType="IO", 
-        X=X_new, inputTrunc=inputTrunc, Y_freq=Y_freq )
+        X=X_new, inputTrunc=inputTrunc, Y_freq=Y_freq,
+        parallel=parallel, nCore=nCore )
     
     
     # return object

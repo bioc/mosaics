@@ -20,21 +20,21 @@
     # process Y
     
     Y <- Yori - k        # use only Y >= k
-    if(length(which(Y<0))>0 ) Y[which(Y<0)] <- -1  
+    # if( length(which(Y<0)) > 0 ) Y[which(Y<0)] <- -1  
     
     # round mu
 
     mu_round <- round(mu_est,2)
-    if(length(which(Y<0))>0 ) mu_round[which(Y<0)] <- 0
+    #if ( length(which(Y<0)) > 0 ) mu_round[which(Y<0)] <- 0
     mu_round_U <- unique(mu_round)  
     
     # prob of N (using rounding mu for prob of S)
-     
-    Ymax <- max(Y)
-    pN <- apply( as.matrix(mu_round_U), 1, 
-        function(x) {
-            b_round <- a / x
-            return( dnbinom( 0:Ymax, a, b_round/(b_round+1) ) )
+    
+    YmaxVec <- 0:max(Y)    
+    b_round <- a / mu_round_U
+    pN <- apply( as.matrix(b_round), 1, 
+        function(x) {            
+            return( dnbinom( YmaxVec, a, x/(x+1) ) )
         }
     )
     pN <- t(pN)

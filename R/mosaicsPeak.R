@@ -5,7 +5,7 @@ setMethod(
     f="mosaicsPeak",
     signature="MosaicsFit",
     definition=function( object, signalModel="2S", FDR=0.05, 
-        maxgap=200, minsize=50, thres=10 )
+        binsize=NA, maxgap=200, minsize=50, thres=10 )
     {
         #mosaicsEst <- object@mosaicsEst
         #tagCount <- object@tagCount
@@ -67,7 +67,7 @@ setMethod(
             }        
         )
         fitPeak <- .peakCall( postProb=fitPH, dataSet=dataSet,
-            FDR=FDR, maxgap=maxgap, minsize=minsize, thres=thres, 
+            FDR=FDR, binsize=binsize, maxgap=maxgap, minsize=minsize, thres=thres, 
             analysisType=analysisType )
         peakSet <- fitPeak$peakSet
         

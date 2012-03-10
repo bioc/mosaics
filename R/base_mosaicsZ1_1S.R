@@ -3,7 +3,7 @@
 # Z1 with 1 signal component
 #########################################################
 
-.mosaicsZ1_1S <- function( MOSAiCS_Z0, Y, pNfit, k=3 )
+.mosaicsZ1_1S <- function( MOSAiCS_Z0, Y, pNfit, Y_bd_all, k=3 )
 {
     ##################################################################
     ### initialization of the main EM
@@ -17,44 +17,6 @@
     tab_Y <- MOSAiCS_Z0$Y_freq
     Y_u <- MOSAiCS_Z0$Y_val
     
-    
-    # Initialization for initial EM iteration
-    
-    #print( "initialization" )
-    
-    #Eyz0 <- Y_Z1_tmp <- rep(0,length(Y_u))
-    Eyz0 <- rep(0,length(Y_u))                  # N_Z0(y)
-    Eyz0[1] <- round(sum(dnbinom(Y_u[1],a,b_est/(b_est+1))))
-
-    i <- 2
-    while( Eyz0[i-1]>0 & i<=length(Y_u) )
-    {
-        Eyz0[i] <- round(sum(dnbinom(Y_u[i],a,b_est/(b_est+1))))
-        i <- i + 1      
-    }
-
-    Y_Z1_tmp <- tab_Y - pi0*Eyz0                # (1-pi0) * N_Z1(y) = N(y) - pi0 * N_Z0(y)
-    Y_Z1_tmp[which(Y_Z1_tmp<0)] <- 0
-
-    Y_bd <- cbind( Y_u[-c(1:3)]-k, Y_Z1_tmp[-c(1:3)] ) ### already adjusted for k
-    
-    if ( sum(Y_bd[,2])==0 ) {
-        # nothing left after background are excluded from the data
-        # risk level = extremely high
-        stop( "over-estimation of background detected. Please tune the parameters!" )
-    } else if ( Y_bd[which.max(Y_bd[,2]),2] / sum(Y_bd[,2]) >= 0.90 ) {
-        # almost nothing left after background are excluded from the data
-        # risk level = very high
-        stop( "over-estimation of background detected. Please tune the parameters!" )
-    } else if ( Y_bd[which.max(Y_bd[,2]),2] / sum(Y_bd[,2]) >= 0.80 ) {
-        # still not much left after background are excluded from the data
-        # rick level = medium high
-        warning( "there is some possibility of background over-estimation." )
-        warning( "parameter tuning might provide better fits." )
-        Y_bd_all <- rep(Y_bd[,1],Y_bd[,2])
-    } else {
-        Y_bd_all <- rep(Y_bd[,1],Y_bd[,2])
-    }        
     
     # initial mu & var
 
@@ -115,13 +77,19 @@
     b_est_Z1 <- b_est[id_geqk]
     mu_est_Z1 <- mu_est[id_geqk]
     
+    Yk <- Y_ori - k        # use only Y >= k
+    #if(length(which(Y<0))>0 ) Y[which(Y<0)] <- -1 
+    Ykmax <- max(Yk)
+    #ind_ge_k <- which(Y>=0)
+    
     
     # Initialization of the main EM calculation
     
     #PYZ0 <- dnbinom( Y_ori, a, b_est_Z1/(b_est_Z1+1) )
     PYZ0 <- pNfit$PYZ0
     #pNfit <- .calcPN( Y_ori, k, a, mu_est_Z1 ) 
-    PYZ1 <- .margDistZ1_1S( Y_ori, pNfit, b_init, c_init )
+    #PYZ1 <- .margDistZ1_1S( Y_ori, pNfit, b_init, c_init )
+    PYZ1 <- .margDistZ1_1S( Yk, Ykmax, pNfit, b_init, c_init )
 
     b_iter <- b_init
     c_iter <- c_init
@@ -165,7 +133,8 @@
         
         #print( "calculate P(Y|Z=1)" )
         
-        PYZ1 <- .margDistZ1_1S( Y_ori, pNfit, b, c )
+        #PYZ1 <- .margDistZ1_1S( Y_ori, pNfit, b, c )
+        PYZ1 <- .margDistZ1_1S( Yk, Ykmax, pNfit, b, c )
         
         # update iteration
         
@@ -199,7 +168,8 @@
         b = b, c = c ) )
 }
 
-.margDistZ1_1S <- function( Yori, pNfit, b, c )
+#.margDistZ1_1S <- function( Yori, pNfit, b, c )
+.margDistZ1_1S <- function( Y, Ymax, pNfit, b, c )
 {     
     k <- pNfit$k
     pN <- pNfit$pN
@@ -208,25 +178,18 @@
     
     # process Y
     
-    Y <- Yori - k        # use only Y >= k
-    if(length(which(Y<0))>0 ) Y[which(Y<0)] <- -1 
-    Ymax <- max(Y)
-    ind_ge_k <- which(Y>=0)
+    #Y <- Yori - k        # use only Y >= k
+    #if(length(which(Y<0))>0 ) Y[which(Y<0)] <- -1 
+    #Ymax <- max(Y)
+    #ind_ge_k <- which(Y>=0)
     
     # prob of S    
     
     pS <- dnbinom( 0:Ymax, b, c/(c+1) )   
-    MDZ1 <- rep( 0, length(Y) )            
-    #MDZ1[ ind_ge_k ] <- apply( cbind( Y, mu_round )[ ind_ge_k, ], 1, 
-    #    function(x) {
-    #        Y.i <- x[1]
-    #        mu.i <- x[2]
-    #        pN.i <- pN[ mu_round_U==mu.i, 1:(Y.i+1) ]     
-    #        return( sum( rev(pS[1:(Y.i+1)]) * pN.i ) )
-    #    }
-    #)
-    
-    MDZ1[ ind_ge_k ] <- conv_1S( y=Y[ind_ge_k], mu_round=mu_round[ind_ge_k],
+    #MDZ1 <- rep( 0, length(Y) )            
+    #MDZ1[ ind_ge_k ] <- conv_1S( y=Y[ind_ge_k], mu_round=mu_round[ind_ge_k],
+    #    mu_round_U=mu_round_U, pN=pN, pS=pS )
+    MDZ1 <- conv_1S( y=Y, mu_round=mu_round,
         mu_round_U=mu_round_U, pN=pN, pS=pS )
     
     return(MDZ1)   

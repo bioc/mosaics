@@ -9,7 +9,8 @@ Call peaks using \code{MosaicsFit} class object, which is a fitted MOSAiCS model
 }
 \usage{
 mosaicsPeak( object, ... )
-\S4method{mosaicsPeak}{MosaicsFit}( object, signalModel="2S", FDR=0.05, maxgap=200, minsize=50, thres=10 )
+\S4method{mosaicsPeak}{MosaicsFit}( object, signalModel="2S", FDR=0.05, 
+    binsize=NA, maxgap=200, minsize=50, thres=10 )
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -19,6 +20,9 @@ mosaicsPeak( object, ... )
         Possible values are "1S" (one-signal-component model) and
         "2S" (two-signal-component model). Default is "2S". }
     \item{FDR}{False discovery rate. Default is 0.05. }    
+    \item{binsize}{Size of bin. It should be either positive integer.
+        If \code{binsize=NA}, \code{mosaics} calcuates it from data.
+        Default is \code{NA}. }     
     \item{maxgap}{Initial nearby peaks are merged if the distance (in bp) between them is less than \code{maxgap}. Default is 200. }     
     \item{minsize}{An initial peak is removed if its width is narrower than \code{minsize}. Default is 50. }
     \item{thres}{A bin within initial peak is removed if its ChIP tag counts are less than \code{thres}. Default is 10. }  

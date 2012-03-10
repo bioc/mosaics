@@ -7,10 +7,10 @@
 #   - L: Expected fragment length
 #   - binsize: Bin size
 #   - collapse: Maximum # of reads allowed at each position (skip if collapse=0)
-#   - indir: Directory of input files
 #   - outdir: Directory of output files
 #   - filename: Name of input file
 #   - bychr: Construct bin-level files by chromosome? (Y or N)
+#	- @excludeChr: Chromosomes to be excluded (vector)
 #
 #   Supported file format: 
 #   - eland_result: eland result
@@ -31,15 +31,23 @@
 use strict;
 use Cwd;
 
-my ($format, $L, $binsize, $collapse, $indir, $outdir, $filename, $bychr) = @ARGV;
+my ($format, $L, $binsize, $collapse, $filename, $outdir, $bychr, @exclude_chr) = @ARGV;
 
 # remember current working directory
 
 my $pwd = cwd();
 
-# move to input directory
+# chromosomes to be excluded
 
-chdir($indir);
+my $ecyn;
+my %ec_hash;
+
+if ( scalar(@exclude_chr) == 0 ) {
+	$ecyn = "N";
+} else {
+	$ecyn = "Y";
+	@ec_hash{ @exclude_chr } = ();	
+}
 
 # load read file and process it
 # (chromosome information is extracted from read file)
@@ -83,6 +91,12 @@ while(<IN>){
     # otherwise, process it
     
     my ($status, $chrt, $pos, $str, $L_tmp, $read_length, $prob ) = @parsed;
+    
+    # skip if chrt \in @exclude_chr
+    
+    if ( $ecyn eq "Y" && exists $ec_hash{ $chrt } ) {
+	    next;
+    }
     
     # adjust position if it is reverse strand
         
@@ -169,10 +183,6 @@ if ( $bychr eq "N" ) {
         close OUT;
     }
 }
-
-# move to current working directory
-
-chdir($pwd);
 
 
 ################################################################################

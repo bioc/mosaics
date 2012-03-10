@@ -9,15 +9,14 @@ Export peak calling results to text files in TXT, BED, or GFF file format.
 }
 \usage{
 export(object, ...)
-\S4method{export}{MosaicsPeak}( object, type=NA, fileLoc=NA, fileName=NA )
+\S4method{export}{MosaicsPeak}( object, type=NA, filename=NA )
 }
 \arguments{
     \item{object}{Object of class \code{MosaicsPeak},
         peak calling results obtained using method \code{mosaicsPeak}. }
     \item{type}{File format.
         Possible values are \code{"txt"}, \code{"bed"}, and \code{"gff"}. See Details. }
-    \item{fileLoc}{Directory of the exported file. }    
-    \item{fileName}{Name of the exported file. }    
+    \item{filename}{Name of the exported file. }    
     \item{...}{ Other parameters to be passed through to generic \code{export}.}
 }
 \details{
@@ -47,9 +46,9 @@ library(mosaicsExample)
 data(exampleFit)
 
 examplePeak <- mosaicsPeak( exampleFit, signalModel = "2S", FDR = 0.05 )
-export( examplePeak, type = "txt", fileLoc = "./", fileName = "TSpeakList.txt" )
-export( examplePeak, type = "bed", fileLoc = "./", fileName = "TSpeakList.bed" )
-export( examplePeak, type = "gff", fileLoc = "./", fileName = "TSpeakList.gff" )
+export( examplePeak, type = "txt", filename = "TSpeakList.txt" )
+export( examplePeak, type = "bed", filename = "TSpeakList.bed" )
+export( examplePeak, type = "gff", filename = "TSpeakList.gff" )
 }
 }
 \keyword{models}

@@ -10,7 +10,7 @@ mappability score, GC content score, and sequence ambiguity score.
 }
 \usage{
 readBins( type = c("chip", "M", "GC", "N"), fileName = NULL,
-    excludeChr=NULL, dataType = "unique", rounding = 100, nCore=8 )
+    dataType = "unique", rounding = 100, parallel=FALSE, nCore=8 )
 }
 \arguments{
   \item{type}{
@@ -27,9 +27,6 @@ readBins( type = c("chip", "M", "GC", "N"), fileName = NULL,
     \code{type} and \code{fileName} should have the same length and
     corresponding elements in two vectors should appear in the same order.
 }
-  \item{excludeChr}{
-    Vector of chromosomes that are excluded from the analysis.
-}  
   \item{dataType}{
     How reads were processed? Possible values are 
     either \code{"unique"} (only uniquely aligned reads were retained)
@@ -40,7 +37,14 @@ readBins( type = c("chip", "M", "GC", "N"), fileName = NULL,
     Default is 100 and this indicates rounding of mappability score and GC content score
     to the nearest hundredth.
 }
-    \item{nCore}{Number of CPUs when parallel computing is utilized. }
+  \item{parallel}{Utilize multiple CPUs for parallel computing 
+    using \code{"parallel"} package?
+    Possible values are \code{TRUE} (use \code{"parallel"}) 
+    or \code{FALSE} (not use \code{"parallel"}).
+    Default is \code{FALSE} (not use \code{"parallel"}).
+}
+  \item{nCore}{Number of CPUs when parallel computing is utilized.
+}
 }
 \details{
 Bin-level ChIP and input data can be generated from the aligned read files for your samples (e.g., files
@@ -59,7 +63,7 @@ user can do all the one- or two-sample analysis. See also help page of \code{mos
 
 When the data contains multiple chromosomes, 
 parallel computing can be utilized for faster preprocessing
-if \code{multicore} package is installed.
+if \code{parallel=TRUE} and \code{parallel} package is installed.
 \code{nCore} determines number of CPUs used for parallel computing.
 }
 \value{

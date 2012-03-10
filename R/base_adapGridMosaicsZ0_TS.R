@@ -1,6 +1,7 @@
 
 .adapGridMosaicsZ0_TS <- function( Y, M, GC, X, bgEst=NA,
-    min_n_MGC=50, grids_MGC=c(0.01,0.02,0.04,0.10,0.20,0.50), min_n_X=200 )
+    min_n_MGC=50, grids_MGC=c(0.01,0.02,0.04,0.10,0.20,0.50), min_n_X=200,
+    parallel=parallel, nCore=nCore )
 {        
     X_u <- M_u <- GC_u <- a_u <- b_u <- mean0_u <- var0_u <-
         u0_u <- u1_u <- u2_u <- n_u <- ty_u <- unitM_u <- c()
@@ -138,7 +139,8 @@
         # background fit
         
         par_est2 <- .mosaicsZ0( Y=Y2, bgEst=bgEst, analysisType="TS", 
-            X=X2, M=M2, GC=GC2, Y_freq=Y_freq )
+            X=X2, M=M2, GC=GC2, Y_freq=Y_freq,
+            parallel=parallel, nCore=nCore )
         
         smallN <- which( par_est2$n_u < min_n_MGC )
         n.uns <- length(smallN) / length(par_est2$n_u)

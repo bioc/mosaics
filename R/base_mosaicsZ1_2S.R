@@ -3,7 +3,7 @@
 # Z1 with mixture of 2 signal components
 #########################################################
 
-.mosaicsZ1_2S <- function( MOSAiCS_Z0, Y, pNfit, k=3 )
+.mosaicsZ1_2S <- function( MOSAiCS_Z0, Y, pNfit, Y_bd_all, k=3 )
 {
     ##################################################################
     ### initialization of the main EM
@@ -18,45 +18,10 @@
     Y_u <- MOSAiCS_Z0$Y_val
     
     
-    # Initialization for initial EM iteration
-
-    #Eyz0 <- Y_Z1_tmp <- rep(0,length(Y_u))
-    Eyz0 <- rep(0,length(Y_u))                  # N_Z0(y)
-    Eyz0[1] <- round(sum(dnbinom(Y_u[1],a,b_est/(b_est+1))))
-
-    i <- 2
-    while( Eyz0[i-1]>0 & i<=length(Y_u) )
-    {
-        Eyz0[i] <- round(sum(dnbinom(Y_u[i],a,b_est/(b_est+1))))
-        i <- i + 1      
-    }
-
-    Y_Z1_tmp <- tab_Y - pi0*Eyz0                # (1-pi0) * N_Z1(y) = N(y) - pi0 * N_Z0(y)
-    Y_Z1_tmp[which(Y_Z1_tmp<0)] <- 0
-
-    Y_bd <- cbind( Y_u[-c(1:3)]-k, Y_Z1_tmp[-c(1:3)] ) ### already adjusted for k
-    
-    if ( sum(Y_bd[,2])==0 ) {
-        # nothing left after background are excluded from the data
-        # risk level = extremely high
-        stop( "over-estimation of background detected. Please tune the parameters!" )
-    } else if ( Y_bd[which.max(Y_bd[,2]),2] / sum(Y_bd[,2]) >= 0.90 ) {
-        # almost nothing left after background are excluded from the data
-        # risk level = very high
-        stop( "over-estimation of background detected. Please tune the parameters!" )
-    } else if ( Y_bd[which.max(Y_bd[,2]),2] / sum(Y_bd[,2]) >= 0.80 ) {
-        # still not much left after background are excluded from the data
-        # rick level = medium high
-        warning( "there is some possibility of background over-estimation.\n" )
-        warning( "parameter tuning might provide better fits.\n" )
-        Y_bd_all <- rep(Y_bd[,1],Y_bd[,2])
-    } else {
-        Y_bd_all <- rep(Y_bd[,1],Y_bd[,2])
-    }    
-    
     # initial EM calculation
 
-    par_2mixNB <- .emZ1_2S( Y_bd_all, epsilon=0.0001, b1_old=NULL, c1_old=NULL, b2_old=NULL, c2_old=NULL )
+    par_2mixNB <- .emZ1_2S( Y_bd_all, epsilon=0.0001, 
+        b1_old=NULL, c1_old=NULL, b2_old=NULL, c2_old=NULL )
 
     mu1_init <- par_2mixNB$b1/par_2mixNB$c1
     mu2_init <- par_2mixNB$b2/par_2mixNB$c2
@@ -167,13 +132,19 @@
     b_est_Z1 <- b_est[id_geqk]
     mu_est_Z1 <- mu_est[id_geqk]
     
+    Yk <- Y_ori - k        # use only Y >= k
+    #if(length(which(Y<0))>0 ) Y[which(Y<0)] <- -1 
+    Ykmax <- max(Yk)
+    #ind_ge_k <- which(Y>=0)
+    
     
     # Initialization of the main EM calculation
     
     #PYZ0 <- dnbinom( Y_ori, a, b_est_Z1/(b_est_Z1+1) )
     PYZ0 <- pNfit$PYZ0
     #pNfit <- .calcPN( Y_ori, k, a, mu_est_Z1 ) 
-    PYZ1 <- .margDistZ1_2S( Y_ori, pNfit, b1_init, c1_init, b2_init, c2_init )
+    #PYZ1 <- .margDistZ1_2S( Y_ori, pNfit, b1_init, c1_init, b2_init, c2_init )
+    PYZ1 <- .margDistZ1_2S( Yk, Ykmax, pNfit, b1_init, c1_init, b2_init, c2_init )
 
     PYZ1G1 <- PYZ1$MDG1
     PYZ1G2 <- PYZ1$MDG2
@@ -234,7 +205,8 @@
         
         #print( "calculate P(Y|Z=1,G=1) and P(Y|Z=1,G=2)" )
 
-        PYZ1 <- .margDistZ1_2S( Y_ori, pNfit, b1, c1, b2, c2)
+        #PYZ1 <- .margDistZ1_2S( Y_ori, pNfit, b1, c1, b2, c2)
+        PYZ1 <- .margDistZ1_2S( Yk, Ykmax, pNfit, b1, c1, b2, c2)
 
         PYZ1G1 <- PYZ1$MDG1
         PYZ1G2 <- PYZ1$MDG2
@@ -269,7 +241,9 @@
 
 # calculate P(Y|Z=1,G=1) and P(Y|Z=1,G=2) for the current parameters
 
-.margDistZ1_2S <- function( Yori, pNfit, b1, c1, b2, c2 )
+#.margDistZ1_2S <- function( Yori, pNfit, b1, c1, b2, c2 )
+.margDistZ1_2S <- function( Y, Ymax, pNfit, b1, c1, b2, c2 )
+# Y <- Yori - k
 {   
     k <- pNfit$k
     pN <- pNfit$pN
@@ -278,34 +252,18 @@
     
     # process Y
     
-    Y <- Yori - k        # use only Y >= k
-    if(length(which(Y<0))>0 ) Y[which(Y<0)] <- -1 
-    Ymax <- max(Y)
-    ind_ge_k <- which(Y>=0)
+    #Y <- Yori - k        # use only Y >= k
+    #if(length(which(Y<0))>0 ) Y[which(Y<0)] <- -1 
+    #Ymax <- max(Y)
+    #ind_ge_k <- which(Y>=0)
                  
     # prob of S1 & S2
     
     pS1 <- dnbinom( 0:Ymax, b1, c1/(c1+1) )
     pS2 <- dnbinom( 0:Ymax, b2, c2/(c2+1) )
-    MDG <- matrix( 0, length(Y), 2 )            
-    #MDGfit <- apply( cbind( Y, mu_round )[ ind_ge_k, ], 1, 
-    #    function(x) {
-    #        Y.i <- x[1]
-    #        mu.i <- x[2]
-    #        pN.i <- pN[ mu_round_U==mu.i, 1:(Y.i+1) ]     
-    #        
-    #        returnVal <- c( 
-    #            sum( rev(pS1[1:(Y.i+1)]) * pN.i ), 
-    #            sum( rev(pS2[1:(Y.i+1)]) * pN.i ) )
-    #        
-    #        return( returnVal )
-    #    }
-    #)
-    
-    MDGfit <- conv_2S( y=Y[ind_ge_k], mu_round=mu_round[ind_ge_k],
+    MDGfit <- conv_2S( y=Y, mu_round=mu_round,
         mu_round_U=mu_round_U, pN=pN, pS1=pS1, pS2=pS2 )
-    MDGfit <- matrix( MDGfit, nrow=2 )  
-    MDG[ ind_ge_k, ] <- t(MDGfit)
+    MDG <- matrix( MDGfit, ncol=2, byrow=TRUE )  
     
     return( list( MDG1 = MDG[,1], MDG2 = MDG[,2] ) )
    
@@ -388,42 +346,48 @@
 .emZ1_2S <- function( Y, epsilon, b1_old=NULL, c1_old=NULL, b2_old=NULL, c2_old=NULL )
 {    
     Y_freq <- table(Y)
-    Y_val <- as.numeric(names(table(Y)))   
-    
+    Y_val <- as.numeric(names(table(Y)))       
     
     # initialize b1, c1, b2, and c2
     
-    mean1 <- mean(Y[which(Y<quantile(Y,0.5))])
-    var1 <- var(Y[which(Y<quantile(Y,0.5))])
+    ind_0.5 <- which(Y<quantile(Y,0.5))
+    mean1 <- mean(Y[ind_0.5])
+    var1 <- var(Y[ind_0.5])
  
-    mean2 <- mean(Y[which(Y>quantile(Y,0.8))])
-    var2 <- var(Y[which(Y>quantile(Y,0.8))])
+    ind_0.8 <- which(Y>quantile(Y,0.8))
+    mean2 <- mean(Y[ind_0.8])
+    var2 <- var(Y[ind_0.8])
     
     if(mean1 == 0||is.na(mean1)==TRUE) 
     {
-        mean1 <- mean(Y[which(Y<quantile(Y,0.6))])
-        var1 <- var(Y[which(Y<quantile(Y,0.6))])
+        ind_0.6 <- which(Y<quantile(Y,0.6))
+        mean1 <- mean(Y[ind_0.6])
+        var1 <- var(Y[ind_0.6])
     }
 
     if(mean1 == 0||is.na(mean1)==TRUE) 
     {
-        mean1 <- mean(Y[which(Y<quantile(Y,0.7))])
-        var1 <- var(Y[which(Y<quantile(Y,0.7))])
+        ind_0.7 <- which(Y<quantile(Y,0.7))
+        mean1 <- mean(Y[ind_0.7])
+        var1 <- var(Y[ind_0.7])
     }
 
     if(mean1 == 0||is.na(mean1)==TRUE) 
     {
-        mean1 <- mean(Y[which(Y<=quantile(Y,0.8))])
-        var1 <- var(Y[which(Y<=quantile(Y,0.8))])
+        ind_0.8 <- which(Y<quantile(Y,0.8))
+        mean1 <- mean(Y[ind_0.8])
+        var1 <- var(Y[ind_0.8])
     }
 
     if(mean1 == 0||is.na(mean1)==TRUE) 
     {
-        mean1 <- mean(Y[which(Y<=quantile(Y,0.9))])
-        var1 <- var(Y[which(Y<=quantile(Y,0.9))])
+        ind_0.9 <- which(Y<quantile(Y,0.9))
         
-        mean2 <- mean(Y[which(Y>quantile(Y,0.9))])
-        var2 <- var(Y[which(Y>quantile(Y,0.9))])
+        mean1 <- mean(Y[ind_0.9])
+        var1 <- var(Y[ind_0.9])
+        
+        mean2 <- mean(Y[ind_0.9])
+        var2 <- var(Y[ind_0.9])
     }
     
     if ( is.na(mean1) || is.na(var1) || is.nan(mean1) || is.nan(var1) ) {

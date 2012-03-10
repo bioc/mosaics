@@ -4,13 +4,23 @@
 setMethod(
     f="mosaicsFit",
     signature="BinData",
-    definition=function( object, analysisType=NULL, bgEst=NA,
-        k=3, meanThres=NA, s=2, d=0.25, truncProb=0.999 )
+    definition=function( object, analysisType="automatic", bgEst="automatic",
+        k=3, meanThres=NA, s=2, d=0.25, truncProb=0.999, 
+        parallel=FALSE, nCore=8 )
     {
         # Note: users can tune parameters only regarding MOSAiCS model fitting.
         # Note: tuning adaptive griding parameters is not supported yet.
+    
+        # check options: parallel computing (optional)
         
-        if ( is.null(analysisType) ) {
+        if ( parallel == TRUE ) {
+            message( "Use 'parallel' package for parallel computing." )        
+            if ( length(find.package('parallel',quiet=TRUE)) == 0 ) {
+                stop( "Please install 'parallel' package!" )
+            }
+        }
+        
+        if ( analysisType == "automatic" ) {
                 # if "analysisType" is not specified, "analysisType" is determined by dataset
                 
                 if ( length(object@input)==0 ) {
@@ -75,7 +85,7 @@ setMethod(
         
         # check validity of "bgEst"
         
-        if ( is.na(bgEst) ) {
+        if ( bgEst == "automatic" ) {
             message( "Info: background estimation method is determined based on data." )
             
             Y_freq <- table( object@tagCount )
@@ -92,7 +102,7 @@ setMethod(
         } else if ( bgEst == "rMOM" ) {
             message( "Info: background estimation based on robust method of moment." )
         } else {
-            stop( "Incorrect specification for 'bgEst'! 'bgEst' should be one of 'matchLow', 'rMOM', or NA!" )
+            stop( "Incorrect specification for 'bgEst'! 'bgEst' should be one of 'matchLow', 'rMOM', or 'automatic'!" )
         }
         
         # default meanThres for each of "OS" & "TS"
@@ -119,19 +129,24 @@ setMethod(
                 # one-sample analysis
                 
                 message( "Info: one-sample analysis." )
-                fit <- .mosaicsFit_OS( object, bgEst=bgEst, k=k, meanThres=meanThres )
+                fit <- .mosaicsFit_OS( object, bgEst=bgEst, k=k, meanThres=meanThres,
+                    parallel=parallel, nCore=nCore )
             },
             TS = {
                 # two-sample analysis (with M & GC)
                 
                 message( "Info: two-sample analysis (with mappability & GC content)." )
-                fit <- .mosaicsFit_TS( object, bgEst=bgEst, k=k, meanThres=meanThres, s=s, d=d )            
+                fit <- .mosaicsFit_TS( object, bgEst=bgEst, 
+                    k=k, meanThres=meanThres, s=s, d=d,
+                    parallel=parallel, nCore=nCore )            
             },
             IO = {
                 # two-sample analysis (Input only)
                 
                 message( "Info: two-sample analysis (Input only)." )
-                fit <- .mosaicsFit_IO( object, bgEst=bgEst, k=k, d=d, truncProb=truncProb )    
+                fit <- .mosaicsFit_IO( object, bgEst=bgEst, 
+                    k=k, d=d, truncProb=truncProb,
+                    parallel=parallel, nCore=nCore )    
             }
         )
         
@@ -143,13 +158,15 @@ setMethod(
 
 # MOSAiCS one-sample analysis
 
-.mosaicsFit_OS <- function( binData, bgEst, k=3, meanThres=0 )
+.mosaicsFit_OS <- function( binData, bgEst, k=3, meanThres=0, 
+    parallel=FALSE, nCore=8 )
 {        
     message( "Info: use adaptive griding." )
     message( "Info: fitting background model..." )    
     fitParam <- .adapGridMosaicsZ0_OS(
         Y=binData@tagCount, M=binData@mappability, GC=binData@gcContent, 
-        bgEst=bgEst, min_n_MGC=50, grids_MGC=c(0.01,0.02,0.04,0.10,0.20,0.50) )
+        bgEst=bgEst, min_n_MGC=50, grids_MGC=c(0.01,0.02,0.04,0.10,0.20,0.50),
+        parallel=parallel, nCore=nCore )
     fitZ0 <- .rlmFit_OS( parEst=fitParam, mean_thres=meanThres, 
         Y=binData@tagCount, M=binData@mappability, GC=binData@gcContent )
     pNfit <- .calcPN( Y=binData@tagCount, k=k, a=fitZ0$a, mu_est=fitZ0$muEst ) 
@@ -158,10 +175,13 @@ setMethod(
     gc()
     message( "Info: done!" )
     
+    Y_bd_all <- .calcYbdAll( fitZ0, k=k )
     message( "Info: fitting one-signal-component model..." )
-    fitZ1_1S <- .mosaicsZ1_1S( fitZ0, Y=binData@tagCount, pNfit=pNfit, k=k )
+    fitZ1_1S <- .mosaicsZ1_1S( fitZ0, Y=binData@tagCount, 
+        pNfit=pNfit, Y_bd_all=Y_bd_all, k=k )
     message( "Info: fitting two-signal-component model..." )
-    fitZ1_2S <- .mosaicsZ1_2S( fitZ0, Y=binData@tagCount, pNfit=pNfit, k=k )
+    fitZ1_2S <- .mosaicsZ1_2S( fitZ0, Y=binData@tagCount, 
+        pNfit=pNfit, Y_bd_all=Y_bd_all, k=k )
     
     message( "Info: calculating BIC of fitted models..." )
     fitBIC_1S <- .calcModelBIC( fitZ1=fitZ1_1S, Y=binData@tagCount, 
@@ -190,7 +210,8 @@ setMethod(
 
 # MOSAiCS two-sample analysis (with M & GC)
 
-.mosaicsFit_TS <- function( binData, bgEst, k=3, meanThres=1, s=2, d=0.25 )
+.mosaicsFit_TS <- function( binData, bgEst, k=3, meanThres=1, s=2, d=0.25, 
+    parallel=FALSE, nCore=8 )
 {    
     message( "Info: use adaptive griding." )
     message( "Info: fitting background model..." )     
@@ -206,7 +227,8 @@ setMethod(
     
     fitParam <- .adapGridMosaicsZ0_TS( 
         Y=binData@tagCount, M=binData@mappability, GC=binData@gcContent, X=binData@input,
-        bgEst=bgEst, min_n_MGC=50, grids_MGC=c(0.01,0.02,0.04,0.10,0.20,0.50), min_n_X=200 )
+        bgEst=bgEst, min_n_MGC=50, grids_MGC=c(0.01,0.02,0.04,0.10,0.20,0.50), min_n_X=200,
+        parallel=parallel, nCore=nCore )
     fitZ0 <- .rlmFit_TS( parEst=fitParam, mean_thres=meanThres, s=s, d=d,
         Y=binData@tagCount, M=binData@mappability, GC=binData@gcContent, X=binData@input )
     pNfit <- .calcPN( Y=binData@tagCount, k=k, a=fitZ0$a, mu_est=fitZ0$muEst ) 
@@ -215,10 +237,13 @@ setMethod(
     gc()
     message( "Info: done!" )
     
+    Y_bd_all <- .calcYbdAll( fitZ0, k=k )
     message( "Info: fitting one-signal-component model..." )
-    fitZ1_1S <- .mosaicsZ1_1S( fitZ0, Y=binData@tagCount, pNfit=pNfit, k=k )
+    fitZ1_1S <- .mosaicsZ1_1S( fitZ0, Y=binData@tagCount, 
+        pNfit=pNfit, Y_bd_all=Y_bd_all, k=k )
     message( "Info: fitting two-signal-component model..." )
-    fitZ1_2S <- .mosaicsZ1_2S( fitZ0, Y=binData@tagCount, pNfit=pNfit, k=k )
+    fitZ1_2S <- .mosaicsZ1_2S( fitZ0, Y=binData@tagCount, 
+        pNfit=pNfit, Y_bd_all=Y_bd_all, k=k )
     
     message( "Info: calculating BIC of fitted models..." )
     fitBIC_1S <- .calcModelBIC( fitZ1=fitZ1_1S, Y=binData@tagCount, 
@@ -248,7 +273,8 @@ setMethod(
 
 # MOSAiCS two-sample analysis (Input only)
 
-.mosaicsFit_IO <- function( binData, bgEst, k=3, d=0.25, truncProb=0.999 )
+.mosaicsFit_IO <- function( binData, bgEst, k=3, d=0.25, truncProb=0.999, 
+    parallel=FALSE, nCore=8 )
 {    
     message( "Info: use adaptive griding." )
     message( "Info: fitting background model..." )
@@ -258,7 +284,8 @@ setMethod(
     #fitParam <- .adapGridMosaicsZ0_IO( Y=binData@tagCount, X=binData@input, 
     #    min_n_X=50 )
     fitParam <- .adapGridMosaicsZ0_IO( Y=binData@tagCount, X=binData@input, 
-        bgEst=bgEst, inputTrunc=inputTrunc, min_n_X=50 )
+        bgEst=bgEst, inputTrunc=inputTrunc, min_n_X=50,
+        parallel=parallel, nCore=nCore )
     fitZ0 <- .rlmFit_IO( parEst=fitParam, d=d, Y=binData@tagCount, 
         X=binData@input, inputTrunc=inputTrunc )
     pNfit <- .calcPN( Y=binData@tagCount, k=k, a=fitZ0$a, mu_est=fitZ0$muEst ) 
@@ -267,10 +294,13 @@ setMethod(
     gc()
     message( "Info: done!" )
     
+    Y_bd_all <- .calcYbdAll( fitZ0, k=k )
     message( "Info: fitting one-signal-component model..." )
-    fitZ1_1S <- .mosaicsZ1_1S( fitZ0, Y=binData@tagCount, pNfit=pNfit, k=k )
+    fitZ1_1S <- .mosaicsZ1_1S( fitZ0, Y=binData@tagCount, 
+        pNfit=pNfit, Y_bd_all=Y_bd_all, k=k )
     message( "Info: fitting two-signal-component model..." )
-    fitZ1_2S <- .mosaicsZ1_2S( fitZ0, Y=binData@tagCount, pNfit=pNfit, k=k )
+    fitZ1_2S <- .mosaicsZ1_2S( fitZ0, Y=binData@tagCount, 
+        pNfit=pNfit, Y_bd_all=Y_bd_all, k=k )
     
     message( "Info: calculating BIC of fitted models..." )
     fitBIC_1S <- .calcModelBIC( fitZ1=fitZ1_1S, Y=binData@tagCount, 

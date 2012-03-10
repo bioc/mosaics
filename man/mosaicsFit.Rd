@@ -9,8 +9,8 @@ Fit one-sample or two-sample MOSAiCS model with one signal component and two sig
 }
 \usage{
 mosaicsFit( object, ... )
-\S4method{mosaicsFit}{BinData}( object, analysisType=NULL, bgEst=NA,
-    k=3, meanThres=NA, s=2, d=0.25, truncProb=0.999 )
+\S4method{mosaicsFit}{BinData}( object, analysisType="automatic", bgEst="automatic",
+    k=3, meanThres=NA, s=2, d=0.25, truncProb=0.999, parallel=FALSE, nCore=8 )
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -20,13 +20,13 @@ mosaicsFit( object, ... )
         Possible values are "OS" (one-sample analysis),
         "TS" (two-sample analysis using mappability and GC content), and 
         "IO" (two-sample analysis without using mappability and GC content).
-        If \code{analysisType} is not specified,
+        If \code{analysisType="automatic"},
                 this method tries to guess its best for \code{analysisType}, 
                 based on the data provided. }
     \item{bgEst}{Parameter to determine background estimation approach.
         Possible values are "matchLow" (estimation using bins with low tag counts) and
         "rMOM" (estimation using robust method of moment (MOM)).
-        If \code{bgEst} is not specified,
+        If \code{bgEst="automatic"},
                 this method tries to guess its best for \code{bgEst}, 
                 based on the data provided.}    
     \item{k}{Parameter for estimating background distribution.
@@ -41,6 +41,14 @@ mosaicsFit( object, ... )
         Default is 0.25. }
     \item{truncProb}{Parameter for estimating background distribution.
         It is not recommended for user to change this value. }  
+      \item{parallel}{Utilize multiple CPUs for parallel computing 
+        using \code{"parallel"} package?
+        Possible values are \code{TRUE} (use \code{"parallel"}) 
+        or \code{FALSE} (not use \code{"parallel"}).
+        Default is \code{FALSE} (not use \code{"parallel"}).
+    }
+      \item{nCore}{Number of CPUs when parallel computing is utilized.
+    }
     \item{...}{ Other parameters to be passed through to generic \code{mosaicsFit}.}  
 }
 \details{
@@ -58,6 +66,9 @@ If control data is available with mappability score, GC content score, or sequen
 user can do either one- or two-sample analysis
 (\code{analysisType="OS"}, \code{analysisType="TS"}, or \code{analysisType="IO"}).
 
+Parallel computing can be utilized for faster computing
+if \code{parallel=TRUE} and \code{parallel} package is installed.
+\code{nCore} determines number of CPUs used for parallel computing.
 \code{meanThres}, \code{s}, and \code{d} are the tuning parameters for estimating background distribution.
 The vignette and Kuan et al. (2010) provide further details about these tuning parameters.
 Do not change \code{k} or \code{truncProb}.
@@ -79,7 +90,7 @@ Kuan, PF, D Chung, JA Thomson, R Stewart, and S Keles (2011),
 library(mosaicsExample)
 data(exampleBinData)
 
-exampleFit <- mosaicsFit( exampleBinData, analysisType="TS" )
+exampleFit <- mosaicsFit( exampleBinData, analysisType="IO", bgEst="automatic" )
 }
 }
 \keyword{models}

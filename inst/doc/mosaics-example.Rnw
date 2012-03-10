@@ -39,6 +39,8 @@ pdftitle={mosaics Vignette}]
 %\VignettePackage{mosaics}
 \maketitle
 
+\tableofcontents
+
 \section{Overview}
 
 This vignette provides an introduction to the analysis of ChIP-seq data with
@@ -49,7 +51,7 @@ two \textbf{S}ample \textbf{A}nalysis and \textbf{I}nference for
 \textbf{C}hIP-\textbf{S}eq Data''. It implements a flexible parametric mixture
 modeling approach for detecting peaks, i.e., enriched regions, in one-sample
 (ChIP sample) or two-sample (ChIP and control samples) ChIP-seq data.
-It accounts for mappability and GC content biases that arise in ChIP-seq data.
+It can account for mappability and GC content biases that arise in ChIP-seq data.
 
 The package can be loaded with the command:
 
@@ -64,42 +66,135 @@ library("mosaics")
 \section{Getting started}
 
 `\texttt{mosaics}' package provides flexible framework for the ChIP-seq analysis.
-If you have the data for matched control sample, two-sample analysis
-(either with mappability and GC content or without them) is usually recommended.
-The two-sample analysis with mappability and GC content is especially useful
-for the ChIP-seq data with low sequencing depth.
-If the ChIP-seq data is deeply sequenced, the two-sample analysis is often appropriate.
+
+If you have the data for matched control sample, 
+two-sample analysis is recommended.
+If the ChIP-seq data is deeply sequenced, 
+the two-sample analysis without mappability and GC content
+(Section \ref{two_sample_no_MGC}) is usually appropriate.
+For the ChIP-seq data with low sequencing depth,
+the two-sample analysis with mappability and GC content 
+(Section \ref{two_sample_MGC}) can be useful.
 When control sample is not available, `\texttt{mosaics}' package accommodates
 one-sample analysis of ChIP-seq data. 
 In this case, you should have files for mappability and GC content, 
 in addition to the files for ChIP and matched control samples.
-Sections \ref{two_sample_MGC} and \ref{two_sample_no_MGC} discuss
-the work flow and command lines for the two-sample analysis with mappability and GC content
-and without them, respectively. Section \ref{one_sample} discuss the case
-of the one-sample analysis.
 
-`\texttt{mosaics}' package accepts aligned read files 
-(such as ones obtained from the ELAND or bowtie aligner) as input
-and converts them into bin-level files for modeling and visualization purposes.
-For the two-sample analysis with mappability and GC content and the one-sample analysis,
-you also need bin-level mappability, GC content, and sequence ambiguity 
-score files for the reference genome you are working with.
-If you are working with organisms such as human (HG18 and HG19), mouse (MM9), 
-rat (RN4), and Arabidopsis (TAIR9), you can download their corresponding 
-preprocessed mappability, GC content, and sequence ambiguity score files 
-at \url{http://www.stat.wisc.edu/~keles/Software/mosaics/}. 
-If your reference genome of interest is not listed on our website, 
-you can inquire about it at our Google group, 
-\url{http://groups.google.com/group/mosaics_user_group}, and we would be happy 
-to add your genome of interest to the list. 
-The companion website also provides 
-all the related scripts and easy-to-follow instructions to prepare these files. 
-Please check \url{http://www.stat.wisc.edu/~keles/Software/mosaics/} 
-for more details. We encourage  questions or requests regarding 
-`\texttt{mosaics}' package to be posted on  our Google group
+We recommend users start from Section \ref{mosaicsRunAll} and
+it discusses the most convenient way to do the two-sample analysis
+(without using mappability and GC content).
+Section \ref{two_sample_no_MGC} discusses each step of the two-sample workflow in detail 
+and provides command lines for each step.
+Sections \ref{two_sample_MGC} and \ref{one_sample} briefly explain
+the workflow and command lines for the two-sample analysis and the one-sample analysis
+with mappability and GC content, respectively.
+
+We encourage  questions or requests regarding 
+`\texttt{mosaics}' package to be posted on our Google group
 \url{http://groups.google.com/group/mosaics_user_group}.
 
-\section{Workflow: Two-Sample Analysis}\label{two_sample_MGC}
+\section{Two-Sample Analysis using \texttt{'mosaicsRunAll'}}\label{mosaicsRunAll}
+
+Two-sample analysis without mappability and GC content can be done 
+in a more convenient way, with the command: 
+
+<<mosaicsRunAll,eval=FALSE>>=
+     mosaicsRunAll( 
+         chipFile="/scratch/eland/STAT1_ChIP_eland_results.txt", 
+         chipFileFormat="eland_result", 
+         controlFile="/scratch/eland/STAT1_control_eland_results.txt", 
+         controlFileFormat="eland_result", 
+         binfileDir="/scratch/bin/", 
+         peakFile=c("/scratch/peak/STAT1_peak_list.bed", "/scratch/peak/STAT1_peak_list.gff"),
+         peakFileFormat=c("bed", "gff"),
+         reportSummary=TRUE, 
+         summaryFile="/scratch/reports/mosaics_summary.txt", 
+         reportExploratory=TRUE, 
+         exploratoryFile="/scratch/reports/mosaics_exploratory.pdf", 
+         reportGOF=TRUE, 
+         gofFile="/scratch/reports/mosaics_GOF.pdf",
+         byChr=FALSE,
+         excludeChr="chrM",
+         FDR=0.05, 
+         fragLen=200, 
+         binSize=fragLen,
+         capping=0,
+         bgEst="automatic",
+         signalModel="BIC",
+         parallel=TRUE,
+         nCore=8 )
+@
+
+`\texttt{mosaicsRunAll}' method imports aligned read files, converts them to bin-level files (generated bin-level files will be saved in the directory 
+specified in `\texttt{binfileDir}' argument for future use),
+fits the MOSAiCS model, identifies peaks, and exports the peak list. 
+In addition, users can also make `\texttt{mosaicsRunAll}' method generate diverse analysis reports, 
+such as summary report of parameters and analysis results, exploratory plots, and goodness of fit (GOF) plots.
+Arguments of `\texttt{mosaicsRunAll}' method are summarized in Table \ref{tab:mosaicsRunAll}.
+See Section \ref{constructBins} for
+details of the arguments `\texttt{chipFileFormat}', `\texttt{controlFileFormat}',
+`\texttt{byChr}', `\texttt{excludeChr}', `\texttt{fragLen}',
+`\texttt{binSize}', and `\texttt{capping}'. 
+See Section \ref{mosaicsFit}' for details of the argument `\texttt{bgEst}'. 
+See Section \ref{mosaicsPeak}' for details of the arguments
+`\texttt{FDR}', `\texttt{signalModel}', `\texttt{peakFileFormat}',
+`\texttt{maxgap}', `\texttt{minsize}', and `\texttt{thres}'.
+
+\begin{table}
+\caption{ \label{tab:mosaicsRunAll} \textbf{Summary of the arguments of `\texttt{mosaicsRunAll}' method.} }
+\label{t:case}
+\begin{center}
+\begin{tabular}{ll}
+\multicolumn{2}{c}{(a) Input and output files} \\
+\hline
+Argument & Explanation \\
+\hline
+\texttt{chipFile} & Name of aligned read file of ChIP sample.\\
+\texttt{chipFileFormat} & File format of aligned read file of ChIP sample.\\
+\texttt{controlFile} & Name of aligned read file of matched control sample.\\
+\texttt{controlFileFormat} & File format of aligned read file of matched control sample.\\
+\texttt{binfileDir} & Directory that bin-level files are exported to.\\
+\texttt{peakFile} & Vector of file names of peak list.\\
+\texttt{peakFileFormat} & Vector of file formats of peak list.\\
+\hline
+\multicolumn{2}{c}{} \\
+\multicolumn{2}{c}{(b) Reports} \\
+\hline
+Argument & Explanation \\
+\hline
+\texttt{reportSummary} * & Generate analysis summary? \\
+\texttt{summaryFileName} & File name of analysis summary. \\
+\texttt{reportExploratory} * & Generate exploratory plots? \\
+\texttt{exploratoryFileName} & File name of exploratory plots. \\
+\texttt{reportGOF} * & Generate GOF plots? \\
+\texttt{gofFileName} & File name of GOF plots. \\
+\hline
+\multicolumn{2}{l}{* Reports will be generated only when these arguments are \texttt{TRUE}. Default is \texttt{FALSE}.} \\
+\multicolumn{2}{c}{} \\
+\multicolumn{2}{c}{(c) Tuning parameters} \\
+\hline
+Argument & Explanation \\
+\hline
+\texttt{byChr} & Genome-wide analysis (\texttt{FALSE}) or chromosome-wise analysis (\texttt{TRUE})? \\
+\texttt{excludeChr} & Vector of chromosomes to be excluded from the analysis. \\
+\texttt{fragLen} & Average fragment length. \\
+\texttt{binSize} & Bin size. \\
+\texttt{capping} & Cap read counts in aligned read files? \\
+\texttt{bgEst} & Background estimation approach. \\
+\texttt{signalModel} & Signal model. \\
+\texttt{FDR} & False discovery rate (FDR). \\
+\texttt{maxgap} & Distance between initial peaks for merging. \\
+\texttt{minsize} & Minimum width to be called as a peak. \\
+\texttt{thres} & Minimum ChIP tag counts to be called as a peak. \\
+\texttt{parallel} & Use \texttt{parallel} package for parallel computing? \\
+\texttt{nCore} & Number of CPUs used for parallel computing. ** \\
+\hline
+\multicolumn{2}{l}{** Relevant only when \texttt{parallel=TRUE} and \texttt{parallel} package is installed.} \\
+\end{tabular}
+\end{center}
+\end{table}
+
+\section{Workflow: Two-Sample Analysis}\label{two_sample_no_MGC}
 
 \subsection{Constructing Bin-Level Files from the Aligned Read File}\label{constructBins}
 
@@ -108,13 +203,13 @@ into bin-level files for modeling and visualization purposes.
 These bin-level data can easily be generated from the aligned read files with the command: 
 
 <<constructBins,eval=FALSE>>=
-constructBins( infileLoc="/scratch/eland/", infileName="STAT1_eland_results.txt", 
-    fileFormat="eland_result", outfileLoc=infileLoc, 
-    byChr=FALSE, fragLen=200, binSize=fragLen, capping=0 )
+constructBins( infile="/scratch/eland/STAT1_eland_results.txt", 
+    fileFormat="eland_result", outfileLoc="/scratch/eland/", 
+    byChr=FALSE, excludeChr="chrM", fragLen=200, binSize=200, capping=0 )
 @
 
-You can specify the directory, name, and file format of the aligned read file 
-in `\texttt{infileLoc}', `\texttt{infileName}', and `\texttt{fileFormat}' arguments, respectively.
+You can specify the name and file format of the aligned read file 
+in `\texttt{infile}' and `\texttt{fileFormat}' arguments, respectively.
 `\texttt{constructBins}' method currently allows the following aligned read file formats:
 Eland result (`\texttt{"eland}$\_$\texttt{result"}'), Eland extended (`\texttt{"eland}$\_$\texttt{extended"}'),
 Eland export (`\texttt{"eland}$\_$\texttt{export"}'), default Bowtie (`\texttt{"bowtie"}'), SAM (`\texttt{"sam"}'), BED (`\texttt{"bed"}'), and CSEM BED (`\texttt{"csem"}').
@@ -132,14 +227,6 @@ and the corresponding bin-level files can be constructed
 by applying `\texttt{constructBins}' method to this BED file with the argument
 `\texttt{fileFormat="csem"}'.
 
-You can specify average fragment length and bin size in `\texttt{fragLen}' and `\texttt{binSize}' arguments, respectively,
-and these arguments control the resolution of bin-level ChIP-seq data.
-By default, average fragment length is set to 200 bp, which is the common fragment length
-for Illumina sequences, and bin size equals to average fragment length.
-`\texttt{capping}' argument indicates maximum number of reads allowed to start at each nucleotide position.
-Using some small value for capping (e.g., `\texttt{capping=3}') will exclude extremely large read counts that might correspond to PCR amplification artifacts, which is especially useful for the ChIP-seq data with low sequencing depth. 
-Capping is not applied (default) if `\texttt{capping}' is set to some non-positive value, e.g., `\texttt{capping=0}'.
-
 `\texttt{constructBins}' can generate a single bin-level file containing all chromosomes
 (for a genome-wide analysis) or multiple bin-level files for each chromosome
 (for a chromosome-wise analysis).
@@ -148,18 +235,26 @@ named as `\texttt{[infileName]}$\_$\texttt{fragL[fragLen]}$\_$\texttt{bin[binSiz
 where \texttt{[infileName]}, \texttt{[fragLen]}, and \texttt{[binSize]} are
 name of aligned read file, average fragment length, and bin size, respectively.
 If `\texttt{byChr=TRUE}', bin-level data for each chromosome is exported
-to a separate file named as `\texttt{[chrID]}$\_$\texttt{[infileName]}$\_$\texttt{fragL[fragLen]}$\_$\texttt{bin[binSize].txt}',
+to a separate file named as `\texttt{[infileName]}$\_$\texttt{fragL[fragLen]}$\_$\texttt{bin[binSize]}$\_$\texttt{[chrID].txt}',
 where \texttt{[chrID]} is chromosome ID that reads align to.
 These chromosome IDs (\texttt{[chrID]}) are extracted from the aligned read file.
-By default, constructed bin-level files are exported to the directory 
-that the aligned read file is located at. 
-If you prefer to export them to another directory, you can specify it in `\texttt{outfileLoc}' argument.
+The constructed bin-level files are exported to the directory 
+specified in `\texttt{outfileLoc}' argument.
 
-\subsection{Reading  Bin-Level Data into the R Environment}\label{readBins}
+If you want to exclude some chromosomes in the processed bin-level files,
+you can specify these chromosomes in `\texttt{excludeChr}' argument.
+You can specify average fragment length and bin size in `\texttt{fragLen}' and `\texttt{binSize}' arguments, respectively,
+and these arguments control the resolution of bin-level ChIP-seq data.
+By default, average fragment length is set to 200 bp, which is the common fragment length
+for Illumina sequences, and bin size equals to average fragment length.
+`\texttt{capping}' argument indicates maximum number of reads allowed to start at each nucleotide position.
+Using some small value for capping (e.g., `\texttt{capping=3}') will exclude extremely large read counts that might correspond to PCR amplification artifacts, which is especially useful for the ChIP-seq data with low sequencing depth. 
+Capping is not applied (default) if `\texttt{capping}' is set to some non-positive value, e.g., `\texttt{capping=0}'.
 
-For the two-sample analysis with mappability and GC content,
-you need preprocessed bin-level ChIP data, control sample data, 
-mappability score, GC content score, and sequence ambiguity score. 
+\subsection{Reading Bin-Level Data into the R Environment}\label{readBins}
+
+You now have bin-level ChIP data and matched control sample data
+from '\texttt{constructBins}'.
 In this vignette, we use chromosome 21 data from a ChIP-seq
 experiment of STAT1 binding in interferon-$\gamma$-stimulated HeLa S3 cells
 \cite{stat1}. `\texttt{mosaicsExample}' package provides this example dataset.
@@ -170,19 +265,15 @@ library(mosaicsExample)
 
 Bin-level data can be imported to the R environment with the command:
 
-<<ts-readbin>>=
-exampleBinData <- readBins( type=c("chip","input","M","GC","N"),
+<<io-readbin>>=
+exampleBinData <- readBins( type=c("chip","input"),
     fileName=c( system.file( file.path("extdata","chip_chr21.txt"), package="mosaicsExample"),
-    system.file( file.path("extdata","input_chr21.txt"), package="mosaicsExample"),
-    system.file( file.path("extdata","M_chr21.txt"), package="mosaicsExample"),
-    system.file( file.path("extdata","GC_chr21.txt"), package="mosaicsExample"),
-    system.file( file.path("extdata","N_chr21.txt"), package="mosaicsExample") ) )
+    system.file( file.path("extdata","input_chr21.txt"), package="mosaicsExample") ) )
 @
 
-For the  `\texttt{type}' argument, \texttt{"chip"}, \texttt{"input"},
-\texttt{"M"}, \texttt{"GC"}, and \texttt{"N"} indicate bin-level ChIP data, 
-control sample data, mappability score, GC content score, and sequence
-ambiguity score, respectively. You need to specify the corresponding file names 
+For the  `\texttt{type}' argument, 
+\texttt{"chip"} and \texttt{"input"} indicate bin-level ChIP data
+control sample data, respectively. You need to specify the corresponding file names 
 in `\texttt{fileName}'. `\texttt{mosaics}' package assumes that each file name 
 in `\texttt{fileName}' is provided in the same order as in `\texttt{type}'. 
 
@@ -198,8 +289,7 @@ If bin-level files are obtained using `\texttt{byChr=FALSE}' in `\texttt{constru
 each bin-level file contains data for only one chromosome
 and each of these bin-level files need to be analyzed separately (chromosome-wise analysis).
 The genome-wide analysis usually provide more stable model fitting and peak identification results
-and it is recommended for most cases.
-The chromosome-wise analysis is usually faster than the genome-wide analysis.
+so it is recommended for most cases.
 
 R package \texttt{mosaics} provides functions for generating simple summaries
 of the data. The following command prints out basic information about the
@@ -209,52 +299,31 @@ bins. This value is usually larger than the sequencing depth since tags are
 counted after extension to average fragment length and an extended fragment can
 contribute to multiple bins. 
 
-<<ts-bindata-show>>=
+<<io-bindata-show>>=
 exampleBinData
 @
 
 `\texttt{print}' method returns the bin-level data in data frame format.
 
-<<ts-bindata-print>>=
+<<io-bindata-print>>=
 print(exampleBinData)[51680:51690,]
 @
 
 `\texttt{plot}' method provides exploratory plots for the ChIP data. Different
 type of plots can be obtained by varying the `\texttt{plotType}' argument.
-`\texttt{plotType="M"}' and `\texttt{plotType="GC"}' generate plots of mean
-ChIP tag counts versus mappability and GC content scores, respectively.
 `\texttt{plotType="input"}' generates a plot of mean ChIP tag counts versus
-control tag counts. Moreover, `\texttt{plotType="M|input"}' and
-`\texttt{plotType="GC|input"}' generate plots of mean ChIP tag counts versus
-mappability and GC content scores, respectively, conditional on control tag
-counts. If `\texttt{plotType}' is not specified, this method plots the
+control tag counts. If `\texttt{plotType}' is not specified, this method plots the
 histogram of ChIP tag counts.
 
-<<ts-bindata-plot,eval=FALSE>>=
-plot(exampleBinData)
-plot( exampleBinData, plotType="M" )
-plot( exampleBinData, plotType="GC" )
+<<io-bindata-plot,eval=FALSE>>=
+plot( exampleBinData )
 plot( exampleBinData, plotType="input" )
-plot( exampleBinData, plotType="M|input" )
-plot( exampleBinData, plotType="GC|input" )  
 @
 
-Figures \ref{fig:bindata-plot-hist}, \ref{fig:bindata-plot-M},
-\ref{fig:bindata-plot-GC}, \ref{fig:bindata-plot-input},
-\ref{fig:bindata-plot-M-input}, and \ref{fig:bindata-plot-GC-input} display
-examples of different types of plots. As discussed in \cite{mosaics}, we
-observe that mean ChIP tag count increases as mappability score increases
-(Figure \ref{fig:bindata-plot-M}). Mean ChIP tag count depends on GC score
-in a non-linear fashion (Figure \ref{fig:bindata-plot-GC}). The relationship
+Figures \ref{fig:bindata-plot-hist} and \ref{fig:bindata-plot-input} display
+examples of different types of plots. The relationship
 between mean ChIP tag counts and control tag counts seems to be linear,
 especially for small  control tag counts (Figure \ref{fig:bindata-plot-input}).
-When we condition on control tag counts (Figures \ref{fig:bindata-plot-M-input}
-and \ref{fig:bindata-plot-GC-input} ), mean ChIP tag count versus mappability
-and GC content relations exhibit similar patterns to that of marginal plots
-given in Figures  \ref{fig:bindata-plot-M} and \ref{fig:bindata-plot-GC}.
-MOSAiCS incorporates this observation by modeling ChIP tag counts from non-peak
-regions  with a small number of control tag counts as a function of
-mappability, GC content, and control tag counts.
 
 \begin{figure}[tbh]
 \begin{center}
@@ -268,24 +337,6 @@ from ChIP and control samples.}
 
 \begin{figure}[tbh]
 \begin{center}
-<<fig-bindata-plot-M,fig=TRUE,height=6,width=6,echo=FALSE>>=
-plot( exampleBinData, plotType="M" )
-@
-\caption{\label{fig:bindata-plot-M} Mean ChIP tag count versus Mappability.}
-\end{center}
-\end{figure}
-
-\begin{figure}[tbh]
-\begin{center}
-<<fig-bindata-plot-GC,fig=TRUE,height=6,width=6,echo=FALSE>>=
-plot( exampleBinData, plotType="GC" )
-@
-\caption{\label{fig:bindata-plot-GC} Mean ChIP tag count versus GC content.}
-\end{center}
-\end{figure}
-
-\begin{figure}[tbh]
-\begin{center}
 <<fig-bindata-plot-input,fig=TRUE,height=6,width=6,echo=FALSE>>=
 plot( exampleBinData, plotType="input" )
 @
@@ -294,50 +345,25 @@ Control tag count.}
 \end{center}
 \end{figure}
 
-\begin{figure}[tbh]
-\begin{center}
-<<fig-bindata-plot-M-input,fig=TRUE,height=6,width=6,echo=FALSE>>=
-plot( exampleBinData, plotType="M|input" )
-@
-\caption{\label{fig:bindata-plot-M-input} Mean ChIP tag count versus
-Mappability, conditional on control tag counts.}
-\end{center}
-\end{figure}
-
-\begin{figure}[tbh]
-\begin{center}
-<<fig-bindata-plot-GC-input,fig=TRUE,height=6,width=6,echo=FALSE>>=
-plot( exampleBinData, plotType="GC|input" )
-@
-\caption{\label{fig:bindata-plot-GC-input} Mean ChIP tag count versus
-GC content, conditional on control tag counts.}
-\end{center}
-\end{figure}
-
 \subsection{Fitting the MOSAiCS Model}\label{mosaicsFit}
 
 We are now ready to fit a MOSAiCS model using the bin-level data above
 (\texttt{exampleBinData})   with the command:
 
-%<<ts-mosaicsfit>>=
-<<ts-mosaicsfit,eval=FALSE>>=
-exampleFit <- mosaicsFit( exampleBinData, analysisType="TS", bgEst=NA )
+<<io-mosaicsfit>>=
+exampleFit <- mosaicsFit( exampleBinData, analysisType="IO", bgEst="automatic" )
 @
 
-<<ts-mosaicsfit-load-fit,echo=FALSE>>=
-data(exampleFit)
-@
-
-`\texttt{analysisType="TS"}' indicates implementation of the two-sample analysis.
+`\texttt{analysisType="IO"}' indicates implementation of the two-sample analysis.
 `\texttt{bgEst}' argument determines background estimation approach.
 `\texttt{bgEst="matchLow"}' estimates background distribution using only bins with low tag counts
 and it is appropriate for the data with relatively low sequencing depth. 
 `\texttt{bgEst="rMOM"}' estimates background distribution using robust method of moment (MOM) and
 it is appropriate for the data with relatively high sequencing depth.
-If `\texttt{bgEst=NA}' (default), `\texttt{mosaicsFit}' tries its best guess 
+If `\texttt{bgEst="automatic"}' (default), `\texttt{mosaicsFit}' tries its best guess 
 for the background estimation approach, based on the data provided.
-If the goodness of fit obtained using `\texttt{bgEst=NA}' is not satisfactory,
-we recommend to try `\texttt{bgEst="matchLow"}' and/or `\texttt{bgEst="rMOM"}' 
+If the goodness of fit obtained using `\texttt{bgEst="automatic"}' is not satisfactory,
+we recommend to try `\texttt{bgEst="matchLow"}' and `\texttt{bgEst="rMOM"}' 
 and it might improve the model fit.
 
 `\texttt{mosaicsFit}' fits both one-signal-component and two-signal-component
@@ -354,7 +380,7 @@ used in fitting the background (non-enriched) distribution. A lower BIC value
 indicates a better model fit. For this dataset, we conclude that the
 two-signal-component model has a lower BIC and hence it provides a better fit.
 
-<<ts-mosaicsfit-show>>=
+<<io-mosaicsfit-show>>=
 exampleFit
 @
 
@@ -365,8 +391,7 @@ two-signal-component models with the actual data.  Figure
 conclude that the two-signal-component model provides a better fit as is also
 supported by its lower BIC value compared to the one-signal component model. 
 
-
-<<ts-mosaicsfit-plot,eval=FALSE>>=
+<<io-mosaicsfit-plot,eval=FALSE>>=
 plot(exampleFit)
 @
 
@@ -381,8 +406,6 @@ fitted models: (Sim:N): Background model; (Sim:N+S1): one-signal-component
 model; (Sim:N+S1+S2): two-signal-component model. }
 \end{center}
 \end{figure}
-
-%In addition to `\texttt{analysisType}', `\texttt{mosaicsFit}' method provides parameters to tune the background distribution of the MOSAiCS model. We specified appropriate default values for these parameters based on computational experiments and analysis of diverse ChIP-seq datasets. Default values work well in general but some tuning might be required for some cases. You may need to consider parameter tuning if the fitted background model is too similar to the actual data in the GOF plot or you encounter some warning or error messages while running `\texttt{mosaicsFit}' method. Section \ref{tuning} provides basic guidelines on parameter tuning. If you encounter a fitting problem you need help with, feel free to contact us at our Google group, \url{http://groups.google.com/group/mosaics_user_group}.
 
 \subsection{Identifying Peaks Based on the Fitted Model}\label{mosaicsPeak}
 
@@ -426,7 +449,7 @@ The following command prints out a summary of identified peaks including
 the number of  peaks identified, median peak width, and the empirical false
 discovery rate (FDR).
 
-<<ts-mosaicspeak-show>>=
+<<io-mosaicspeak-show>>=
 examplePeak
 @
 
@@ -444,7 +467,7 @@ bin refers to  the probability that the bin is not a peak conditional on data.
 Hence, smaller posterior probabilities provide more evidence that the bin is
 actually a peak.
 
-<<ts-mosaicspeak-print>>=
+<<io-mosaicspeak-print>>=
 print(examplePeak)[1:15,]
 @
 
@@ -457,134 +480,135 @@ formats, respectively, where score is the averaged ChIP tag counts in each
 peak. Peak calling results can be exported in TXT, BED, and GFF file formats,
 respectively, by the commands:
 
-<<ts-mosaicspeak-export>>=
-export( examplePeak, type="txt", fileLoc=".", fileName="TSpeakList.txt" )
-export( examplePeak, type="bed", fileLoc=".", fileName="TSpeakList.bed" )
-export( examplePeak, type="gff", fileLoc=".", fileName="TSpeakList.gff" )
+<<io-mosaicspeak-export>>=
+export( examplePeak, type="txt", filename="TSpeakList.txt" )
+export( examplePeak, type="bed", filename="TSpeakList.bed" )
+export( examplePeak, type="gff", filename="TSpeakList.gff" )
 @
 
 `\texttt{fileLoc}' and `\texttt{fileName}' indicate the directory and the name
 of the exported file.
 
-\section{Two-Sample Analysis without Mappability and GC Content}\label{two_sample_no_MGC}
+\section{Two-Sample Analysis with Mappability and GC Content}\label{two_sample_MGC}
 
-Application of MOSAiCS to multiple case studies showed that consideration of
+For the two-sample analysis with mappability and GC content and the one-sample analysis,
+you also need bin-level mappability, GC content, and sequence ambiguity 
+score files for the reference genome you are working with.
+If you are working with organisms such as human (HG18 and HG19), mouse (MM9), 
+rat (RN4), and Arabidopsis (TAIR9), you can download their corresponding 
+preprocessed mappability, GC content, and sequence ambiguity score files 
+at \url{http://www.stat.wisc.edu/~keles/Software/mosaics/}. 
+If your reference genome of interest is not listed on our website, 
+you can inquire about it at our Google group, 
+\url{http://groups.google.com/group/mosaics_user_group}, and we would be happy 
+to add your genome of interest to the list. 
+The companion website also provides 
+all the related scripts and easy-to-follow instructions to prepare these files. 
+Please check \url{http://www.stat.wisc.edu/~keles/Software/mosaics/} 
+for more details.
+
+You can import bin-level data and fit MOSAiCS model 
+for the two-sample analysis using mappability and GC content with the commands:
+
+<<ts-readbin>>=
+exampleBinData <- readBins( type=c("chip","input","M","GC","N"),
+    fileName=c( system.file( file.path("extdata","chip_chr21.txt"), package="mosaicsExample"),
+    system.file( file.path("extdata","input_chr21.txt"), package="mosaicsExample"),
+    system.file( file.path("extdata","M_chr21.txt"), package="mosaicsExample"),
+    system.file( file.path("extdata","GC_chr21.txt"), package="mosaicsExample"),
+    system.file( file.path("extdata","N_chr21.txt"), package="mosaicsExample") ) )
+@
+
+For the  `\texttt{type}' argument, \texttt{"chip"}, \texttt{"input"},
+\texttt{"M"}, \texttt{"GC"}, and \texttt{"N"} indicate bin-level ChIP data, 
+control sample data, mappability score, GC content score, and sequence
+ambiguity score, respectively.
+
+When you have mappability and GC contents, 
+`\texttt{plot}' method provides additional plot types.
+`\texttt{plotType="M"}' and `\texttt{plotType="GC"}' generate plots of mean
+ChIP tag counts versus mappability and GC content scores, respectively.
+Moreover, `\texttt{plotType="M|input"}' and
+`\texttt{plotType="GC|input"}' generate plots of mean ChIP tag counts versus
+mappability and GC content scores, respectively, conditional on control tag
+counts.
+
+<<ts-bindata-plot>>=
+plot( exampleBinData, plotType="M" )
+plot( exampleBinData, plotType="GC" )
+plot( exampleBinData, plotType="M|input" )
+plot( exampleBinData, plotType="GC|input" )  
+@
+
+As discussed in \cite{mosaics}, 
+we observe that mean ChIP tag count increases as mappability score increases
+(Figure \ref{fig:bindata-plot-M}). Mean ChIP tag count depends on GC score
+in a non-linear fashion (Figure \ref{fig:bindata-plot-GC}). 
+When we condition on control tag counts (Figures \ref{fig:bindata-plot-M-input}
+and \ref{fig:bindata-plot-GC-input} ), mean ChIP tag count versus mappability
+and GC content relations exhibit similar patterns to that of marginal plots
+given in Figures  \ref{fig:bindata-plot-M} and \ref{fig:bindata-plot-GC}.
+MOSAiCS incorporates this observation by modeling ChIP tag counts from non-peak
+regions with a small number of control tag counts as a function of
+mappability, GC content, and control tag counts.
+
+\begin{figure}[tbh]
+\begin{center}
+<<fig-bindata-plot-M,fig=TRUE,height=6,width=6,echo=FALSE>>=
+plot( exampleBinData, plotType="M" )
+@
+\caption{\label{fig:bindata-plot-M} Mean ChIP tag count versus Mappability.}
+\end{center}
+\end{figure}
+
+\begin{figure}[tbh]
+\begin{center}
+<<fig-bindata-plot-GC,fig=TRUE,height=6,width=6,echo=FALSE>>=
+plot( exampleBinData, plotType="GC" )
+@
+\caption{\label{fig:bindata-plot-GC} Mean ChIP tag count versus GC content.}
+\end{center}
+\end{figure}
+
+\begin{figure}[tbh]
+\begin{center}
+<<fig-bindata-plot-M-input,fig=TRUE,height=6,width=6,echo=FALSE>>=
+plot( exampleBinData, plotType="M|input" )
+@
+\caption{\label{fig:bindata-plot-M-input} Mean ChIP tag count versus
+Mappability, conditional on control tag counts.}
+\end{center}
+\end{figure}
+
+\begin{figure}[tbh]
+\begin{center}
+<<fig-bindata-plot-GC-input,fig=TRUE,height=6,width=6,echo=FALSE>>=
+plot( exampleBinData, plotType="GC|input" )
+@
+\caption{\label{fig:bindata-plot-GC-input} Mean ChIP tag count versus
+GC content, conditional on control tag counts.}
+\end{center}
+\end{figure}
+
+Application of MOSAiCS to multiple case studies of ChIP-seq data
+with low sequencing depth showed that consideration of
 mappability and GC content in the model improves sensitivity and specificity 
 of peak identification even in the presence of a control sample \cite{mosaics}.
-However, \texttt{mosaics} package accommodates a  two-sample analysis without
-mappability and GC content by specification of `\texttt{analysisType="IO"}'
+\texttt{mosaics} package accommodates a two-sample analysis with
+mappability and GC content by specification of `\texttt{analysisType="TS"}'
 when calling the `\texttt{mosaicsFit}' method.
 
-<<io-mosaicsfit,eval=FALSE>>=
-inputOnlyFit <- mosaicsFit( exampleBinData, analysisType="IO" )
+<<ts-mosaicsfit,eval=FALSE>>=
+exampleFit <- mosaicsFit( exampleBinData, analysisType="TS", bgEst="automatic" )
 @
 
-You can import bin-level data (for ChIP and control sample only) and fit
-MOSAiCS model for the two-sample analysis without mappability and GC content
-with the commands:
+Peak identification can be done exactly in the same way
+as in the case of the two-sample analysis without mappability and GC content.
 
-<<io-readbin>>=
-inputOnlyBinData <- readBins( type=c("chip","input"),
-    fileName=c( system.file( file.path("extdata","chip_chr21.txt"), package="mosaicsExample"),
-    system.file( file.path("extdata","input_chr21.txt"), package="mosaicsExample") ) )
+<<os-mosaicspeak,eval=FALSE>>=
+OneSamplePeak <- mosaicsPeak( OneSampleFit, signalModel="2S", FDR=0.05,
+maxgap=200, minsize=50, thres=10 )
 @
-<<io-mosaicsfit-io-readbin,eval=FALSE>>=
-inputOnlyFit <- mosaicsFit( inputOnlyBinData, analysisType="IO" )
-@
-
-Two-sample analysis without mappability and GC content can be done in a more convenient way,
-with the command: 
-
-<<mosaicsRunAll,eval=FALSE>>=
-     mosaicsRunAll( 
-         chipDir="/scratch/eland/", 
-         chipFileName="STAT1_ChIP_eland_results.txt", 
-         chipFileFormat="eland_result", 
-         controlDir="/scratch/eland/", 
-         controlFileName="STAT1_control_eland_results.txt", 
-         controlFileFormat="eland_result", 
-         binfileDir="/scratch/bin/", 
-         peakDir="/scratch/peak/", 
-         peakFileName="STAT1_peak_list.txt", 
-         peakFileFormat="txt",
-         reportSummary=TRUE, 
-         summaryDir="/scratch/reports/", 
-         summaryFileName="mosaics_summary.txt", 
-         reportExploratory=TRUE, 
-         exploratoryDir="/scratch/reports/", 
-         exploratoryFileName="mosaics_exploratory.pdf", 
-         reportGOF=TRUE, 
-         gofDir="/scratch/reports/", 
-         gofFileName="mosaics_GOF.pdf",
-         byChr=FALSE,
-         FDR=0.05, 
-         fragLen=200, 
-         binSize=fragLen,
-         capping=0,
-         bgEst=NA,
-         signalModel="BIC",
-         nCore=8 )
-@
-
-`\texttt{mosaicsRunAll}' method imports aligned read files, converts them to bin-level files (generated bin-level files will be saved in the directory 
-specified in `\texttt{binfileDir}' argument for future use),
-fits the MOSAiCS model, identifies peaks, and exports the peak list. 
-In addition, users can also make `\texttt{mosaicsRunAll}' method generate diverse analysis reports, 
-such as summary report of parameters and analysis results, exploratory plots, and goodness of fit (GOF) plots.
-Arguments of `\texttt{mosaicsRunAll}' method are summarized in Table \ref{tab:mosaicsRunAll}.
-See Section \ref{constructBins} for
-details of the arguments `\texttt{chipFileFormat}', `\texttt{controlFileFormat}',
-`\texttt{byChr}', `\texttt{fragLen}', `\texttt{binSize}', and `\texttt{capping}'. 
-See Section \ref{mosaicsFit}' for details of the argument `\texttt{bgEst}'. 
-See Section \ref{mosaicsPeak}' for details of the arguments
-`\texttt{FDR}', `\texttt{signalModel}', `\texttt{peakFileFormat}',
-`\texttt{maxgap}', `\texttt{minsize}', and `\texttt{thres}'.
-
-\begin{table}
-\caption{ \label{tab:mosaicsRunAll} \textbf{Summary of the arguments of `\texttt{mosaicsRunAll}' method.} In the tables (a) and (b), each cell in the second to fourth columns of the second to fourth rows corresponds to each argument. In table (c), the first column corresponds to arguments.}
-\label{t:case}
-\begin{center}
-\begin{tabular}{llll}
-\multicolumn{4}{c}{(a) Input and output files} \\
-\hline
-Category & Directory & File name & File format\\
-\hline
-ChIP sample & \texttt{chipDir} & \texttt{chipFileName} & \texttt{chipFileFormat}\\
-Matched control sample & \texttt{controlDir} & \texttt{controlFileName} & \texttt{controlFileFormat}\\
-Bin-level files & \texttt{binfileDir} & & \\
-Peak list & \texttt{peakDir} & \texttt{peakFileName} & \texttt{peakFileFormat}\\
-\hline
-\multicolumn{4}{c}{} \\
-\multicolumn{4}{c}{(b) Reports} \\
-\hline
-Category & Generate report? & Directory & File name\\
-\hline
-Analysis summary & \texttt{reportSummary} * & \texttt{summaryDir} & \texttt{summaryFileName}\\
-Exploratory plots & \texttt{reportExploratory} * & \texttt{exploratoryDir} & \texttt{exploratoryFileName}\\
-GOF plots & \texttt{reportGOF} * & \texttt{gofDir} & \texttt{gofFileName}\\
-\hline
-\multicolumn{4}{l}{* Reports will be generated only when these arguments are \texttt{TRUE}. Default is \texttt{FALSE}.} \\
-\multicolumn{4}{c}{} \\
-\multicolumn{4}{c}{(c) Tuning parameters} \\
-\hline
-Argument & \multicolumn{3}{l}{Explanation} \\
-\hline
-\texttt{byChr} & \multicolumn{3}{l}{Genome-wide analysis (\texttt{FALSE}) or chromosome-wise analysis (\texttt{TRUE})?} \\
-\texttt{fragLen} & \multicolumn{3}{l}{Average fragment length.} \\
-\texttt{binSize} & \multicolumn{3}{l}{Bin size.} \\
-\texttt{capping} & \multicolumn{3}{l}{Cap read counts in aligned read files?} \\
-\texttt{bgEst} & \multicolumn{3}{l}{Background estimation approach.} \\
-\texttt{signalModel} & \multicolumn{3}{l}{Signal model.} \\
-\texttt{FDR} & \multicolumn{3}{l}{False discovery rate (FDR).} \\
-\texttt{maxgap} & \multicolumn{3}{l}{Distance between initial peaks for merging.} \\
-\texttt{minsize} & \multicolumn{3}{l}{Minimum width to be called as a peak.} \\
-\texttt{thres} & \multicolumn{3}{l}{Minimum ChIP tag counts to be called as a peak.} \\
-\texttt{nCore} & \multicolumn{3}{l}{Number of CPUs used for parallel processing/computing. **} \\
-\hline
-\multicolumn{4}{l}{** Relevant only when \texttt{multicore} package is installed.} \\
-\end{tabular}
-\end{center}
-\end{table}
          
 \section{One-Sample Analysis}\label{one_sample}
 
@@ -593,8 +617,8 @@ one-sample analysis of ChIP-seq data. Implementation of the MOSAiCS one-sample
 model is very similar to that  of  the two-sample analysis. Bin-level data for
 the one-sample analysis can be imported to the R environment with the command:
 
-<<os-readbin>>=
-OneSampleBinData <- readBins( type=c("chip","M","GC","N"),
+<<os-readbin,eval=FALSE>>=
+exampleBinData <- readBins( type=c("chip","M","GC","N"),
     fileName=c( system.file( file.path("extdata","chip_chr21.txt"), package="mosaicsExample"),
     system.file( file.path("extdata","M_chr21.txt"), package="mosaicsExample"),
     system.file( file.path("extdata","GC_chr21.txt"), package="mosaicsExample"),
@@ -602,20 +626,20 @@ OneSampleBinData <- readBins( type=c("chip","M","GC","N"),
 @
 
 %Note that you don't need to provide `\texttt{"input"}' in `\texttt{type}' and
-the file name of  a control dataset in `\texttt{fileName}' here. 
+%the file name of  a control dataset in `\texttt{fileName}' here. 
 In order to fit a MOSAiCS model for the one-sample analysis, you need to specify
 `\texttt{analysisType="OS"}' %instead of `\texttt{analysisType="TS"}' 
 when calling  the `\texttt{mosaicsFit}' method.
 
 <<os-mosaicsfit,eval=FALSE>>=
-OneSampleFit <- mosaicsFit( OneSampleBinData, analysisType="OS" )
+exampleFit <- mosaicsFit( exampleBinData, analysisType="OS", bgEst="automatic" )
 @
 
 Peak identification can be done exactly in the same way as in the case 
 of the two-sample analysis.
 
 <<os-mosaicspeak,eval=FALSE>>=
-OneSamplePeak <- mosaicsPeak( OneSampleFit, signalModel="2S", FDR=0.05,
+exampleFit <- mosaicsPeak( exampleFit, signalModel="2S", FDR=0.05,
 maxgap=200, minsize=50, thres=10 )
 @
 
@@ -629,6 +653,8 @@ maxgap=200, minsize=50, thres=10 )
 %@
 
 %Users might need to consider parameter tuning especially when the fitted background model is too similar to the actual data, resulting in too few peaks. If such cases are detected or predicted, `\texttt{mosaicsFit}' prints out warning or error messages. You may also be able to detect this case using the GOF plot.  Using a higher `\texttt{s}' value and lower `\texttt{meanThres}' often solves the problem, e.g., `\texttt{s = 6}' and `\texttt{meanThres = 0}'. 
+
+%In addition to `\texttt{analysisType}', `\texttt{mosaicsFit}' method provides parameters to tune the background distribution of the MOSAiCS model. We specified appropriate default values for these parameters based on computational experiments and analysis of diverse ChIP-seq datasets. Default values work well in general but some tuning might be required for some cases. You may need to consider parameter tuning if the fitted background model is too similar to the actual data in the GOF plot or you encounter some warning or error messages while running `\texttt{mosaicsFit}' method. Section \ref{tuning} provides basic guidelines on parameter tuning. If you encounter a fitting problem you need help with, feel free to contact us at our Google group, \url{http://groups.google.com/group/mosaics_user_group}.
 
 \section{Conclusion and Ongoing Work}\label{conclusion}
 

@@ -1,7 +1,8 @@
 
 #.mosaicsZ0 <- function( Y, analysisType=NA, X=NA, M=NA, GC=NA, truncProb=0.9999, Y_freq )
-.mosaicsZ0 <- function( Y, bgEst=NA, analysisType=NA, 
-    X=NA, M=NA, GC=NA, inputTrunc=NA, Y_freq )
+.mosaicsZ0 <- function( Y, bgEst="automatic", analysisType=NA, 
+    X=NA, M=NA, GC=NA, inputTrunc=NA, Y_freq,
+    parallel=parallel, nCore=nCore )
 {    
     #library(MASS)    
     
@@ -38,7 +39,14 @@
     
     # calculate strata-specific parameters
     
-    yParamList <- lapply( ySubList, function(x) .getParamZ0( x, bgEst=bgEst, Y_freq=Y_freq ) )
+    if ( parallel ) {
+        yParamList <- mclapply( ySubList, 
+            function(x) .getParamZ0( x, bgEst=bgEst, Y_freq=Y_freq ),
+            mc.cores=nCore )    
+    } else {
+        yParamList <- lapply( ySubList, 
+            function(x) .getParamZ0( x, bgEst=bgEst, Y_freq=Y_freq ) )
+    }
     yParamMat <- matrix( unlist(yParamList), ncol = 9, byrow = TRUE )
     
     # decode ty

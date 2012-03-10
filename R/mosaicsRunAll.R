@@ -1,74 +1,62 @@
 mosaicsRunAll <- function( 
-    chipDir=NULL, chipFileName=NULL, chipFileFormat=NULL, 
-    controlDir=NULL, controlFileName=NULL, controlFileFormat=NULL, 
-    binfileDir=NULL, peakDir=NULL, peakFileName=NULL, peakFileFormat=NULL,
-    reportSummary=FALSE, summaryDir=NULL, summaryFileName=NULL, 
-    reportExploratory=FALSE, exploratoryDir=NULL, exploratoryFileName=NULL, 
-    reportGOF=FALSE, gofDir=NULL, gofFileName=NULL, byChr=FALSE,
-    excludeChr=NULL, FDR=0.05, fragLen=200, binSize=fragLen, capping=0, 
-    analysisType="IO", bgEst=NA, d=0.25, 
-    signalModel="BIC", maxgap=fragLen, minsize=50, thres=10, nCore=8 ) {
+    chipFile=NULL, chipFileFormat=NULL, 
+    controlFile=NULL, controlFileFormat=NULL, 
+    binfileDir=NULL, 
+    peakFile=NULL, peakFileFormat=NULL,
+    reportSummary=FALSE, summaryFile=NULL, 
+    reportExploratory=FALSE, exploratoryFile=NULL, 
+    reportGOF=FALSE, gofFile=NULL, 
+    byChr=FALSE, excludeChr=NULL, 
+    FDR=0.05, fragLen=200, binSize=200, capping=0, bgEst="automatic", d=0.25, 
+    signalModel="BIC", maxgap=200, minsize=50, thres=10, parallel=FALSE, nCore=8 ) {
+    
+    analysisType <- "IO"
     
     # check options: input & output (required)
     
-    if ( is.null(chipDir) ) { stop( "Please specify 'chipDir'!" ) }
-    if ( is.null(chipFileName) ) { stop( "Please specify 'chipFileName'!" ) }
+    if ( is.null(chipFile) ) { stop( "Please specify 'chipFile'!" ) }
     if ( is.null(chipFileFormat) ) { stop( "Please specify 'chipFileFormat'!" ) }
     
-    if ( is.null(controlDir) ) { stop( "Please specify 'controlDir'!" ) }
-    if ( is.null(controlFileName) ) { stop( "Please specify 'controlFileName'!" ) }
+    if ( is.null(controlFile) ) { stop( "Please specify 'controlFile'!" ) }
     if ( is.null(controlFileFormat) ) { stop( "Please specify 'controlFileFormat'!" ) }
     
-    if ( is.null(peakDir) ) { stop( "Please specify 'peakDir'!" ) }
-    if ( is.null(peakFileName) ) { stop( "Please specify 'peakFileName'!" ) }
+    if ( is.null(peakFile) ) { stop( "Please specify 'peakFile'!" ) }
     if ( is.null(peakFileFormat) ) { stop( "Please specify 'peakFileFormat'!" ) }
     
     if ( is.null(binfileDir) ) { stop( "Please specify 'binfileDir'!" ) }
-  
-    # check options: analysisType (fixed)
-    
-    if ( analysisType!="IO" ) {
-        message( "Info: only input-only analysis is currently supported in 'mosaicsRunAll'." )
-        message( "Info: 'analysisType' is set to 'IO'." )
-    }
     
     # check options: peak list
     
-    if ( length(peakDir) > 1 ) {
-        if ( length(peakDir) != length(peakFileName) | length(peakDir) != length(peakFileFormat) ) {
-            stop( "Length of 'peakDir' should be either one or same as those of 'peakFileName' and 'peakFileFormat'!" )
-        }
-    }
-    if ( length(peakFileName) != length(peakFileFormat) ) {
+    if ( length(peakFile) != length(peakFileFormat) ) {
         stop( "Lengths of 'peakFileName' and 'peakFileFormat' should be same!" )
     }
     
     # check options: reports (optional)
     
     if ( reportSummary ) {
-        if ( is.null(summaryDir) ) {
-            stop( "Please specify 'summaryDir'!" )
-        }
-        if ( is.null(summaryFileName) ) {
-            stop( "Please specify 'summaryFileName'!" )
+        if ( is.null(summaryFile) ) {
+            stop( "Please specify 'summaryFile'!" )
         }
     }
   
     if ( reportGOF ) {
-        if ( is.null(gofDir) ) {
-            stop( "Please specify 'gofDir'!" )
-        }
-        if ( is.null(gofFileName) ) {
-            stop( "Please specify 'gofFileName'!" )
+        if ( is.null(gofFile) ) {
+            stop( "Please specify 'gofFile'!" )
         }
     }
   
     if ( reportExploratory ) {
-        if ( is.null(exploratoryDir) ) {
-            stop( "Please specify 'exploratoryDir'!" )
+        if ( is.null(exploratoryFile) ) {
+            stop( "Please specify 'exploratoryFile'!" )
         }
-        if ( is.null(exploratoryFileName) ) {
-            stop( "Please specify 'exploratoryFileName'!" )
+    }
+    
+    # check options: parallel computing (optional)
+    
+    if ( parallel == TRUE ) {
+        message( "Use 'parallel' package for parallel computing." )        
+        if ( length(find.package('parallel',quiet=TRUE)) == 0 ) {
+            stop( "Please install 'parallel' package!" )
         }
     }
   
@@ -77,17 +65,16 @@ mosaicsRunAll <- function(
     cat( "Info: constructing bin-level files...\n" )
     
     processSet <- list()
-    processSet[[1]] <- c( chipDir, chipFileName, chipFileFormat )
-    processSet[[2]] <- c( controlDir, controlFileName, controlFileFormat )
+    processSet[[1]] <- c( chipFile, chipFileFormat )
+    processSet[[2]] <- c( controlFile, controlFileFormat )
     
     
-    if ( is.element( "multicore", installed.packages()[,1] ) ) {
-        # if "multicore" package exists, utilize parallel computing with "mclapply"
-        library(multicore)
+    if ( parallel == TRUE ) {
+        # if "parallel" package exists, utilize parallel computing with "mclapply"
         
         mclapply( processSet, function(x) {
             constructBins( 
-                infileLoc = x[1], infileName = x[2], fileFormat = x[3], 
+                infile = x[1], fileFormat = x[2], 
                 outfileLoc = binfileDir, byChr = byChr,
                 fragLen = fragLen, binSize = binSize, capping = capping )    
         }, mc.cores=nCore )
@@ -96,7 +83,7 @@ mosaicsRunAll <- function(
         
         lapply( processSet, function(x) {
             constructBins( 
-                infileLoc = x[1], infileName = x[2], fileFormat = x[3], 
+                infile = x[1], fileFormat = x[2], 
                 outfileLoc = binfileDir, byChr = byChr,
                 fragLen = fragLen, binSize = binSize, capping = capping )    
         } )
@@ -111,31 +98,19 @@ mosaicsRunAll <- function(
     
         # read in bin-level files                           
         
-        cat( "Info: analyzing bin-level files...\n" )
-        
-        currentLoc <- getwd()
-        
+        cat( "Info: analyzing bin-level files...\n" )        
         setwd( binfileDir )
-        #list_chip <- system( 
-        #    paste("ls *_",chipFileName,"_fragL",fragLen,"_bin",binSize,".txt",sep=""), 
-        #    intern=TRUE ) 
-        #list_control <- system( 
-        #    paste("ls *_",controlFileName,"_fragL",fragLen,"_bin",binSize,".txt",sep=""), 
-        #    intern=TRUE )
-        list_chip <- system( 
-            paste("ls * | grep '",chipFileName,"_fragL",fragLen,"_bin",binSize,".txt'",sep=""), 
-            intern=TRUE ) 
-        list_control <- system( 
-            paste("ls * | grep '",controlFileName,"_fragL",fragLen,"_bin",binSize,".txt'",sep=""), 
-            intern=TRUE )
-        setwd(currentLoc)
+        list_chip <- list.files( path=binfileDir,
+            paste(chipFile,"_fragL",fragLen,"_bin",binSize,"_*.txt'",sep="")  ) 
+        list_control <- list.files( path=binfileDir,
+            paste(controlFile,"_fragL",fragLen,"_bin",binSize,"_*.txt'",sep="")  )
         
         # check list of chromosomes & analyze only chromosomes 
         # that bin-level files for both chip & control exist
         
-        chrID_chip <- unlist( lapply( strsplit( list_chip, paste("_",chipFileName,sep="") ), 
+        chrID_chip <- unlist( lapply( strsplit( list_chip, paste("_",chipFile,sep="") ), 
             function(x) x[1] ) )
-        chrID_control <- unlist( lapply( strsplit( list_control, paste("_",controlFileName,sep="") ), 
+        chrID_control <- unlist( lapply( strsplit( list_control, paste("_",controlFile,sep="") ), 
             function(x) x[1] ) )        
         index_chip <- which( !is.na( match( chrID_chip, chrID_control ) ) )
         index_control <- match( chrID_chip, chrID_control )
@@ -153,23 +128,22 @@ mosaicsRunAll <- function(
             nCore <- length(index_chip)
         }
         
-        if ( is.element( "multicore", installed.packages()[,1] ) ) {
-            # if "multicore" package exists, utilize parallel computing with "mclapply"
-            library(multicore)
+        if ( parallel == TRUE ) {
+            # if "parallel" package exists, utilize parallel computing with "mclapply"
             
             out <- mclapply( index_list, function(x) {    
                 # read in bin-level file
                 
                 chip_file <- list_chip[ x[1] ]
-                input_file <- list_control[ x[2] ]
-                
-                setwd( binfileDir )                 
-                bin <- readBins( type=c("chip","input"), fileName=c(chip_file,input_file) )
-                setwd( currentLoc )
+                input_file <- list_control[ x[2] ]                
+                bin <- readBins( 
+                    type=c("chip","input"), fileName=c(chip_file,input_file),
+                    parallel=parallel, nCore=nCore )
           
                 # fit model
                 
-                fit <- mosaicsFit( bin, analysisType=analysisType, bgEst=bgEst, d=d )    
+                fit <- mosaicsFit( bin, analysisType=analysisType, bgEst=bgEst, d=d,
+                    parallel=parallel, nCore=nCore )    
                 
                 # call peaks
                 
@@ -212,15 +186,15 @@ mosaicsRunAll <- function(
                 # read in bin-level file
                 
                 chip_file <- list_chip[ x[1] ]
-                input_file <- list_control[ x[2] ]
-                
-                setwd( binfileDir )                 
-                bin <- readBins( type=c("chip","input"), fileName=c(chip_file,input_file) )
-                setwd( currentLoc )
+                input_file <- list_control[ x[2] ]                            
+                bin <- readBins( 
+                    type=c("chip","input"), fileName=c(chip_file,input_file),
+                    parallel=parallel, nCore=nCore )
           
                 # fit model
                 
-                fit <- mosaicsFit( bin, analysisType=analysisType, bgEst=bgEst, d=d )    
+                fit <- mosaicsFit( bin, analysisType=analysisType, bgEst=bgEst, d=d,
+                    parallel=parallel, nCore=nCore )    
                 
                 # call peaks
                 
@@ -285,10 +259,8 @@ mosaicsRunAll <- function(
         
         cat( "Info: analyzing bin-level files...\n" )
         
-        currentLoc <- getwd()
-        
-        chip_file <- paste(chipFileName,"_fragL",fragLen,"_bin",binSize,".txt",sep="")
-        input_file <- paste(controlFileName,"_fragL",fragLen,"_bin",binSize,".txt",sep="")
+        chip_file <- paste(chipFile,"_fragL",fragLen,"_bin",binSize,".txt",sep="")
+        input_file <- paste(controlFile,"_fragL",fragLen,"_bin",binSize,".txt",sep="")
         
         # model fitting & peak calling
         # check whether rparallel is available. if so, use it.
@@ -299,13 +271,13 @@ mosaicsRunAll <- function(
         
         # read in bin-level file
         
-        setwd( binfileDir )                 
-        out$bin <- readBins( type=c("chip","input"), fileName=c(chip_file,input_file) )
-        setwd( currentLoc )
+        out$bin <- readBins( type=c("chip","input"), fileName=c(chip_file,input_file),
+            parallel=parallel, nCore=nCore )
   
         # fit model
         
-        out$fit <- mosaicsFit( out$bin, analysisType=analysisType, bgEst=bgEst, d=d )    
+        out$fit <- mosaicsFit( out$bin, analysisType=analysisType, bgEst=bgEst, d=d,
+            parallel=parallel, nCore=nCore )    
         
         # call peaks
         
@@ -352,18 +324,12 @@ mosaicsRunAll <- function(
     cat( "Info: writing the peak list...\n" )
   
     for ( ff in 1:length(peakFileFormat) ) {
-        if ( length(peakDir) == 1 ) {
-            peakDirFF <- peakDir
-        } else {
-            peakDirFF <- peakDir[ff]
-        }
-        
         if ( peakFileFormat[ff] == "txt" ) {
-            .exportTXT( peakList=peakSetFinal, fileLoc=peakDirFF, fileName=peakFileName[ff] )
+            .exportTXT( peakList=peakSetFinal, filename=peakFile[ff] )
         } else if ( peakFileFormat[ff] == "bed" ) {
-            .exportBED( peakList=peakSetFinal, fileLoc=peakDirFF, fileName=peakFileName[ff] )
+            .exportBED( peakList=peakSetFinal, filename=peakFile[ff] )
         } else if ( peakFileFormat[ff] == "gff" ) {
-            .exportGFF( peakList=peakSetFinal, fileLoc=peakDirFF, fileName=peakFileName[ff] )
+            .exportGFF( peakList=peakSetFinal, filename=peakFile[ff] )
         } else {
             stop( "Inappropriate peak file format!" )  
         }
@@ -374,28 +340,20 @@ mosaicsRunAll <- function(
     cat( "Info: generating reports...\n" )
   
     if ( reportSummary ) {    
-        setwd(summaryDir)
-        
-        .reportSummary( summaryFileName=summaryFileName, resultList=resultList,
-            chipDir=chipDir, chipFileName=chipFileName, 
-            chipFileFormat=chipFileFormat, 
-            controlDir=controlDir, controlFileName=controlFileName, 
-            controlFileFormat=controlFileFormat, 
+        .reportSummary( summaryFile=summaryFile, resultList=resultList,
+            chipFile=chipFile, chipFileFormat=chipFileFormat, 
+            controlFile=controlFile, controlFileFormat=controlFileFormat, 
             binfileDir=binfileDir, 
-            peakDir=peakDir, peakFileName=peakFileName, peakFileFormat=peakFileFormat, 
+            peakFile=peakFile, peakFileFormat=peakFileFormat, 
             byChr=byChr, FDR=FDR, fragLen=fragLen, binSize=binSize, capping=capping, 
             analysisType=analysisType, d=d, 
             signalModel=signalModel, maxgap=maxgap, minsize=minsize, thres=thres )
-                
-        setwd(currentLoc)
     }
         
     # GOF
   
     if ( reportGOF ) {    
-        setwd(gofDir)
-        
-        pdf(gofFileName)
+        pdf(gofFile)
         
         if ( byChr ) {
             for ( i in 1:length(out) ) {
@@ -417,16 +375,12 @@ mosaicsRunAll <- function(
         }        
         
         dev.off()
-        
-        setwd(currentLoc)
     }
         
     # exploratory analysis
   
     if ( reportExploratory ) {
-        setwd(exploratoryDir)
-        
-        pdf(exploratoryFileName)
+        pdf(exploratoryFile)
         
         if ( byChr ) {
             for ( i in 1:length(out) ) {
@@ -477,7 +431,5 @@ mosaicsRunAll <- function(
         }
         
         dev.off()
-        
-        setwd(currentLoc)
     }
 }

@@ -1,71 +1,60 @@
 
-.reportSummary <- function( summaryFileName, resultList,
-    chipDir=NULL, chipFileName=NULL, chipFileFormat=NULL, 
-    controlDir=NULL, controlFileName=NULL, controlFileFormat=NULL, 
-    binfileDir=NULL, peakDir=NULL, peakFileName=NULL, peakFileFormat=NULL, 
+.reportSummary <- function( summaryFile, resultList,
+    chipFile=NULL, chipFileFormat=NULL, 
+    controlFile=NULL, controlFileFormat=NULL, 
+    binfileDir=NULL, 
+    peakFile=NULL, peakFileFormat=NULL, 
     byChr=FALSE, FDR=0.05, fragLen=200, binSize=fragLen, capping=0, 
     analysisType="IO", d=0.25, 
     signalModel="BIC", maxgap=fragLen, minsize=50, thres=10 ) {
     
-    cat( "MOSAiCS: Summary of model fitting and peak calling\n", file=summaryFileName )
-    cat( "\n", file=summaryFileName, append=TRUE )
+    cat( "MOSAiCS: Summary of model fitting and peak calling\n", file=summaryFile )
+    cat( "\n", file=summaryFile, append=TRUE )
     cat( "------------------------------------------------------------\n", 
-        file=summaryFileName, append=TRUE )
-    cat( "Input/output file settings\n", file=summaryFileName, append=TRUE )
+        file=summaryFile, append=TRUE )
+    cat( "Input/output file settings\n", file=summaryFile, append=TRUE )
     cat( "------------------------------------------------------------\n", 
-        file=summaryFileName, append=TRUE )
-    cat( "\n", file=summaryFileName, append=TRUE )
+        file=summaryFile, append=TRUE )
+    cat( "\n", file=summaryFile, append=TRUE )
     
-    cat( "Directory of aligned read file (ChIP):", chipDir, "\n",
-        file=summaryFileName, append=TRUE )
-    cat( "Name of aligned read file (ChIP): ",chipFileName,"\n", sep="",
-        file=summaryFileName, append=TRUE )
+    cat( "Name of aligned read file (ChIP): ",chipFile,"\n", sep="",
+        file=summaryFile, append=TRUE )
     cat( "Aligned read file format (ChIP):", chipFileFormat, "\n",
-        file=summaryFileName, append=TRUE )
+        file=summaryFile, append=TRUE )
             
-    cat( "\n", file=summaryFileName, append=TRUE )
+    cat( "\n", file=summaryFile, append=TRUE )
     
-    cat( "Directory of aligned read file (control):", controlDir, "\n",
-        file=summaryFileName, append=TRUE )
-    cat( "Name of aligned read file (control): ",controlFileName,"\n", sep="",
-        file=summaryFileName, append=TRUE )
+    cat( "Name of aligned read file (control): ",controlFile,"\n", sep="",
+        file=summaryFile, append=TRUE )
     cat( "Aligned read file format (control):", controlFileFormat, "\n",
-        file=summaryFileName, append=TRUE )
+        file=summaryFile, append=TRUE )
                  
-    cat( "\n", file=summaryFileName, append=TRUE )
+    cat( "\n", file=summaryFile, append=TRUE )
     
-    for ( ff in 1:length(peakFileFormat) ) {
-        if ( length(peakDir) == 1 ) {
-            peakDirFF <- peakDir
-        } else {
-            peakDirFF <- peakDir[ff]
-        }
-        
-        cat( "Directory of peak result file:", peakDirFF, "\n",
-            file=summaryFileName, append=TRUE )
-        cat( "Name of peak result file: ",peakFileName[ff],"\n", sep="",
-            file=summaryFileName, append=TRUE )
+    for ( ff in 1:length(peakFileFormat) ) {   
+        cat( "Name of peak result file: ",peakFile[ff],"\n", sep="",
+            file=summaryFile, append=TRUE )
         cat( "Peak result file format:", peakFileFormat[ff], "\n",
-            file=summaryFileName, append=TRUE )
+            file=summaryFile, append=TRUE )
         
-        cat( "\n", file=summaryFileName, append=TRUE )
+        cat( "\n", file=summaryFile, append=TRUE )
     }
                
-    #cat( "\n", file=summaryFileName, append=TRUE )    
+    #cat( "\n", file=summaryFile, append=TRUE )    
     
     cat( "------------------------------------------------------------\n", 
-        file=summaryFileName, append=TRUE )
-    cat( "Parameter settings\n", file=summaryFileName, append=TRUE )
+        file=summaryFile, append=TRUE )
+    cat( "Parameter settings\n", file=summaryFile, append=TRUE )
     cat( "------------------------------------------------------------\n", 
-        file=summaryFileName, append=TRUE )
-    cat( "\n", file=summaryFileName, append=TRUE )
+        file=summaryFile, append=TRUE )
+    cat( "\n", file=summaryFile, append=TRUE )
     
     if ( byChr ) {    
         cat( "Genome-wide or chromosome-wise analysis? Chromosome-wise analysis\n",
-            file=summaryFileName, append=TRUE )
+            file=summaryFile, append=TRUE )
     } else  {    
         cat( "Genome-wide or chromosome-wise analysis? Genome-wide analysis\n",
-            file=summaryFileName, append=TRUE )
+            file=summaryFile, append=TRUE )
     }      
     
     if ( analysisType=="OS" ) {
@@ -84,27 +73,27 @@
         signalModelOut <- "Two-signal-component model"
     }
       
-    cat( "False discovery rate (FDR):", FDR, "\n", file=summaryFileName, append=TRUE )
-    cat( "Fragment length:", fragLen, "\n", file=summaryFileName, append=TRUE )
-    cat( "Bin size:", binSize, "\n", file=summaryFileName, append=TRUE )
+    cat( "False discovery rate (FDR):", FDR, "\n", file=summaryFile, append=TRUE )
+    cat( "Fragment length:", fragLen, "\n", file=summaryFile, append=TRUE )
+    cat( "Bin size:", binSize, "\n", file=summaryFile, append=TRUE )
     if ( capping > 0 ) {
         cat( "Maximum number of reads allowed in each nucleotide:", capping, "\n",
-            file=summaryFileName, append=TRUE )
+            file=summaryFile, append=TRUE )
     }
-    cat( "Analysis type:", analysisTypeOut, "\n", file=summaryFileName, append=TRUE )
-    cat( "d:", d, "\n", file=summaryFileName, append=TRUE )
-    cat( "Signal model:", signalModelOut, "\n", file=summaryFileName, append=TRUE )
-    cat( "maxgap:", maxgap, "\n", file=summaryFileName, append=TRUE )
-    cat( "minsize:", minsize, "\n", file=summaryFileName, append=TRUE )
-    cat( "thres:", thres, "\n", file=summaryFileName, append=TRUE )
+    cat( "Analysis type:", analysisTypeOut, "\n", file=summaryFile, append=TRUE )
+    cat( "d:", d, "\n", file=summaryFile, append=TRUE )
+    cat( "Signal model:", signalModelOut, "\n", file=summaryFile, append=TRUE )
+    cat( "maxgap:", maxgap, "\n", file=summaryFile, append=TRUE )
+    cat( "minsize:", minsize, "\n", file=summaryFile, append=TRUE )
+    cat( "thres:", thres, "\n", file=summaryFile, append=TRUE )
        
-    cat( "\n", file=summaryFileName, append=TRUE )
+    cat( "\n", file=summaryFile, append=TRUE )
     cat( "------------------------------------------------------------\n", 
-        file=summaryFileName, append=TRUE )
-    cat( "Peak calling summary\n", file=summaryFileName, append=TRUE )
+        file=summaryFile, append=TRUE )
+    cat( "Peak calling summary\n", file=summaryFile, append=TRUE )
     cat( "------------------------------------------------------------\n", 
-        file=summaryFileName, append=TRUE )
-    cat( "\n", file=summaryFileName, append=TRUE )
+        file=summaryFile, append=TRUE )
+    cat( "\n", file=summaryFile, append=TRUE )
     
     outFormat <- data.frame( 
         resultList$chrID, resultList$n_peaks, 
@@ -113,19 +102,19 @@
     colnames(outFormat) <- c( "chrID", "# peaks", 
         "Median peak width", "Optimal/specified signal model" )
       
-    cat( as.character(colnames(outFormat)), file=summaryFileName, sep="\t", append=TRUE )
-    cat( "\n", file=summaryFileName, append=TRUE )
-    cat( rep("-----",3), file=summaryFileName, sep="\t", append=TRUE )
-    cat( "\t\t\t-----", file=summaryFileName, sep="\t", append=TRUE )
-    cat( "\n", file=summaryFileName, append=TRUE )
+    cat( as.character(colnames(outFormat)), file=summaryFile, sep="\t", append=TRUE )
+    cat( "\n", file=summaryFile, append=TRUE )
+    cat( rep("-----",3), file=summaryFile, sep="\t", append=TRUE )
+    cat( "\t\t\t-----", file=summaryFile, sep="\t", append=TRUE )
+    cat( "\n", file=summaryFile, append=TRUE )
     
     # peak list
      
     for ( i in 1:nrow(outFormat) )
     {
-        cat( as.character(outFormat[i,])[1:3], file=summaryFileName, sep="\t", append=TRUE )
+        cat( as.character(outFormat[i,])[1:3], file=summaryFile, sep="\t", append=TRUE )
         cat( "\t\t", as.character(outFormat[i,])[4], 
-            file=summaryFileName, sep="\t", append=TRUE )
-        cat( "\n", file=summaryFileName, append=TRUE )
+            file=summaryFile, sep="\t", append=TRUE )
+        cat( "\n", file=summaryFile, append=TRUE )
     }
 }

@@ -72,7 +72,7 @@ setMethod(
 setMethod(
     f="export",
     signature="MosaicsPeak",
-    definition=function( object, type=NA, fileLoc=NA, fileName=NA ) {
+    definition=function( object, type=NA, filename=NA ) {
         # error treatment: check invalid type
         
         if ( is.na(type) )
@@ -98,23 +98,13 @@ setMethod(
             type <- "txt"
         }
         
-        # error treatment: 'fileLoc' not specified
+        # error treatment: 'filename' not specified
         
-        if ( is.na(fileLoc) )
+        if ( is.na(filename) )
         {
-            message( "Info: 'fileLoc' is not specified by the user." )
-            message( "Info: 'fileLoc' is specified as current directory instead." )
-            fileLoc <- getwd()
-            message( "Info: current directory = ", fileLoc )
-        }
-        
-        # error treatment: 'fileName' not specified
-        
-        if ( is.na(fileName) )
-        {
-            message( "Info: 'fileName' is not specified by the user." )
-            message( "Info: 'fileName' is specified as 'peakList' instead." )
-            fileName <- paste("peakList.",type,sep="")
+            message( "Info: 'filename' is not specified by the user." )
+            message( "Info: 'filename' is specified as 'peakList' instead." )
+            filename <- paste("peakList.",type,sep="")
         }
         
         # export peak lists
@@ -125,19 +115,19 @@ setMethod(
                 message( "Info: exporting the peak list..." )
                 switch( type,
                     "gff" = {
-                        .exportGFF( peakList=peakList, fileLoc=fileLoc, fileName=fileName )
+                        .exportGFF( peakList=peakList, filename=filename )
                     },
                     "bed" = {
-                        .exportBED( peakList=peakList, fileLoc=fileLoc, fileName=fileName )
+                        .exportBED( peakList=peakList, filename=filename )
                     },
                     "txt" = {
-                        .exportTXT( peakList=peakList, fileLoc=fileLoc, fileName=fileName )
+                        .exportTXT( peakList=peakList, filename=filename )
                     }
                 )
             } else {
                 # exception handling (no peak case)
                 
-                message( "Info: no peak detected. Nothing exported." )
+                message( "Info: no peak identifed. Nothing exported." )
             }
     }
 )

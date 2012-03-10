@@ -1,8 +1,9 @@
 
 # read alignment files and construct bin-level files
 
-constructBins <- function( infileLoc=NULL, infileName=NULL, fileFormat=NULL, 
-    outfileLoc=infileLoc, byChr=FALSE, fragLen=200, binSize=fragLen, capping=0, perl = "perl" )
+constructBins <- function( infile=NULL, fileFormat=NULL, outfileLoc="./", 
+    byChr=FALSE, excludeChr=NULL, 
+    fragLen=200, binSize=200, capping=0, perl = "perl" )
 {   
     # preprocessing perl script embedded in "mosaics/inst/Perl/" (for SET)
     
@@ -24,12 +25,7 @@ constructBins <- function( infileLoc=NULL, infileName=NULL, fileFormat=NULL,
     
     # check whether minimal options are missing
     
-    if ( length(infileLoc) != 1 || is.null(infileLoc) )
-    {
-        stop( "Please specify the location of the aligned read file!" )
-    }   
-    
-    if ( length(infileName) != 1 || is.null(infileName) )
+    if ( length(infile) != 1 || is.null(infile) )
     {
         stop( "Please specify the name of the aligned read file!" )
     }       
@@ -55,11 +51,11 @@ constructBins <- function( infileLoc=NULL, infileName=NULL, fileFormat=NULL,
     cat( "------------------------------------------------------------\n" )
     cat( "Info: setting summary\n" )
     cat( "------------------------------------------------------------\n" )
-    cat( "Directory of aligned read file:", infileLoc, "\n" )
-    cat( "Name of aligned read file: ",infileName,"\n", sep="" )
+    cat( "Name of aligned read file: ",infile,"\n", sep="" )
     cat( "Aligned read file format:", fileFormatName, "\n" )
     cat( "Directory of processed bin-level files:", outfileLoc, "\n" )
-    cat( "Construct bin-level files by chromosome?", ifelse(byChr,"Y","N"), "\n" )
+    cat( "Construct bin-level files by chromosome?", ifelse(byChr,"Y","N"), "\n" )    
+    cat( "List of chromosomes to be excluded?", paste(excludeChr,collapse=", "), "\n" )
     cat( "Fragment length:", fragLen, "\n" )
     cat( "Bin size:", binSize, "\n" )
     if ( capping > 0 ) {
@@ -70,7 +66,6 @@ constructBins <- function( infileLoc=NULL, infileName=NULL, fileFormat=NULL,
     
     # get path to the perl code (unified script for all file formats)
     
-    require(mosaics)
     Fn.Path <- system.file( file.path("Perl",script), package="mosaics")
     
     
@@ -81,6 +76,10 @@ constructBins <- function( infileLoc=NULL, infileName=NULL, fileFormat=NULL,
     if ( capping <= 0 ) {
         capping <- 0
     }
+    if ( is.null(excludeChr) ) {
+        excludeChrVec <- ""
+        excludeChrVec <- paste( excludeChr, collapse=" " )
+    }
     
     CMD <- paste( perl, 
         " ", Fn.Path,
@@ -88,10 +87,10 @@ constructBins <- function( infileLoc=NULL, infileName=NULL, fileFormat=NULL,
         " ", fragLen, 
         " ", binSize, 
         " ", capping, 
-        " ", infileLoc, 
+        " ", infile, 
         " ", outfileLoc, 
-        " ", infileName, 
-        " ", ifelse(byChr,"Y","N"), sep="" )
+        " ", ifelse(byChr,"Y","N"),
+        " ", excludeChrVec, sep="" )
     
     res <- system( CMD, intern = TRUE )
     
@@ -100,17 +99,12 @@ constructBins <- function( infileLoc=NULL, infileName=NULL, fileFormat=NULL,
     
     # print out processing results
     
-    currentLoc <- getwd()
-    setwd(outfileLoc)
     if ( byChr ) {
-        #outfileName <- system( paste("ls *_",infileName,"_fragL",fragLen,"_bin",binSize,".txt",sep=""),
-        #    intern=TRUE )
-        outfileName <- system( paste("ls * | grep '",infileName,"_fragL",fragLen,"_bin",binSize,".txt'",sep=""),
-            intern=TRUE )
+        outfileName <- list.files( path=outfileLoc,
+            pattern=paste(infile,"_fragL",fragLen,"_bin",binSize,"_*.txt",sep="") )
     } else {
-        outfileName <- paste(infileName,"_fragL",fragLen,"_bin",binSize,".txt",sep="")
+        outfileName <- paste(infile,"_fragL",fragLen,"_bin",binSize,".txt",sep="")
     }
-    setwd(currentLoc)
     
     cat( "------------------------------------------------------------\n" )
     cat( "Info: processing summary\n" )
