@@ -14,22 +14,22 @@ estimates( object, ... )
 %- maybe also 'usage' for other objects documented here.
 \arguments{
     \item{object}{Object of class \code{MosaicsFit}, which represents
-        fitted MOSAiCS model obtained using method \code{mosaicsFit}. }
+        a fitted MOSAiCS model obtained using method \code{mosaicsFit}. }
     \item{...}{ Other parameters to be passed through to generic \code{estimates}.}
 }
 \value{
 Returns a list with components:
-    \item{pi0}{ Mixing proportion of background component and signal components. }
+    \item{pi0}{ Mixing proportion of background component. }
     \item{a}{ Parameter for background component. }
     \item{betaEst}{ Parameter for background component (coefficient estimates). }
     \item{muEst}{ Parameter for background component. }
-    \item{b}{ Parameter for one-signal-componenet model. }
-    \item{c}{ Parameter for one-signal-componenet model. }
-    \item{p1}{ Parameter for two-signal-componenet model (mixing proportion of signal components). }
-    \item{b1}{ Parameter for two-signal-componenet model (the first signal component). }
-    \item{c1}{ Parameter for two-signal-componenet model (the first signal component). }
-    \item{b2}{ Parameter for two-signal-componenet model (the second signal component). }
-    \item{c2}{ Parameter for two-signal-componenet model (the second signal component). }
+    \item{b}{ Parameter for one-signal-component model. }
+    \item{c}{ Parameter for one-signal-component model. }
+    \item{p1}{ Parameter for two-signal-component model (mixing proportion of signal components). }
+    \item{b1}{ Parameter for two-signal-component model (the first signal component). }
+    \item{c1}{ Parameter for two-signal-component model (the first signal component). }
+    \item{b2}{ Parameter for two-signal-component model (the second signal component). }
+    \item{c2}{ Parameter for two-signal-component model (the second signal component). }
     \item{analysisType}{ Analysis type.
         Possible values are "OS" (one-sample analysis),
         "TS" (two-sample analysis using mappability and GC content), and 

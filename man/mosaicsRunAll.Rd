@@ -4,8 +4,9 @@
 Analyze ChIP-seq data using the MOSAiCS framework
 }
 \description{
-Construct bin-level ChIP-sep data from aligned read files of ChIP and control samples,
-fit MOSAiCS model, call peaks, and export peak calling results and reports for diagnostics.
+Construct bin-level ChIP-sep data from aligned read files of ChIP and matched control samples,
+fit a MOSAiCS model, call peaks, export peak calling results, 
+and generate reports for diagnostics.
 }
 \usage{
 mosaicsRunAll( 
@@ -30,17 +31,19 @@ mosaicsRunAll(
     Currently, \code{mosaicsRunAll} permits the following aligned read file formats:
         \code{"eland_result"} (Eland result), \code{"eland_extended"} (Eland extended),
         \code{"eland_export"} (Eland export), \code{"bowtie"} (default Bowtie),
-        and \code{"sam"} (SAM).
+        \code{"sam"} (SAM), \code{"bed"} (BED), and \code{"csem"} (CSEM BED).
+        Note that \code{"csem"} does not mean CSEM output file format, but CSEM BED file format.
 }
   \item{controlFile}{
-    Name of the aligned read file of control sample to be processed.
+    Name of the aligned read file of matched control sample to be processed.
 }
   \item{controlFileFormat}{
-    Format of the aligned read file of control sample to be processed.
+    Format of the aligned read file of matched control sample to be processed.
     Currently, \code{mosaicsRunAll} permits the following aligned read file formats:
         \code{"eland_result"} (Eland result), \code{"eland_extended"} (Eland extended),
         \code{"eland_export"} (Eland export), \code{"bowtie"} (default Bowtie),
-        and \code{"sam"} (SAM).
+        \code{"sam"} (SAM), \code{"bed"} (BED), and \code{"csem"} (CSEM BED).
+        Note that \code{"csem"} does not mean CSEM output file format, but CSEM BED file format.
 }
   \item{binfileDir}{
     Directory to store processed bin-level files.
@@ -54,37 +57,38 @@ mosaicsRunAll(
 }
   \item{reportSummary}{
     Report the summary of model fitting and peak calling? 
-    Possible values are \code{TRUE} and \code{FALSE}. Default is \code{FALSE}. 
+    Possible values are \code{TRUE} (YES) and \code{FALSE} (NO).
+    Default is \code{FALSE} (NO). 
 }
   \item{summaryFile}{
-    Name of the summary report of model fitting and peak calling.
+    File name of the summary report of model fitting and peak calling.
     The summary report is a text file.
 }
   \item{reportExploratory}{
     Report the exploratory analysis plots? 
-    Possible values are \code{TRUE} and \code{FALSE}. Default is \code{FALSE}. 
+    Possible values are \code{TRUE} (YES) and \code{FALSE} (NO).
+    Default is \code{FALSE} (NO). 
 }
   \item{exploratoryFile}{
     Name of the file for exploratory analysis plots.
-    The exploratory analysis results are exported as PDF.
+    The exploratory analysis results are exported as a PDF file.
 }
   \item{reportGOF}{
     Report the goodness of fit (GOF) plots? 
-    Possible values are \code{TRUE} and \code{FALSE}. Default is \code{FALSE}. 
+    Possible values are \code{TRUE} (YES) and \code{FALSE} (NO).
+    Default is \code{FALSE} (NO). 
 }
   \item{gofFile}{
     Name of the file for goodness of fit (GOF) plots.
-    The exploratory analysis results are exported as PDF.
+    The GOF plots are exported as a PDF file.
 }
   \item{byChr}{
     Analyze ChIP-seq data for each chromosome separately or analyze it genome-wide?
-    Possible values are \code{TRUE} or \code{FALSE}.
-    \code{byChr=TRUE} and \code{byChr=FALSE} mean 
-    chromosome-wise and genome-wide analysis, respectively.
+    Possible values are \code{TRUE} (chromosome-wise) and \code{FALSE} (genome-wide).
     Default is \code{FALSE} (genome-wide analysis).
 }
   \item{excludeChr}{
-    Vector of chromosomes that are excluded from the analysis.
+    Vector of chromosomes that will be excluded from the analysis.
 }  
   \item{FDR}{
     False discovery rate. Default is 0.05.
@@ -106,7 +110,7 @@ mosaicsRunAll(
     Possible values are "matchLow" (estimation using bins with low tag counts) and
     "rMOM" (estimation using robust method of moment (MOM)).
     If \code{bgEst="automatic"},
-            this method tries to guess its best for \code{bgEst}, 
+            this method tries to make the best guess for \code{bgEst}, 
             based on the data provided.}    
   \item{d}{Parameter for estimating background distribution.
     Default is 0.25. } 
@@ -122,49 +126,52 @@ mosaicsRunAll(
     Default is 10. }
   \item{parallel}{Utilize multiple CPUs for parallel computing 
     using \code{"parallel"} package?
-    Possible values are \code{TRUE} (use \code{"parallel"}) 
-    or \code{FALSE} (not use \code{"parallel"}).
-    Default is \code{FALSE} (not use \code{"parallel"}).}
+    Possible values are \code{TRUE} (use multiple CPUs) 
+    or \code{FALSE} (do not use multiple CPUs).
+    Default is \code{FALSE} (do not use multiple CPUs).}
   \item{nCore}{Number of maximum number of CPUs used for the analysis. 
     Default is 8. }
 }
 \details{
-This method implements the work flow to analyze ChIP-seq data using the MOSAiCS framework.
-It imports aligned read files of ChIP and control samples,
-process them into bin-level files, fit MOSAiCS model, call peaks, and export the peak lists. 
+This method implements the work flow for the two-sample analysis of ChIP-seq data 
+using the MOSAiCS framework (without using mappability and GC content scores).
+It imports aligned read files of ChIP and matched control samples,
+processes them into bin-level files, fits MOSAiCS model, calls peaks, 
+exports the peak lists to text files, and generates reports for diagnostics. 
 This method is a wrapper function of \code{constructBins}, \code{readBins},
-\code{mosaicsFit}, \code{mosaicsPeak}, \code{export}, and methods of classes
-\code{BinData}, \code{MosaicsFit}, and \code{MosaicsPeak}.
+\code{mosaicsFit}, \code{mosaicsPeak}, \code{export} functions, and methods of
+\code{BinData}, \code{MosaicsFit}, and \code{MosaicsPeak} classes.
 
 See the vignette of the package for the illustration of the work flow
 and the description of employed methods and their options.
 Exploratory analysis plots and goodness of fit (GOF) plots are generated 
 using the methods \code{plot} of the classes \code{BinData} and \code{MosaicsFit}, respectively.
 See the help of \code{constructBins} for details of the options \code{chipFileFormat},
-\code{controlFileFormat}, \code{byChr}, \code{fragLen}, \code{binSize}, and \code{capping}.
-See the help of \code{readBins} for details of the option \code{excludeChr}.
+\code{controlFileFormat}, \code{byChr}, \code{excludeChr}, 
+\code{fragLen}, \code{binSize}, and \code{capping}.
 See the help of \code{mosaicsFit} 
-for details of the options \code{bgEst}, and \code{d}.
+for details of the options \code{bgEst} and \code{d}.
 See the help of \code{mosaicsPeak} for details of the options \code{FDR}, 
 \code{signalModel}, \code{maxgap}, \code{minsize}, and \code{thres}.
 See the help of \code{export} for details of the option \code{peakFileFormat}.
 
 When the data contains multiple chromosomes, 
 parallel computing can be utilized for faster preprocessing and model fitting
-if \code{parallel=TRUE} and \code{parallel} package is installed.
+if \code{parallel=TRUE} and \code{parallel} package is loaded.
 \code{nCore} determines number of CPUs used for parallel computing.
 }
 \value{
-Processed bin-level files are exported to the directory specified in \code{binfileDir}.
+Processed bin-level files are exported to the directory 
+specified in \code{binfileDir} argument.
 If \code{byChr=FALSE} (genome-wide analysis), 
-one bin-level file is exported for each of ChIP and control samples,
+one bin-level file is generated for each of ChIP and matched control samples,
 where file names are \code{[chipFile]_fragL[fragLen]_bin[binSize].txt}
 and \code{[controlFile]_fragL[fragLen]_bin[binSize].txt}, respectively.
 If \code{byChr=TRUE} (chromosome-wise analysis),
-bin-level files are exported for each chromosome of each of ChIP and control samples,
+bin-level files are generated for each chromosome of each of ChIP and matched control samples,
 where file names are \code{[chipFile]_fragL[fragLen]_bin[binSize]_[chrID].txt}
 and \code{[controlFile]_fragL[fragLen]_bin[binSize]_[chrID].txt}
-(\code{[chrID]} is chromosome ID that reads align to).
+(\code{[chrID]} is chromosome IDs that reads align to).
 The peak list generated from the analysis are exported 
 to the file with the name specified in \code{peakFile}.
 If \code{reportSummary=TRUE}, the summary of model fitting and peak calling is exported 
@@ -195,8 +202,8 @@ mosaicsRunAll(
     controlFile = "/scratch/eland/input_eland_results.txt", 
     controlFileFormat = "eland_result", 
     binfileDir = "/scratch/bin/", 
-    peakFile = "/scratch/peak/STAT1_peak_list.txt", 
-    peakFileFormat = "txt" )
+    peakFile = "/scratch/peak/STAT1_peak_list.bed", 
+    peakFileFormat = "bed" )
     
 # generate all reports for diagnostics  
     
@@ -206,8 +213,8 @@ mosaicsRunAll(
     controlFile = "/scratch/eland/input_eland_results.txt", 
     controlFileFormat = "eland_result", 
     binfileDir = "/scratch/bin/", 
-    peakFile = "/scratch/peak/STAT1_peak_list.txt", 
-    peakFileFormat = "txt",
+    peakFile = "/scratch/peak/STAT1_peak_list.bed", 
+    peakFileFormat = "bed",
     reportSummary = TRUE, 
     summaryFile = "/scratch/reports/mosaics_summary.txt", 
     reportExploratory = TRUE, 

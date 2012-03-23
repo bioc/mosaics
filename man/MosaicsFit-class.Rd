@@ -24,7 +24,7 @@ Objects can be created by calls of the form \code{new("MosaicsFit", ...)}.
     \item{\code{chrID}:}{Object of class \code{"character"},
         a vector of chromosome IDs. }
     \item{\code{coord}:}{Object of class \code{"numeric"},
-        a vector of coordinates. }
+        a vector of genomic coordinates. }
     \item{\code{tagCount}:}{Object of class \code{"numeric"},
         a vector of tag counts of ChIP sample. }
     \item{\code{bic1S}:}{Object of class \code{"numeric"},

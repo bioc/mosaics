@@ -118,7 +118,7 @@
             # binsize calculation
             
             if ( is.na(binsize) ) {
-                binsize <- min(diff(coord))
+                binsize <- min(abs( diff(coord) ))
             }
             
             # process peaks for each chromosome

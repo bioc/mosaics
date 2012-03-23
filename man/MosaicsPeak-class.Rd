@@ -17,11 +17,13 @@ Objects can be created by calls of the form \code{new("MosaicsPeak", ...)}.
 }
 \section{Slots}{
   \describe{
-    \item{\code{peakList}:}{Object of class \code{"MosaicsPeakList"}, representing peak list. }
+    \item{\code{peakList}:}{Object of class \code{"data.frame"}, representing peak list. }
     \item{\code{peakParam}:}{Object of class \code{"MosaicsPeakParam"},
         representing parameters for peak calling. }
-    \item{\code{bdBin}:}{Object of class \code{"numeric"}, a vector of bounded bins. }
-    \item{\code{empFDR}:}{Object of class \code{"numeric"}, empirical FDR. }
+    \item{\code{bdBin}:}{Object of class \code{"numeric"}, 
+    		representing a vector of bounded bins. }
+    \item{\code{empFDR}:}{Object of class \code{"numeric"}, 
+    		representing empirical FDR. }
   }
 }
 \section{Methods}{
@@ -49,9 +51,9 @@ examplePeak <- mosaicsPeak( exampleFit, signalModel = "2S", FDR = 0.05 )
 
 examplePeak
 print(examplePeak)[1:10, ]
-export( examplePeak, type = "txt", fileLoc = "./", fileName = "TSpeakList.txt" )
-export( examplePeak, type = "bed", fileLoc = "./", fileName = "TSpeakList.bed" )
-export( examplePeak, type = "gff", fileLoc = "./", fileName = "TSpeakList.gff" )
+export( examplePeak, type = "txt", filename = "./TSpeakList.txt" )
+export( examplePeak, type = "bed", filename = "./TSpeakList.bed" )
+export( examplePeak, type = "gff", filename = "./TSpeakList.gff" )
 }
 }
 \keyword{classes}

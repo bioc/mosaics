@@ -29,10 +29,12 @@ constructBins( infile=NULL, fileFormat=NULL, outfileLoc="./",
   \item{byChr}{
     Construct separate bin-level file for each chromosome? 
     Possible values are \code{TRUE} or \code{FALSE}.
-    If \code{byChr=FALSE}, all chromosomes are exported into one file. Default is \code{FALSE}.
+    If \code{byChr=FALSE}, bin-level data for all chromosomes are exported to one file. 
+    If \code{byChr=TRUE}, bin-level data for each chromosome is exported to a separate file.
+    Default is \code{FALSE}.
 }
   \item{excludeChr}{
-    Vector of chromosomes that are excluded from the analysis.
+    Vector of chromosomes that will be excluded from the analysis.
 }  
   \item{fragLen}{
     Average fragment length. Default is 200.
@@ -44,7 +46,7 @@ constructBins( infile=NULL, fileFormat=NULL, outfileLoc="./",
     Maximum number of reads allowed to start at each nucleotide position. 
     To avoid potential PCR amplification artifacts, the maximum number of reads
     that can start at a nucleotide position is capped at \code{capping}. 
-    Capping is not applied if non-positive \code{capping} is used.
+    Capping is not applied if non-positive value is used for \code{capping}.
     Default is 0 (no capping).
 }
   \item{perl}{
@@ -52,13 +54,16 @@ constructBins( infile=NULL, fileFormat=NULL, outfileLoc="./",
 }
 }
 \details{
-Bin-level files are constructred from the aligned read file and exported to \code{outfileLoc}.
+Bin-level files are constructred from the aligned read file and 
+exported to the directory specified in \code{outfileLoc} argument.
 If \code{byChr=FALSE}, bin-level files are named 
-as \code{[infileName]_fragL[fragLen]_bin[binSize].txt},
+as \code{[infileName]_fragL[fragLen]_bin[binSize].txt}.
 If \code{byChr=TRUE}, bin-level files are named 
 as \code{[infileName]_fragL[fragLen]_bin[binSize]_[chrID].txt},
-where \code{[chrID]} is chromosome ID that reads align to.
+where \code{chrID} is chromosome IDs that reads align to.
 These chromosome IDs are extracted from the aligned read file.
+Chromosomes that are specified in \code{excludeChr}
+will not be included in the processed bin-level files.
 Constructed bin-level files can be loaded into the R environment using the method \code{readBins}.
 
 \code{constructBins} currently supports the following aligned read file formats: 
@@ -66,7 +71,7 @@ Eland result (\code{"eland_result"}), Eland extended (\code{"eland_extended"}),
 Eland export (\code{"eland_export"}), default Bowtie (\code{"bowtie"}), 
 SAM (\code{"sam"}), and BED (\code{"bed"}).
 This method assumes that these aligned read files are obtained from single-end tag (SET) experiments
-and retains only reads mapping uniquely to the reference genome. 
+and it retains only reads mapping uniquely to the reference genome. 
 }
 \value{
 Processed bin-level files are exported to the directory specified in \code{outfileLoc}.

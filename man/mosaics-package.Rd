@@ -13,22 +13,23 @@ a statistical framework to analyze one-sample or two-sample ChIP-seq data.
 \tabular{ll}{
 Package: \tab mosaics\cr
 Type: \tab Package\cr
-Version: \tab 1.3.2\cr
-Date: \tab 2012-03-09\cr
+Version: \tab 1.3.3\cr
+Date: \tab 2012-03-23\cr
 License: \tab GPL (>= 2)\cr
 LazyLoad: \tab yes\cr
 }
 This package contains three main classes, \code{BinData}, \code{MosaicsFit}, and \code{MosaicsPeak},
 which represent bin-level ChIP-seq data, MOSAiCS model fit, and MOSAiCS peak calling results, respectively.
-This package contains three main methods,\code{readBins}, \code{mosaicsFit}, and \code{mosaicsPeak}.
+This package contains four main methods, 
+\code{constructBins}, \code{readBins}, \code{mosaicsFit}, and \code{mosaicsPeak}.
 \code{constructBins} method constructs bin-level files from the aligned read file.
 \code{readBins} method imports bin-level data and construct \code{BinData} class object.
-\code{mosaicsFit} method fits MOSAiCS model using \code{BinData} class object and
+\code{mosaicsFit} method fits a MOSAiCS model using \code{BinData} class object and
  constructs \code{MosaicsFit} class object.
 \code{mosaicsPeak} method calls peaks using \code{MosaicsFit} class object and
  construct \code{MosaicsPeak} class object.
-\code{MosaicsPeak} class object can be exported as text files or transformed into data frame
-and can be used for the downstream analysis.
+\code{MosaicsPeak} class object can be exported as text files or transformed into data frame,
+which can be used for the downstream analysis.
 This package also provides methods for simple exploratory analysis.
 
 The \code{mosaics} package companion website, \url{http://www.stat.wisc.edu/~keles/Software/mosaics/},
@@ -73,8 +74,8 @@ estimates(exampleFit)
 examplePeak <- mosaicsPeak( exampleFit, signalModel = "2S", FDR = 0.05 )
 examplePeak
 print(examplePeak)[1:10, ]
-export( examplePeak, type = "txt", filename = "TSpeakList.txt" )
-export( examplePeak, type = "bed", filename = "TSpeakList.bed" )
-export( examplePeak, type = "gff", filename = "TSpeakList.gff" )
+export( examplePeak, type = "txt", filename = "./TSpeakList.txt" )
+export( examplePeak, type = "bed", filename = "./TSpeakList.bed" )
+export( examplePeak, type = "gff", filename = "./TSpeakList.gff" )
 }
 }

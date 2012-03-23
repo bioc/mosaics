@@ -1,3 +1,13 @@
+Changes in version 1.3.3:
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o Improve help documents for all classes and functions.
+    
+BUG FIXES
+
+    o mosaicsPeak(): Correct bin size calculation when binsize=NA.
+    
 Changes in version 1.3.2:
 
 SIGNIFICANT USER-VISIBLE CHANGES
