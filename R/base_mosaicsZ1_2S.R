@@ -350,41 +350,43 @@
     
     # initialize b1, c1, b2, and c2
     
-    ind_0.5 <- which(Y<quantile(Y,0.5))
+    ind_0.5 <- which( Y <= quantile(Y,0.5) )
     mean1 <- mean(Y[ind_0.5])
     var1 <- var(Y[ind_0.5])
  
-    ind_0.8 <- which(Y>quantile(Y,0.8))
+    ind_0.8 <- which( Y > quantile(Y,0.8) )
     mean2 <- mean(Y[ind_0.8])
     var2 <- var(Y[ind_0.8])
     
     if(mean1 == 0||is.na(mean1)==TRUE) 
     {
-        ind_0.6 <- which(Y<quantile(Y,0.6))
+        ind_0.6 <- which( Y <= quantile(Y,0.6) )
         mean1 <- mean(Y[ind_0.6])
         var1 <- var(Y[ind_0.6])
     }
 
     if(mean1 == 0||is.na(mean1)==TRUE) 
     {
-        ind_0.7 <- which(Y<quantile(Y,0.7))
+        ind_0.7 <- which( Y <= quantile(Y,0.7) )
         mean1 <- mean(Y[ind_0.7])
         var1 <- var(Y[ind_0.7])
     }
 
     if(mean1 == 0||is.na(mean1)==TRUE) 
     {
-        ind_0.8 <- which(Y<quantile(Y,0.8))
+        ind_0.8 <- which( Y <= quantile(Y,0.8) )
         mean1 <- mean(Y[ind_0.8])
         var1 <- var(Y[ind_0.8])
     }
 
     if(mean1 == 0||is.na(mean1)==TRUE) 
     {
-        ind_0.9 <- which(Y<quantile(Y,0.9))
+        ind_0.9 <- which( Y <= quantile(Y,0.9) )
         
         mean1 <- mean(Y[ind_0.9])
         var1 <- var(Y[ind_0.9])
+        
+        ind_0.9 <- which( Y > quantile(Y,0.9) )
         
         mean2 <- mean(Y[ind_0.9])
         var2 <- var(Y[ind_0.9])

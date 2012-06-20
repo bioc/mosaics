@@ -94,16 +94,19 @@ constructBins <- function( infile=NULL, fileFormat=NULL, outfileLoc="./",
     
     res <- system( CMD, intern = TRUE )
     
-    message( "Info: done!" )
-    
+    message( "Info: done!" )   
+        
     
     # print out processing results
     
+    infilename <- basename( infile )
+        # extract only filename from infile
+        
     if ( byChr ) {
         outfileName <- list.files( path=outfileLoc,
-            pattern=paste(infile,"_fragL",fragLen,"_bin",binSize,"_*.txt",sep="") )
+            pattern=paste(infilename,"_fragL",fragLen,"_bin",binSize,"_*.txt",sep="") )
     } else {
-        outfileName <- paste(infile,"_fragL",fragLen,"_bin",binSize,".txt",sep="")
+        outfileName <- paste(infilename,"_fragL",fragLen,"_bin",binSize,".txt",sep="")
     }
     
     cat( "------------------------------------------------------------\n" )

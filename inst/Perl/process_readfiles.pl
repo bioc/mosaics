@@ -30,8 +30,14 @@
 #use warnings;
 use strict;
 use Cwd;
+use File::Basename;
 
-my ($format, $L, $binsize, $collapse, $filename, $outdir, $bychr, @exclude_chr) = @ARGV;
+my ($format, $L, $binsize, $collapse, $infile, $outdir, $bychr, @exclude_chr) = @ARGV;
+
+# extract only filename from $infile
+
+my @pr = fileparse( $infile );
+my $filename = $pr[0];
 
 # remember current working directory
 
@@ -52,7 +58,7 @@ if ( scalar(@exclude_chr) == 0 ) {
 # load read file and process it
 # (chromosome information is extracted from read file)
 
-open IN, "$filename" or die "Cannot open $filename\n";
+open IN, "$infile" or die "Cannot open $infile\n";
 
 my %seen =();
 my %bin_count = ();

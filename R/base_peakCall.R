@@ -215,7 +215,7 @@
                     
                     peak_range <- IRanges( start=peak_start, end=peak_stop )
                     info_range <- IRanges( start=coord_chr, end=coord_chr )
-                    mm <- matchMatrix( findOverlaps( peak_range, info_range ) )
+                    mm <- as.matrix( findOverlaps( peak_range, info_range ) )
                     matchlist <- split( mm[,2], mm[,1] )
                     
                     switch( analysisType,
