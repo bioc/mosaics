@@ -17,7 +17,7 @@ mosaicsRunAll(
     reportSummary=FALSE, summaryFile=NULL, 
     reportExploratory=FALSE, exploratoryFile=NULL, 
     reportGOF=FALSE, gofFile=NULL, 
-    byChr=FALSE, excludeChr=NULL, 
+    PET=FALSE, byChr=FALSE, useChrfile=FALSE, chrfile=NULL, excludeChr=NULL, 
     FDR=0.05, fragLen=200, binSize=200, capping=0, bgEst="automatic", d=0.25, 
     signalModel="BIC", maxgap=200, minsize=50, 
     thres=10, parallel=FALSE, nCore=8 )
@@ -82,10 +82,27 @@ mosaicsRunAll(
     Name of the file for goodness of fit (GOF) plots.
     The GOF plots are exported as a PDF file.
 }
+  \item{PET}{
+    Is the file paired-end tag (PET) data?
+    If \code{PET=FALSE}, it is assumed that the file is SET data. 
+    If \code{PET=TRUE}, it is assumed that the file is PET data.    
+    Default is \code{FALSE} (SET data).
+}
   \item{byChr}{
     Analyze ChIP-seq data for each chromosome separately or analyze it genome-wide?
     Possible values are \code{TRUE} (chromosome-wise) and \code{FALSE} (genome-wide).
     Default is \code{FALSE} (genome-wide analysis).
+}
+  \item{useChrfile}{
+    Is the file for chromosome info provided?
+    Possible values are \code{TRUE} or \code{FALSE}.
+    If \code{useChrfile=FALSE}, it is assumed that the file for chromosome info is not provided. 
+    If \code{useChrfile=TRUE}, it is assumed that the file for chromosome info is provided.
+    Default is \code{FALSE}.
+}
+  \item{chrfile}{
+    Name of the file for chromosome info.
+    In this file, the first and second columns are ID and size of each chromosome, respectively.
 }
   \item{excludeChr}{
     Vector of chromosomes that will be excluded from the analysis.
@@ -146,8 +163,8 @@ See the vignette of the package for the illustration of the work flow
 and the description of employed methods and their options.
 Exploratory analysis plots and goodness of fit (GOF) plots are generated 
 using the methods \code{plot} of the classes \code{BinData} and \code{MosaicsFit}, respectively.
-See the help of \code{constructBins} for details of the options \code{chipFileFormat},
-\code{controlFileFormat}, \code{byChr}, \code{excludeChr}, 
+See the help of \code{constructBins} for details of the options \code{PET}, \code{chipFileFormat},
+\code{controlFileFormat}, \code{byChr}, \code{useChrfile}, \code{chrfile}, \code{excludeChr}, 
 \code{fragLen}, \code{binSize}, and \code{capping}.
 See the help of \code{mosaicsFit} 
 for details of the options \code{bgEst} and \code{d}.
@@ -221,7 +238,7 @@ mosaicsRunAll(
     exploratoryFile = "/scratch/reports/mosaics_exploratory.pdf", 
     reportGOF = TRUE, 
     gofFile = "/scratch/reports/mosaics_GOF.pdf",
-    byChr = FALSE, excludeChr = "chrM", FDR = 0.05,  fragLen = 200, 
+    PET = FALSE, byChr = FALSE, excludeChr = "chrM", FDR = 0.05,  fragLen = 200, 
     capping = 0, bgEst="automatic", parallel = FALSE, nCore = 8 )
 }
 }

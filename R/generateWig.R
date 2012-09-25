@@ -1,18 +1,18 @@
 
 # read alignment files and construct bin-level files
 
-constructBins <- function( infile=NULL, fileFormat=NULL, outfileLoc="./", 
+generateWig <- function( infile=NULL, fileFormat=NULL, outfileLoc="./", 
     byChr=FALSE, useChrfile=FALSE, chrfile=NULL, excludeChr=NULL, 
-    PET=FALSE, fragLen=200, binSize=200, capping=0, perl = "perl" )
+    PET=FALSE, fragLen=200, span=200, capping=0, normConst=1, perl = "perl" )
 {   
     # preprocessing perl script embedded in "mosaics/inst/Perl/"
     
     if ( PET == TRUE ) {
-        script <- "process_readfiles_PET.pl"
+        script <- "readfile2wig_PET.pl"
         allFormat <- c( "eland_result", "sam" )
         allFormatName <- c( "Eland result", "SAM" )
     } else {
-        script <- "process_readfiles_SET.pl"
+        script <- "readfile2wig_SET.pl"
         allFormat <- c( "eland_result", "eland_extended", "eland_export", 
             "bowtie", "sam", "bed", "csem" )
         allFormatName <- c( "Eland result", "Eland extended", "Eland export", 
@@ -40,14 +40,14 @@ constructBins <- function( infile=NULL, fileFormat=NULL, outfileLoc="./",
         
         if ( length(fileFormat) != 1 || is.null(fileFormat) )
         {
-            stop( "Please specify aligned read file format! Read '?constructBins' for supported file formats" )
+            stop( "Please specify aligned read file format! Read '?generateWig' for supported file formats" )
         }   
         
         # check file format specification
         
         if ( length(which(!is.na(match( fileFormat, allFormat )))) == 0 )
         {
-            stop( "Unsupported aligned read file format! Read '?constructBins' for supported file formats" )
+            stop( "Unsupported aligned read file format! Read '?generateWig' for supported file formats" )
         }
         
         # if useChrfile is TRUE & excludeChr is NOT null, then ignore excludeChr
@@ -68,10 +68,12 @@ constructBins <- function( infile=NULL, fileFormat=NULL, outfileLoc="./",
         cat( "------------------------------------------------------------\n" )
         cat( "Name of aligned read file:", infile, "\n" )
         cat( "Aligned read file format:", fileFormatName, "\n" )
-        cat( "Directory of processed bin-level files:", outfileLoc, "\n" )
-        cat( "Construct bin-level files by chromosome?", ifelse(byChr,"Y","N"), "\n" ) 
+        cat( "Directory of processed wig files:", outfileLoc, "\n" )
+        cat( "span of the wig files:", span, "\n" )
+        cat( "Normalizing constant:", normConst, "\n" )
+        cat( "Construct wig files by chromosome?", ifelse(byChr,"Y","N"), "\n" ) 
         cat( "Is file for chromosome info provided?", ifelse(useChrfile,"Y","N"), "\n" )   
-        if ( useChrfile == TRUE ) { 
+        if ( useChrfile == TRUE ) {
             cat( "Name of file for chromosome info: ", chrfile, "\n" )
         }
         if ( !is.null(excludeChr) ) {
@@ -83,7 +85,6 @@ constructBins <- function( infile=NULL, fileFormat=NULL, outfileLoc="./",
         } else {
             cat( "Data type: Paired-end tag (PET)\n" )
         }
-        cat( "Bin size:", binSize, "\n" )
         if ( capping > 0 ) {
             cat( "Maximum number of reads allowed in each nucleotide:", capping, "\n" )
         }
@@ -114,7 +115,8 @@ constructBins <- function( infile=NULL, fileFormat=NULL, outfileLoc="./",
                 " ", infile, 
                 " ", outfileLoc, 
                 " ", fileFormat,
-                " ", binSize, 
+                " ", span, 
+                " ", normConst,
                 " ", capping,
                 " ", ifelse(byChr,"Y","N"),
                 " ", ifelse(useChrfile,"Y","N"),
@@ -126,8 +128,9 @@ constructBins <- function( infile=NULL, fileFormat=NULL, outfileLoc="./",
                 " ", infile, 
                 " ", outfileLoc, 
                 " ", fileFormat, 
-                " ", fragLen, 
-                " ", binSize, 
+                " ", span,
+                " ", normConst,
+                " ", fragLen,
                 " ", capping, 
                 " ", ifelse(byChr,"Y","N"),
                 " ", ifelse(useChrfile,"Y","N"),
@@ -148,30 +151,30 @@ constructBins <- function( infile=NULL, fileFormat=NULL, outfileLoc="./",
         if ( PET == TRUE ) {    
             if ( byChr ) {
                 outfileName <- list.files( path=outfileLoc,
-                    pattern=paste(infilename,"_bin",binSize,"_.*.txt",sep="") )
+                    pattern=paste(infilename,"_span",span,"_.*.wig",sep="") )
             } else {
-                outfileName <- paste(infilename,"_bin",binSize,".txt",sep="")
+                outfileName <- paste(infilename,"_span",span,".wig",sep="")
             }
         } else {
             if ( byChr ) {
                 outfileName <- list.files( path=outfileLoc,
-                    pattern=paste(infilename,"_fragL",fragLen,"_bin",binSize,"_.*.txt",sep="") )
+                    pattern=paste(infilename,"_fragL",fragLen,"_span",span,"_.*.wig",sep="") )
             } else {
-                outfileName <- paste(infilename,"_fragL",fragLen,"_bin",binSize,".txt",sep="")
+                outfileName <- paste(infilename,"_fragL",fragLen,"_span",span,".wig",sep="")
             }
         }
         
         cat( "------------------------------------------------------------\n" )
         cat( "Info: processing summary\n" )
         cat( "------------------------------------------------------------\n" )    
-        cat( "Directory of processed bin-level files:", outfileLoc, "\n" )
+        cat( "Directory of processed wig files:", outfileLoc, "\n" )
         if ( byChr ) {
-            cat( "List of processed bin-level files:\n" )
+            cat( "List of processed wig files:\n" )
             for ( i in 1:length(outfileName) ) {                
                 cat( "- ",outfileName[i],"\n", sep="" )
             }
         } else {
-            cat( "Processed bin-level file: ",outfileName,"\n", sep="" )   
+            cat( "Processed wig file: ",outfileName,"\n", sep="" )   
         }
         cat( "------------------------------------------------------------\n" )
     }

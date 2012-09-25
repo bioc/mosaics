@@ -6,7 +6,7 @@ mosaicsRunAll <- function(
     reportSummary=FALSE, summaryFile=NULL, 
     reportExploratory=FALSE, exploratoryFile=NULL, 
     reportGOF=FALSE, gofFile=NULL, 
-    byChr=FALSE, excludeChr=NULL, 
+    PET=FALSE, byChr=FALSE, useChrfile=FALSE, chrfile=NULL, excludeChr=NULL, 
     FDR=0.05, fragLen=200, binSize=200, capping=0, bgEst="automatic", d=0.25, 
     signalModel="BIC", maxgap=200, minsize=50, thres=10, parallel=FALSE, nCore=8 ) {
     
@@ -74,18 +74,18 @@ mosaicsRunAll <- function(
         
         mclapply( processSet, function(x) {
             constructBins( 
-                infile = x[1], fileFormat = x[2], 
-                outfileLoc = binfileDir, byChr = byChr,
-                fragLen = fragLen, binSize = binSize, capping = capping )    
+                infile = x[1], fileFormat = x[2], outfileLoc = binfileDir, 
+                byChr = byChr, useChrfile = useChrfile, chrfile = chrfile, excludeChr = excludeChr,
+                PET = PET, fragLen = fragLen, binSize = binSize, capping = capping )    
         }, mc.cores=nCore )
     } else {
         # otherwise, use usual "lapply"
         
         lapply( processSet, function(x) {
             constructBins( 
-                infile = x[1], fileFormat = x[2], 
-                outfileLoc = binfileDir, byChr = byChr,
-                fragLen = fragLen, binSize = binSize, capping = capping )    
+                infile = x[1], fileFormat = x[2], outfileLoc = binfileDir, 
+                byChr = byChr, useChrfile = useChrfile, chrfile = chrfile, excludeChr = excludeChr,
+                PET = PET, fragLen = fragLen, binSize = binSize, capping = capping )    
         } )
     }
     
@@ -98,12 +98,20 @@ mosaicsRunAll <- function(
     
         # read in bin-level files                           
         
-        cat( "Info: analyzing bin-level files...\n" )        
+        cat( "Info: analyzing bin-level files...\n" )      
+          
         setwd( binfileDir )
-        list_chip <- list.files( path=binfileDir,
-            paste(chipFile,"_fragL",fragLen,"_bin",binSize,"_*.txt'",sep="")  ) 
-        list_control <- list.files( path=binfileDir,
-            paste(controlFile,"_fragL",fragLen,"_bin",binSize,"_*.txt'",sep="")  )
+        if ( PET == TRUE ) {
+            list_chip <- list.files( path=binfileDir,
+                paste(basename(chipFile),"_bin",binSize,"_.*.txt",sep="")  ) 
+            list_control <- list.files( path=binfileDir,
+                paste(basename(controlFile),"_bin",binSize,"_.*.txt",sep="")  )
+        } else {
+            list_chip <- list.files( path=binfileDir,
+                paste(basename(chipFile),"_fragL",fragLen,"_bin",binSize,"_.*.txt",sep="")  ) 
+            list_control <- list.files( path=binfileDir,
+                paste(basename(controlFile),"_fragL",fragLen,"_bin",binSize,"_.*.txt",sep="")  )
+        }
         
         # check list of chromosomes & analyze only chromosomes 
         # that bin-level files for both chip & control exist
@@ -259,8 +267,18 @@ mosaicsRunAll <- function(
         
         cat( "Info: analyzing bin-level files...\n" )
         
-        chip_file <- paste(chipFile,"_fragL",fragLen,"_bin",binSize,".txt",sep="")
-        input_file <- paste(controlFile,"_fragL",fragLen,"_bin",binSize,".txt",sep="")
+        setwd( binfileDir )
+        if ( PET == TRUE ) {
+            chip_file <- list.files( path=binfileDir,
+                paste(basename(chipFile),"_bin",binSize,".txt",sep="")  ) 
+            input_file <- list.files( path=binfileDir,
+                paste(basename(controlFile),"_bin",binSize,".txt",sep="")  ) 
+        } else {
+            chip_file <- list.files( path=binfileDir,
+                paste(basename(chipFile),"_fragL",fragLen,"_bin",binSize,".txt",sep="")  ) 
+            input_file <- list.files( path=binfileDir,
+                paste(basename(controlFile),"_fragL",fragLen,"_bin",binSize,".txt",sep="")  ) 
+        }
         
         # model fitting & peak calling
         # check whether rparallel is available. if so, use it.

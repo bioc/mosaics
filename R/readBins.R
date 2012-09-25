@@ -15,9 +15,9 @@ readBins <- function( type=c("chip","input"), fileName=NULL,
     # check options: parallel computing (optional)
     
     if ( parallel == TRUE ) {
-        message( "Use 'multicore' package for parallel computing." )        
-        if ( length(find.package('multicore',quiet=TRUE)) == 0 ) {
-            stop( "Please install 'multicore' package!" )
+        message( "Use 'parallel' package for parallel computing." )        
+        if ( length(find.package('parallel',quiet=TRUE)) == 0 ) {
+            stop( "Please install 'parallel' package!" )
         }
     }
     

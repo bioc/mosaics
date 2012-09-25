@@ -1,24 +1,22 @@
 ###################################################################
 #
-#   Process read files into bin-level files
+#   Process read files into WIG files
 #
 #   Command arguments: 
-#   - format: File format
-#   - L: Expected fragment length
-#   - binsize: Bin size
-#   - collapse: Maximum # of reads allowed at each position (skip if collapse=0)
+#   - infile: Input file (directory + file name)
 #   - outdir: Directory of output files
-#   - filename: Name of input file
+#   - format: File format
+#   - span: wig span
+#	- norm_const: normalizing constant
+#   - L: Expected fragment length
+#   - collapse: Maximum # of reads allowed at each position (skip if collapse=0)
 #   - bychr: Construct bin-level files by chromosome? (Y or N)
+#	- chrinfo: Is the file for chromosome info provided?
+#	- chrfile: File name for chromosome info (chr size)
 #	- @excludeChr: Chromosomes to be excluded (vector)
 #
 #   Supported file format: 
-#   - eland_result: eland result
-#   - eland_extended: eland extended
-#   - eland_export: eland export
-#   - bowtie: bowtie default
-#   - sam: SAM
-#   - bed: BED
+#   - eland_result, eland_extended, eland_export, bowtie, sam, bed, csem
 #
 #   Note
 #   - chromosomes are extracted from read files, after excluding invalid lines
@@ -27,15 +25,46 @@
 ###################################################################
 
 #!/usr/bin/env perl;
-#use warnings;
+use warnings;
 use strict;
 use Cwd;
+use File::Basename;
 
-my ($format, $L, $binsize, $collapse, $filename, $outdir, $bychr, @exclude_chr) = @ARGV;
+my ($infile, $outdir, $format, $span, $norm_const, $L, $collapse, $bychr, 
+	$chrinfo, $chrfile, @exclude_chr) = @ARGV;
+
+# extract only filename from $infile
+
+my @pr = fileparse( $infile );
+my $filename = $pr[0];
 
 # remember current working directory
 
 my $pwd = cwd();
+
+# construct bin-level data based on chromsome info, if provided
+
+my %bin_count = ();
+my $bin_start = 0;
+my $bin_stop = 0;
+
+if ( $chrinfo eq "Y" ) {
+	open CHR, "$chrfile" or die "Cannot open $chrfile\n";
+	
+	while (<CHR>) {
+		chomp;
+		my ( $chrname, $chrsize ) = split /\s+/, $_;
+		
+		$bin_start = 0;
+		$bin_stop = int($chrsize/$span);
+	        
+		for (my $i = $bin_start; $i <= $bin_stop; $i++) {
+			${$bin_count{$chrname}}[$i] = 0;
+		}
+	}
+	
+	close CHR;
+}
 
 # chromosomes to be excluded
 
@@ -46,16 +75,15 @@ if ( scalar(@exclude_chr) == 0 ) {
 	$ecyn = "N";
 } else {
 	$ecyn = "Y";
-	@ec_hash{ @exclude_chr } = ();	
+	@ec_hash{ @exclude_chr } = 0;	
 }
 
 # load read file and process it
 # (chromosome information is extracted from read file)
 
-open IN, "$filename" or die "Cannot open $filename\n";
+open IN, "$infile" or die "Cannot open $infile\n";
 
 my %seen =();
-my %bin_count = ();
 
 while(<IN>){
     chomp;
@@ -98,17 +126,20 @@ while(<IN>){
 	    next;
     }
     
+    # process to bin-level files if collapse condition is satisfied
+    
+    my $id_collapse = join("",$chrt,$pos,$str);
+    $seen{$id_collapse}++;
+    
+    if ( $collapse > 0 && $seen{$id_collapse} > $collapse ) {
+        next;   
+    }    
+    
     # adjust position if it is reverse strand
         
     $pos = $pos + $read_length - $L if ( $str eq "R" );
-    
-    # process to bin-level files if collapse condition is satisfied
-    
-    my $id = join("",$chrt,$pos);
-    $seen{$id}++;
-    
-    if ( $collapse > 0 && $seen{$id} > $collapse ) {
-        next;   
+    if ( $pos <= 0 ) {
+	    $pos = 1;
     }
     
     # update bin count
@@ -116,8 +147,8 @@ while(<IN>){
     if ( exists $bin_count{$chrt} ) {
         # if there is already a matrix for chromosome, update it
         
-        my $bin_start = int($pos/$binsize) ;
-        my $bin_stop = int(($pos + $L_tmp - 1 )/$binsize) ;
+        $bin_start = int(($pos-1)/$span) ;
+        $bin_stop = int(($pos + $L_tmp - 1 - 1 )/$span) ;
         for (my $i = $bin_start; $i <= $bin_stop; $i++) {
             ${$bin_count{$chrt}}[$i] += $prob;
         }
@@ -125,8 +156,8 @@ while(<IN>){
         # if there is no matrix for chromosome yet, construct one
         
         @{$bin_count{$chrt}} = ();
-        my $bin_start = int($pos/$binsize) ;
-        my $bin_stop = int(($pos + $L_tmp - 1 )/$binsize) ;
+        $bin_start = int(($pos-1)/$span) ;
+        $bin_stop = int(($pos + $L_tmp - 1 - 1 )/$span) ;
         for (my $i = $bin_start; $i <= $bin_stop; $i++) {
             ${$bin_count{$chrt}}[$i] += $prob;
         }
@@ -144,44 +175,55 @@ chdir($outdir);
 if ( $bychr eq "N" ) {
     # genome-wide version: all chromosome in one file
     
-    my $outfile = $filename."_fragL".$L."_bin".$binsize.".txt";
-    open OUT, ">$outfile" or die "Cannot open $outfile\n";
-    
-    foreach my $chr_id (keys %bin_count) {      
-        my @bin_count_chr = @{$bin_count{$chr_id}};
-        
-        for( my $i = 0; $i< scalar(@bin_count_chr); $i++ ){
-            my $coord = $i*$binsize;
-            if ( $bin_count_chr[$i] ) {
-                print OUT "$chr_id\t$coord\t$bin_count_chr[$i]\n";
-            } else {
-                print OUT "$chr_id\t$coord\t0\n";
-            }
-        }       
-    }
-    
-    close OUT;
+	my $outfile = $filename."_fragL".$L."_span".$span.".wig";
+	open OUT, ">$outfile" or die "Cannot open $outfile\n";
+	
+	print OUT "track type=wiggle_0 name=\"".$outfile."\" ";
+	print OUT "description=\"".$outfile."\"\n";
+	
+	foreach my $chr_id (keys %bin_count) {      
+	    my @bin_count_chr = @{$bin_count{$chr_id}};
+	    
+	    print OUT "variableStep chrom=$chr_id span=$span\n";
+	
+	    for( my $i = 0; $i < scalar(@bin_count_chr); $i++ ){
+	        my $coord = $i*$span + 1;	        
+	        if ( $bin_count_chr[$i] ) {
+		    	my $count_final = $bin_count_chr[$i] * $norm_const;
+		    	print OUT "$coord $count_final\n";
+	        } else {
+	            print OUT "$coord 0\n";
+	        }
+	    }
+	}
+	
+	close OUT;
 } else {
     # chromosome version: one chromosome in each file
-    
-    foreach my $chr_id (keys %bin_count) {
-        my $outfile = $chr_id."_".$filename."_fragL".$L."_bin".$binsize.".txt";
-        open OUT, ">$outfile" or die "Cannot open $outfile\n";
-        
-        my @bin_count_chr = @{$bin_count{$chr_id}};
-        
-        for( my $i = 0; $i< scalar(@bin_count_chr); $i++ ){
-            my $coord = $i*$binsize;
-            if ( $bin_count_chr[$i] ) {
-                print OUT "$chr_id\t$coord\t$bin_count_chr[$i]\n";
-            }
-            else {
-                print OUT "$chr_id\t$coord\t0\n";
-            }
-        }
-        
-        close OUT;
-    }
+	
+	foreach my $chr_id (keys %bin_count) {      	    
+		my $outfile = $filename."_fragL".$L."_span".$span."_".$chr_id.".wig";
+		open OUT, ">$outfile" or die "Cannot open $outfile\n";
+		
+		print OUT "track type=wiggle_0 name=\"".$outfile."\" ";
+		print OUT "description=\"".$outfile."\"\n";
+		
+	    my @bin_count_chr = @{$bin_count{$chr_id}};
+	    
+	    print OUT "variableStep chrom=$chr_id span=$span\n";
+	
+	    for( my $i = 0; $i < scalar(@bin_count_chr); $i++ ){
+	        my $coord = $i*$span + 1;	        
+	        if ( $bin_count_chr[$i] ) {
+		    	my $count_final = $bin_count_chr[$i] * $norm_const;
+		    	print OUT "$coord $count_final\n";
+	        } else {
+	            print OUT "$coord 0\n";
+	        }
+	    }
+	}
+	
+	close OUT;
 }
 
 
@@ -199,7 +241,7 @@ sub eland_result {
     
     # parse line    
     
-    my ($t1, $seq, $map, $t3, $t4, $t5, $chrt, $pos, $str, @rest) = split /\s+/, $line;
+    my ($t1, $seq, $map, $t3, $t4, $t5, $chrt, $pos, $str, @rest) = split /\t/, $line;
     
     # exclude invalid lines
     
@@ -235,9 +277,9 @@ sub eland_result {
     
     my $read_length = length $seq;
     my $L_tmp = $L;  
-    if ( $L < $read_length ) {
-        $L_tmp = $read_length;
-    }
+    #if ( $L < $read_length ) {
+    #    $L_tmp = $read_length;
+    #}
     
     # return
     
@@ -255,7 +297,7 @@ sub eland_extended {
     
     # parse line    
     
-    my ($t1, $seq, $map, $map_result) = split /\s+/, $line;
+    my ($t1, $seq, $map, $map_result) = split /\t/, $line;
     
     # exclude invalid lines
     
@@ -283,9 +325,9 @@ sub eland_extended {
     
     my $read_length = length $seq;
     my $L_tmp = $L;  
-    if ( $L < $read_length ) {
-        $L_tmp = $read_length;
-    }
+    #if ( $L < $read_length ) {
+    #    $L_tmp = $read_length;
+    #}
     
     # return
     
@@ -303,7 +345,7 @@ sub eland_export {
     
     # parse line    
     
-    my ($t1, $t2, $t3, $t4, $t5, $t6, $t7, $t8, $seq, $t9, $chrt, $pos, $str, @rest) = split /\s+/, $line;
+    my ($t1, $t2, $t3, $t4, $t5, $t6, $t7, $t8, $seq, $t9, $chrt, $pos, $str, @rest) = split /\t/, $line;
     
     # exclude invalid lines
     
@@ -324,9 +366,9 @@ sub eland_export {
     
     my $read_length = length $seq;
     my $L_tmp = $L;  
-    if ( $L < $read_length ) {
-        $L_tmp = $read_length;
-    }
+    #if ( $L < $read_length ) {
+    #    $L_tmp = $read_length;
+    #}
     
     # return
     
@@ -344,7 +386,7 @@ sub bowtie {
     
     # parse line    
     
-    my ( $read_idx, $str_org, $chrt, $pos, $seq, @rest ) = split /\s+/, $line;
+    my ( $read_idx, $str_org, $chrt, $pos, $seq, @rest ) = split /\t/, $line;
     
     # exclude invalid lines?
     # exclude multi-reads?
@@ -366,9 +408,9 @@ sub bowtie {
     
     my $read_length = length $seq;
     my $L_tmp = $L;  
-    if ( $L < $read_length ) {
-        $L_tmp = $read_length;
-    }
+    #if ( $L < $read_length ) {
+    #    $L_tmp = $read_length;
+    #}
     
     # return
     
@@ -389,7 +431,7 @@ sub sam {
     if ( $line =~ /^[^@].+/ ) { 
         # exclude lines starting with "@" (comments)
         
-        my ($t1, $bwflag, $chrt, $pos, $t2, $t3, $t4, $t5, $t6, $seq, $t7 ) = split /\s+/, $line;
+        my ($t1, $bwflag, $chrt, $pos, $t2, $t3, $t4, $t5, $t6, $seq, $t7 ) = split /\t/, $line;
         $pos = int($pos);
         my $str;
         
@@ -412,9 +454,9 @@ sub sam {
         
         my $read_length = length $seq;
         my $L_tmp = $L;  
-        if ( $L < $read_length ) {
-            $L_tmp = $read_length;
-        }
+        #if ( $L < $read_length ) {
+        #    $L_tmp = $read_length;
+        #}
         
         # return
         
@@ -436,7 +478,7 @@ sub bed {
     
     # skip track line
     
-    my ($element1, @element2) = split /\s+/, $line;
+    my ($element1, @element2) = split /\t/, $line;
     
     if ( $element1 eq "track" ) {
         my @status = 0;
@@ -445,7 +487,7 @@ sub bed {
     
     # parse line    
     
-    my ($chrt, $start, $end, $t1, $t2, $str_org, @rest) = split /\s+/, $line;
+    my ($chrt, $start, $end, $t1, $t2, $str_org, @rest) = split /\t/, $line;
     
     # pos: 0-based offset -> adjust
     
@@ -465,9 +507,9 @@ sub bed {
     
     my $read_length = $end - $start + 1;
     my $L_tmp = $L;  
-    if ( $L < $read_length ) {
-        $L_tmp = $read_length;
-    }
+    #if ( $L < $read_length ) {
+    #    $L_tmp = $read_length;
+    #}
     
     # return
     
@@ -494,7 +536,7 @@ sub csem {
     
     # parse line    
     
-    my ($chrt, $start, $end, $t1, $score, $str_org, @rest) = split /\s+/, $line;
+    my ($chrt, $start, $end, $t1, $score, $str_org, @rest) = split /\t/, $line;
     
     # pos: 0-based offset -> adjust
     
@@ -514,9 +556,9 @@ sub csem {
     
     my $read_length = $end - $start + 1;
     my $L_tmp = $L;  
-    if ( $L < $read_length ) {
-        $L_tmp = $read_length;
-    }
+    #if ( $L < $read_length ) {
+    #    $L_tmp = $read_length;
+    #}
     
     # return
     

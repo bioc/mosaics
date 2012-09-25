@@ -1,3 +1,43 @@
+Changes in version 1.5.2:
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o constructBins(): Supports aligned read file formats for PET data (eland results and SAM formats). 
+
+    o mosaicsRunAll(): Supports aligned read file formats for PET data. 
+    
+    o Add generateWig(): Constructs wiggle files for PET and SET data. 
+    
+    o Use tab separator instead of whitespaces for generateWig() and constructBins().
+    
+    o Improve the vignette (case studies, example lines for input files, generateWig()).
+
+BUG FIXES
+
+    o constructBins(): Bug fix for capping and excludeChr. Fix incorrect summary when byChr = TRUE.
+
+    o mosaicsRunAll(): Bug fix for excludeChr & handling the full path for chipFile and controlFile.
+
+Changes in version 1.5.1:
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o constructBins(): Chromosome information can now be specified. 
+    
+    o mosaicsRunAll(): Chromosome information can now be specified. 
+
+
+Changes in version 1.4.1:
+
+BUG FIXES
+
+    o constructBins(): Bug fix for the "outfileLoc" argument. 
+
+    o mosaicsFit(): Minor changes in two-signal-component model fitting.
+
+    o mosaicsPeak(): No warning with the updated IRanges package.
+
+
 Changes in version 1.3.4:
 
 SIGNIFICANT USER-VISIBLE CHANGES
