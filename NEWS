@@ -1,3 +1,9 @@
+Changes in version 1.5.3:
+
+BUG FIXES
+
+    o mosaicsRunAll(): Bug fix when byChr = TRUE.
+
 Changes in version 1.5.2:
 
 SIGNIFICANT USER-VISIBLE CHANGES

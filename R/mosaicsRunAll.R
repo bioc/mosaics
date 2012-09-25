@@ -116,10 +116,20 @@ mosaicsRunAll <- function(
         # check list of chromosomes & analyze only chromosomes 
         # that bin-level files for both chip & control exist
         
-        chrID_chip <- unlist( lapply( strsplit( list_chip, paste("_",chipFile,sep="") ), 
-            function(x) x[1] ) )
-        chrID_control <- unlist( lapply( strsplit( list_control, paste("_",controlFile,sep="") ), 
-            function(x) x[1] ) )        
+        #chrID_chip <- unlist( lapply( strsplit( list_chip, paste("_",basename(chipFile),sep="") ), 
+        #    function(x) x[1] ) )
+        #chrID_control <- unlist( lapply( strsplit( list_control, paste("_",controlFile,sep="") ), 
+        #    function(x) x[1] ) )        
+        chrID_chip <- unlist( lapply( list_chip, function(x) {
+            splitvec <- strsplit( x, "_" )[[1]]
+            IDtxt <- splitvec[ length(splitvec) ]
+            return( strsplit( IDtxt, ".txt" )[[1]][1] )
+        } ) )
+        chrID_control <- unlist( lapply( list_control, function(x) {
+            splitvec <- strsplit( x, "_" )[[1]]
+            IDtxt <- splitvec[ length(splitvec) ]
+            return( strsplit( IDtxt, ".txt" )[[1]][1] )
+        } ) )      
         index_chip <- which( !is.na( match( chrID_chip, chrID_control ) ) )
         index_control <- match( chrID_chip, chrID_control )
         index_list <- list()
@@ -181,11 +191,10 @@ mosaicsRunAll <- function(
                 
                 peakPrint <- print(peak)
                 
-                return( 
-                    chrID=as.character( chrID_chip[ x[1] ] ), 
+                return( list( chrID=as.character( chrID_chip[ x[1] ] ), 
                     bin=bin, fit=fit, peak=peak, peakPrint=peakPrint,
                     n_peaks=nrow(peak@peakList), peak_width=median(peak@peakList$peakSize),
-                    opt_sig_model=opt_sig_model )
+                    opt_sig_model=opt_sig_model ) )
             }, mc.cores=nCore )
         } else {
             # otherwise, use usual "lapply"
@@ -232,11 +241,10 @@ mosaicsRunAll <- function(
                 
                 peakPrint <- print(peak)
                 
-                return( 
-                    chrID=as.character( chrID_chip[ x[1] ] ), 
+                return( list( chrID=as.character( chrID_chip[ x[1] ] ), 
                     bin=bin, fit=fit, peak=peak, peakPrint=peakPrint,
                     n_peaks=nrow(peak@peakList), peak_width=median(peak@peakList$peakSize),
-                    opt_sig_model=opt_sig_model )
+                    opt_sig_model=opt_sig_model ) )
             } )
         }
         
