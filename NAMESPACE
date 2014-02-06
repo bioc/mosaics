@@ -2,6 +2,8 @@ useDynLib(mosaics)
 
 import( methods, graphics, Rcpp, MASS, splines, lattice, IRanges )
 
+importFrom(Rcpp, evalCpp)
+
 export( constructBins, readBins, mosaicsFit, mosaicsPeak, mosaicsRunAll, generateWig )
 
 export( show, print, plot )
