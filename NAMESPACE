@@ -1,6 +1,6 @@
 useDynLib(mosaics)
 
-import( methods, graphics, Rcpp, MASS, splines, lattice, IRanges )
+import( methods, graphics, MASS, splines, lattice, IRanges )
 
 importFrom(Rcpp, evalCpp)
 
