@@ -2,7 +2,7 @@ Package: mosaics
 Type: Package
 Title: MOSAiCS (MOdel-based one and two Sample Analysis and Inference
         for ChIP-Seq)
-Version: 1.11.5
+Version: 1.12.0
 Depends: R (>= 2.11.1), methods, graphics, Rcpp
 Imports: MASS, splines, lattice, IRanges, Rcpp
 Suggests: mosaicsExample
