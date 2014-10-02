@@ -1,8 +1,22 @@
+   
+Changes in version 1.12.1:
+
+BUG FIXES
+
+    o Update package by reflecting deprecation of RCPP_FUNCTION_x.
+	
+    
+Changes in version 1.12.0:
+
+   o BioConductor release 2.14.
+   
+   
 Changes in version 1.5.3:
 
 BUG FIXES
 
     o mosaicsRunAll(): Bug fix when byChr = TRUE.
+
 
 Changes in version 1.5.2:
 
@@ -23,6 +37,7 @@ BUG FIXES
     o constructBins(): Bug fix for capping and excludeChr. Fix incorrect summary when byChr = TRUE.
 
     o mosaicsRunAll(): Bug fix for excludeChr & handling the full path for chipFile and controlFile.
+
 
 Changes in version 1.5.1:
 
