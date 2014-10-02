@@ -10,7 +10,7 @@ Fit one-sample or two-sample MOSAiCS models with one signal component and two si
 \usage{
 mosaicsFit( object, ... )
 \S4method{mosaicsFit}{BinData}( object, analysisType="automatic", bgEst="automatic",
-    k=3, meanThres=NA, s=2, d=0.25, truncProb=0.999, parallel=FALSE, nCore=8 )
+    k=3, meanThres=NA, s=2, d=0.25, trans="log", truncProb=0.999, parallel=FALSE, nCore=8 )
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -39,8 +39,13 @@ mosaicsFit( object, ... )
     \item{d}{Parameter for estimating background distribution.
         Relevant only when \code{analysisType="TS"} or \code{analysisType="IO"}.
         Default is 0.25. }
+    \item{trans}{Transformation of matching control tag count.
+        Possible values are "log" (logarithm transformation) and
+        "power" (power transformation).
+		Relevant only when \code{analysisType="IO"}. 
+		Default is \code{trans="log"}. }  
     \item{truncProb}{Parameter for estimating background distribution.
-    		Relevant only when \code{analysisType="IO"}. }  
+    	Relevant only when \code{analysisType="IO"}. }  
     \item{parallel}{Utilize multiple CPUs for parallel computing 
         using \code{"parallel"} package?
         Possible values are \code{TRUE} (utilize multiple CPUs) 
@@ -68,7 +73,7 @@ only one-sample analysis (\code{analysisType="OS"}) is permitted.
 Parallel computing can be utilized for faster computing
 if \code{parallel=TRUE} and \code{parallel} package is loaded.
 \code{nCore} determines number of CPUs used for parallel computing.
-\code{meanThres}, \code{s}, \code{d}, and \code{truncProb} are 
+\code{meanThres}, \code{s}, \code{d}, \code{trans}, and \code{truncProb} are 
 the tuning parameters for estimating background distribution.
 The vignette and Kuan et al. (2011) provide further details about these tuning parameters.
 Please do not try different value for \code{k} argument.

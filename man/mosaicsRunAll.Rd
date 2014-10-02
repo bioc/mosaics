@@ -178,17 +178,22 @@ if \code{parallel=TRUE} and \code{parallel} package is loaded.
 \code{nCore} determines number of CPUs used for parallel computing.
 }
 \value{
-Processed bin-level files are exported to the directory 
-specified in \code{binfileDir} argument.
+Processed bin-level files are exported to the directory specified in \code{binfileDir} argument.
 If \code{byChr=FALSE} (genome-wide analysis), 
 one bin-level file is generated for each of ChIP and matched control samples,
 where file names are \code{[chipFile]_fragL[fragLen]_bin[binSize].txt}
-and \code{[controlFile]_fragL[fragLen]_bin[binSize].txt}, respectively.
+and \code{[controlFile]_fragL[fragLen]_bin[binSize].txt}, respectively, for SET data (\code{PET = FALSE}).
+For PET data (\code{PET = TRUE}), file names for each of ChIP and matched control samples
+are \code{[chipFile]_bin[binSize].txt} and \code{[controlFile]_bin[binSize].txt}, respectively.
 If \code{byChr=TRUE} (chromosome-wise analysis),
 bin-level files are generated for each chromosome of each of ChIP and matched control samples,
 where file names are \code{[chipFile]_fragL[fragLen]_bin[binSize]_[chrID].txt}
-and \code{[controlFile]_fragL[fragLen]_bin[binSize]_[chrID].txt}
+and \code{[controlFile]_fragL[fragLen]_bin[binSize]_[chrID].txt}, respectively, for SET data (\code{PET = FALSE})
 (\code{[chrID]} is chromosome IDs that reads align to).
+For PET data (\code{PET = TRUE}), file names for each of ChIP and matched control samples
+are \code{[chipFile]_bin[binSize]_[chrID].txt} 
+and \code{[controlFile]_bin[binSize]_[chrID].txt}, respectively.
+
 The peak list generated from the analysis are exported 
 to the file with the name specified in \code{peakFile}.
 If \code{reportSummary=TRUE}, the summary of model fitting and peak calling is exported 
@@ -223,7 +228,8 @@ mosaicsRunAll(
     peakFileFormat = "bed" )
     
 # generate all reports for diagnostics  
-    
+
+library(parallel)    
 mosaicsRunAll( 
     chipFile = "/scratch/eland/STAT1_eland_results.txt", 
     chipFileFormat = "eland_result", 
@@ -238,8 +244,9 @@ mosaicsRunAll(
     exploratoryFile = "/scratch/reports/mosaics_exploratory.pdf", 
     reportGOF = TRUE, 
     gofFile = "/scratch/reports/mosaics_GOF.pdf",
-    PET = FALSE, byChr = FALSE, excludeChr = "chrM", FDR = 0.05,  fragLen = 200, 
-    capping = 0, bgEst="automatic", parallel = FALSE, nCore = 8 )
+    PET = FALSE, byChr = FALSE, useChrfile=FALSE, chrfile=NULL, excludeChr = "chrM", 
+    FDR = 0.05,  fragLen = 200, capping = 0, bgEst="automatic", thres=10,
+    parallel = TRUE, nCore = 8 )
 }
 }
 \keyword{models}

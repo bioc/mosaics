@@ -71,7 +71,8 @@ setMethod(
             analysisType=analysisType )
         peakSet <- fitPeak$peakSet
         
-        rm( fitPH, dataSet )
+        #rm( fitPH, dataSet )
+        rm( dataSet )
         gc()
         
         message( "Info: done!" )
@@ -80,7 +81,7 @@ setMethod(
                 
         peakParam <- new( "MosaicsPeakParam",
             analysisType=(object@mosaicsEst)@analysisType, signalModel=signalModel, 
-            FDR=FDR, maxgap=maxgap, minsize=minsize, thres=thres )
+            FDR=FDR, maxgap=maxgap, minsize=minsize, thres=thres, decoding="posterior" )
         
         if ( !is.null(peakSet) ) {
             peakList <- fitPeak$peakSet 
@@ -89,7 +90,13 @@ setMethod(
             
             peakList <- data.frame()
         }
+        
+        postProb <- data.frame( object@chrID, object@coord, fitPH$pH0,
+        	stringsAsFactors=FALSE )
+        colnames(postProb) <- c( "chrID", "coord", "PostProb" )
+        
         new( "MosaicsPeak",         
-            peakList=peakList, peakParam=peakParam, bdBin=fitPeak$bdBin, empFDR=fitPeak$empFDR )
+            peakList=peakList, peakParam=peakParam, 
+            bdBin=fitPeak$bdBin, postProb=postProb, empFDR=fitPeak$empFDR )
     }
 )

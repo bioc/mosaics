@@ -92,7 +92,7 @@ constructBins <- function( infile=NULL, fileFormat=NULL, outfileLoc="./",
         
         # get path to the perl code (unified script for all file formats)
         
-        Fn.Path <- system.file( file.path("Perl",script), package="mosaics")
+        Fn.Path <- system.file( file.path("Perl",script), package="mosaics2")
         
         
         # process read file to bin-level files using perl codes

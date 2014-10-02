@@ -1,8 +1,39 @@
+Changes in version 2.0.0:
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o mosaicsFit(): Improve robustness of model fitting and allow more flexible parameter tuning.
+	
+	
+Changes in version 1.99.1:
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o mosaicsFitHMM() & mosaicsPeakHMM(): Hidden-Markov-Model-based MOSAiCS model fitting & peak calling, respectively, to identify broad peaks such as histone modifications.
+	
+	o Add new class 'MosaicsHMM' with methods show(), plot(), & estimates().
+	
+	o mosaicsFit(): Introduces a new argument 'trans' & sets bgEst="rMOM" as default.
+	
+	o mosaicsFit(): Stability & robustness of model fitting were improved.
+
+    o Polish help documents of constructBins(), generateWig(), and mosaicsRunAll().
+	
+	o Tested to work with >= R 3.0 properly.
+
+BUG FIXES
+
+    o constructBins() & export(): Use correct base for BED file (one base shift).
+	
+	o Reflect the changes in Rcpp packages that mosaics package depends on.
+    
+	
 Changes in version 1.5.3:
 
 BUG FIXES
 
     o mosaicsRunAll(): Bug fix when byChr = TRUE.
+
 
 Changes in version 1.5.2:
 
@@ -24,6 +55,7 @@ BUG FIXES
 
     o mosaicsRunAll(): Bug fix for excludeChr & handling the full path for chipFile and controlFile.
 
+
 Changes in version 1.5.1:
 
 SIGNIFICANT USER-VISIBLE CHANGES
@@ -42,6 +74,11 @@ BUG FIXES
     o mosaicsFit(): Minor changes in two-signal-component model fitting.
 
     o mosaicsPeak(): No warning with the updated IRanges package.
+    
+	
+Changes in version 1.4.0:
+
+   o BioConductor release 2.10.
 
 
 Changes in version 1.3.4:

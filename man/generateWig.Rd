@@ -82,9 +82,11 @@ generateWig( infile=NULL, fileFormat=NULL, outfileLoc="./",
 Wiggle files are constructed from the aligned read file and 
 exported to the directory specified in \code{outfileLoc} argument.
 If \code{byChr=FALSE}, wiggle files are named 
-as \code{[infileName]_fragL[fragLen]_span[span].wig}.
+as \code{[infileName]_fragL[fragLen]_span[span].wig} for SET data (\code{PET = FALSE})
+and \code{[infileName]_span[span].wig} for PET data (\code{PET = TRUE}).
 If \code{byChr=TRUE}, wiggle files are named 
-as \code{[infileName]_fragL[fragLen]_span[span]_[chrID].wig},
+as \code{[infileName]_fragL[fragLen]_span[span]_[chrID].wig} for SET data (\code{PET = FALSE})
+and \code{[infileName]_span[span]_[chrID].wig} for PET data (\code{PET = TRUE}),
 where \code{chrID} is chromosome IDs that reads align to.
 These chromosome IDs are extracted from the aligned read file.
 
@@ -118,8 +120,8 @@ Kuan, PF, D Chung, JA Thomson, R Stewart, and S Keles (2011),
 \dontrun{
 generateWig( infile="/scratch/eland/STAT1_eland_results.txt", 
     fileFormat="eland_result", outfileLoc="/scratch/eland/", 
-    byChr=FALSE, excludeChr="chrM", PET = FALSE, 
-    fragLen=200, span=200, capping=0, normConst=1 )
+    byChr=FALSE, useChrfile=FALSE, chrfile=NULL, excludeChr="chrM", 
+    PET = FALSE, fragLen=200, span=200, capping=0, normConst=1 )
 }
 }
 \keyword{models}

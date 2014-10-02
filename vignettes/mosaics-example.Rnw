@@ -716,16 +716,16 @@ and we provided deeper discussion and example analysis codes in this book chapte
 
 \begin{figure}[ht]
 \centering
-\subfigure[Automatic selection]{
+\subfigure[When the background estimation approach was automatically chosen]{
    \includegraphics[width=0.5\textwidth] {GOF_matchLow.pdf}
  }
-\subfigure[Robust method of moment]{
+\subfigure[When the background estimation approach was explicitly specified]{
    \includegraphics[width=0.5\textwidth] {GOF_rMOM.pdf}
  }
 \caption{ Case \#1. Goodness of fit when the background estimation approach was automatically chosen by \texttt{mosaics} package (a) and explicitly specified as robust method of moment (b). The MOSAiCS fit was significantly improved by explicitly specifying the background estimation approach. \label{fig:case_studies_GOF_no1} }
 \end{figure}
 
-Figure \ref{fig:case_studies_GOF_no1}a shows that the goodness of fit from the MOSAiCS fit of the two-sample analysis without using mappability and GC content. The GOF plot indicates that ChIP tag counts generated from the fitted model are higher than the actual ChIP-Seq data. Moreover, estimated background dominates in the fitted model. In such cases (\textit{over-estimation of background}), we have small number of peak regions. This problem occurred essentially because `\texttt{mosaicsFit}' guessed using bins with low ChIP tag counts (`\texttt{bgEst="matchLow"}') as the optimal background estimation approach, from its automatic selection (`\texttt{bgEst="automatic"}'). Although automatic selection usually works well, there are some cases that it does not result in optimal background estimation approach. In this case, the MOSAiCS fit can be improved by explicitly specifying the background estimation approach with the command:
+Figure \ref{fig:case_studies_GOF_no1}a shows the GOF plot for the two-sample analysis without using mappability and GC content. The GOF plot indicates that ChIP tag counts simulated from the fitted model are on average higher than the actual ChIP-Seq data. Moreover, estimated background dominates in the fitted model. In such cases (\textit{over-estimation of background}), we usually have much smaller number of peaks. This problem occurred essentially because `\texttt{mosaicsFit}' guessed using bins with low ChIP tag counts (`\texttt{bgEst="matchLow"}') as the optimal background estimation approach, from its automatic selection (`\texttt{bgEst="automatic"}'). Although automatic selection usually works well, there are some cases that it does not result in optimal background estimation approach. In this case, the MOSAiCS fit can be improved by explicitly specifying the background estimation approach with the command:
 
 <<tuning-case1,eval=FALSE>>=
 exampleFit <- mosaicsFit( exampleBinData, analysisType="IO", bgEst="rMOM" )
@@ -737,17 +737,17 @@ Figure \ref{fig:case_studies_GOF_no1}b shows that the MOSAiCS fit was significan
 
 \begin{figure}[ht]
 \centering
-\subfigure[Default `\texttt{truncProb}' value (0.999)]{
+\subfigure[`\texttt{truncProb = 0.999}' (default)]{
    \includegraphics[width=0.5\textwidth] {Figure5c.pdf}
  }
 \subfigure[`\texttt{truncProb = 0.80}']{
    \includegraphics[width=0.5\textwidth] {Figure5d.pdf}
  }
-\caption{ Case \#2. Goodness of fit when default `\texttt{truncProb}' value (0.999) is used (a) and when we specify `\texttt{truncProb = 0.80}' (b). The MOSAiCS fit was significantly improved by explicitly lowering the `\texttt{truncProb}' value.
+\caption{ Case \#2. Goodness of fit when default `\texttt{truncProb}' value (0.999) is used (a) and `\texttt{truncProb = 0.80}' is explicitly specified (b). The MOSAiCS fit was significantly improved by lowering the `\texttt{truncProb}' value.
 \label{fig:case_studies_GOF_no2} }
 \end{figure}
 
-Figure \ref{fig:case_studies_GOF_no2}a shows that the goodness of fit from the MOSAiCS fit of the two-sample analysis without using mappability and GC content. The GOF plot indicates that the MOSAiCS fit is unsatisfactory for the bins with low ChIP tag counts. This problem occurred essentially because background estimation was affected by some bins with high tag counts in the matched control data. In the two-sample analysis without using mappability and GC content, the `\texttt{truncProb}' argument indicates proportion of bins that are not considered as outliers in the control data and it controls the functional form used for the control data. Although our empirical studies indicates that default `\texttt{truncProb}' value usually works well, there are some cases that it does not result in optimal background estimation. In this case, the MOSAiCS fit can be improved by lowering the `\texttt{truncProb}' value with the command: 
+Figure \ref{fig:case_studies_GOF_no2}a shows the GOF plot for the two-sample analysis without using mappability and GC content. The GOF plot indicates that the MOSAiCS fit is unsatisfactory for the bins with low ChIP tag counts. This problem occurred essentially because background estimation was affected by some bins with high tag counts in the matched control data. In the two-sample analysis without using mappability and GC content, the `\texttt{truncProb}' argument indicates proportion of bins that are not considered as outliers in the control data and it controls the functional form used for the control data. Although our empirical studies indicates that default `\texttt{truncProb}' value usually works well, there are some cases that it does not result in optimal background estimation. In this case, the MOSAiCS fit can be improved by lowering the `\texttt{truncProb}' value with the command: 
 
 <<tuning-case2,eval=FALSE>>=
 exampleFit <- mosaicsFit( exampleBinData, analysisType="IO", 
@@ -760,21 +760,21 @@ Figure \ref{fig:case_studies_GOF_no2}b shows that the MOSAiCS fit was significan
 
 \begin{figure}[ht]
 \centering
-\subfigure[Without mappability and GC content]{
+\subfigure[Two-sample analysis without mappability and GC content]{
    \includegraphics[width=0.5\textwidth] {Figure5a.pdf}
  }
-\subfigure[With mappability and GC content]{
+\subfigure[Two-sample analysis with mappability and GC content]{
    \includegraphics[width=0.5\textwidth] {Figure5b.pdf}
  }
 \caption{ Case \#3. Goodness of fit for the two-sample analysis without utilizing mappability and GC content (a). The MOSAiCS fit was improved when we use the two-sample analysis utilizing mappability and GC content (b).
 \label{fig:case_studies_GOF_no3} }
 \end{figure}
 
-Figure \ref{fig:case_studies_GOF_no3}a displays the GOF plot for the two-sample analysis without utilizing mappability and GC content. Neither the blue (two-signal component) nor the red (one-signal component) curve provides good fit to the ChIP data. Therefore, we consider fitting a two-sample analysis with mappability and GC content. Figure \ref{fig:case_studies_GOF_no3}b displays the GOF plot for the two-sample analysis with mappability and GC content in addition to Input and the goodness of fit improves significantly by utilizing mappability and GC content. 
+Figure \ref{fig:case_studies_GOF_no3}a displays the GOF plot for the two-sample analysis without utilizing mappability and GC content. Neither the blue (two-signal component) nor the red (one-signal component) curve provides good fit to the ChIP data. In this case, we consider fitting a two-sample analysis with mappability and GC content. Figure \ref{fig:case_studies_GOF_no3}b displays the GOF plot for the two-sample analysis with mappability and GC content in addition to Input and the goodness of fit improves significantly by utilizing mappability and GC content. 
 
 \subsection{Note on Parameter Tuning}
 
-Overall, unsatisfactory model fits can be improved via the tuning parameters in the 'mosaicsFit()' function. Our empirical studies suggest that as the sequencing depths are getting larger, genomic features mappability and GC content have less of an impact on the overall model fit. In particular, we suggest tuning the the two-sample model without mappability and GC content in the cases of unsatisfactory fits before switching to a fit with mappability and GC content. The following are some general tuning suggestions: for the two-sample analysis without utilizing mappability and GC content, lowering the value of the `\texttt{truncProb}' parameter; for the two-sample analysis with mappability and GC content, a larger `\texttt{s}' parameter and a smaller `\texttt{meanThres}' parameter; for the one-sample analysis with mappability and GC content, varying the `\texttt{meanThres}' parameter are the general tuning guidelines. Although MOSAiCS has two additional tunable parameters, `\texttt{k}' and `\texttt{d}', we have accumulated ample empirical evidence through analyzing many datasets that the default values of `\texttt{k = 3}' and `\texttt{d = 0.25}' work well for these parameters \cite{bookchapter}. If you encounter a fitting problem you need help with, feel free to contact us at our Google group, \url{http://groups.google.com/group/mosaics_user_group}.
+Overall, unsatisfactory model fits can be improved via the tuning parameters in the `\texttt{mosaicsFit}' function. Our empirical studies suggest that as the sequencing depths are getting larger, genomic features mappability and GC content have less of an impact on the overall model fit. In particular, we suggest tuning the the two-sample model without mappability and GC content in the cases of unsatisfactory fits before switching to a fit with mappability and GC content. The following are some general tuning suggestions: for the two-sample analysis without utilizing mappability and GC content, lowering the value of the `\texttt{truncProb}' parameter; for the two-sample analysis with mappability and GC content, a larger `\texttt{s}' parameter and a smaller `\texttt{meanThres}' parameter; for the one-sample analysis with mappability and GC content, varying the `\texttt{meanThres}' parameter are the general tuning guidelines. Although MOSAiCS has two additional tunable parameters, `\texttt{k}' and `\texttt{d}', we have accumulated ample empirical evidence through analyzing many datasets that the default values of `\texttt{k = 3}' and `\texttt{d = 0.25}' work well for these parameters \cite{bookchapter}. If you encounter a fitting problem you need help with, feel free to contact us at our Google group, \url{http://groups.google.com/group/mosaics_user_group}.
 
 %In the two-sample analysis using mappability and GC content, users can control three tuning parameters: `\texttt{s}', `\texttt{d}', and `\texttt{meanThres}'.  `\texttt{s}' and `\texttt{d}' are parameters of the background distribution and control the functional form used for the control data. Please see \cite{mosaics} for further details on these two model parameters. `\texttt{meanThres}' controls the number of strata used at the robust linear regression modeling step of the background distribution fitting. `\texttt{mosaics}' package uses the following parameter setting as default:
 

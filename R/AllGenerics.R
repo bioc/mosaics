@@ -31,24 +31,36 @@ setGeneric( "input",
     standardGeneric("input")
 )
 
-# generic methods for "MosaicsFit" class
-
 setGeneric( "mosaicsFit",
     function( object, ... )
     standardGeneric("mosaicsFit")
 )
+
+# generic methods for "MosaicsFit" class
 
 setGeneric( "estimates",
     function( object, ... )
     standardGeneric("estimates")
 )
 
-# generic methods for "MosaicsPeak" class
-
 setGeneric( "mosaicsPeak",
     function( object, ... )
     standardGeneric("mosaicsPeak")
 )
+
+setGeneric( "mosaicsFitHMM",
+    function( object, ... )
+    standardGeneric("mosaicsFitHMM")
+)
+
+# generic methods for "MosaicsHMM" class
+
+setGeneric( "mosaicsPeakHMM",
+    function( object, ... )
+    standardGeneric("mosaicsPeakHMM")
+)
+
+# generic methods for "MosaicsPeak" class
 
 setGeneric( "peakList",
     function( object, ... )

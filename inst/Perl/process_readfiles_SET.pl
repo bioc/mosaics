@@ -18,8 +18,9 @@
 #   - eland_result, eland_extended, eland_export, bowtie, sam, bed, csem
 #
 #   Note
-#   - chromosomes are extracted from read files, after excluding invalid lines
-#   - uni-reads are assumed
+#   - chromosomes are extracted from read files, after excluding invalid lines.
+#   - uni-reads are assumed.
+#   - BED format covers tagAlign (BED6) format of ENCODE.
 #
 ###################################################################
 
@@ -500,9 +501,12 @@ sub bed {
         $str = "R";
     }
     
-    # fragment length adjustment
+    # fragment length adjustment (fixed from ver. 1.5.5)
+    # [Note] BED format: The chromEnd base is not included in the display of the feature.
+    # [Note] BED format covers tagAlign (BED6) format of ENCODE.
     
-    my $read_length = $end - $start + 1;
+    #my $read_length = $end - $start + 1;
+    my $read_length = $end - $start;
     my $L_tmp = $L;  
     #if ( $L < $read_length ) {
     #    $L_tmp = $read_length;

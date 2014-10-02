@@ -29,6 +29,10 @@ mosaicsPeak( object, ... )
     \item{...}{ Other parameters to be passed through to generic \code{mosaicsPeak}.}
 }
 \details{
+\code{mosaicsPeak} is developed to identify narrow peaks such as transcription factor binding sites. 
+If you are interested in identifying broad peaks such as histone modifications,
+please use \code{mosaicsFitHMM} and \code{mosaicsPeakHMM} instead of \code{mosaicsPeak}.
+
 When peaks are called, proper signal model needs to be specified.
 The optimal choice for the number of signal components depends on the characteristics of ChIP-seq data.
 In order to support users in the choice of optimal signal model, 
@@ -36,9 +40,9 @@ Bayesian Information Criterion (BIC) values and Goodness of Fit (GOF) plot are p
 for the fitted MOSAiCS model.
 BIC values and GOF plot can be obtained by applying \code{show} and \code{plot} methods,
 respectively, to the \code{MosaicsFit} class object, which is a fitted MOSAiCS model.
+
 \code{maxgap}, \code{minsize}, and \code{thres} are for refining initial peaks called
 using specified \code{signalModel} and \code{FDR}.
-
 If you use a bin size shorter than the average fragment length of the experiment, 
 we recommend to set \code{maxgap} to the average fragment length 
 and \code{minsize} to the bin size.
@@ -56,7 +60,7 @@ Kuan, PF, D Chung, G Pan, JA Thomson, R Stewart, and S Keles (2011),
 }
 \author{ Dongjun Chung, Pei Fen Kuan, Sunduz Keles }
 \seealso{
-\code{\link{mosaicsFit}} , \code{\linkS4class{MosaicsPeak}}, \code{\linkS4class{MosaicsFit}}.
+\code{\link{mosaicsFit}}, \code{\link{mosaicsPeakHMM}}, \code{\link{mosaicsFitHMM}}, \code{\linkS4class{MosaicsPeak}}, \code{\linkS4class{MosaicsFit}}.
 }
 \examples{
 \dontrun{

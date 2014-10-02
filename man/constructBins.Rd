@@ -79,9 +79,11 @@ constructBins( infile=NULL, fileFormat=NULL, outfileLoc="./",
 Bin-level files are constructed from the aligned read file and 
 exported to the directory specified in \code{outfileLoc} argument.
 If \code{byChr=FALSE}, bin-level files are named 
-as \code{[infileName]_fragL[fragLen]_bin[binSize].txt}.
+as \code{[infileName]_fragL[fragLen]_bin[binSize].txt} for SET data (\code{PET = FALSE})
+and \code{[infileName]_bin[binSize].txt} for PET data (\code{PET = TRUE}).
 If \code{byChr=TRUE}, bin-level files are named 
-as \code{[infileName]_fragL[fragLen]_bin[binSize]_[chrID].txt},
+as \code{[infileName]_fragL[fragLen]_bin[binSize]_[chrID].txt}for SET data (\code{PET = FALSE})
+and \code{[infileName]_bin[binSize]_[chrID].txt} for PET data (\code{PET = TRUE}),
 where \code{chrID} is chromosome IDs that reads align to.
 These chromosome IDs are extracted from the aligned read file.
 
@@ -119,8 +121,8 @@ Kuan, PF, D Chung, JA Thomson, R Stewart, and S Keles (2011),
 \dontrun{
 constructBins( infile="/scratch/eland/STAT1_eland_results.txt", 
     fileFormat="eland_result", outfileLoc="/scratch/eland/", 
-    byChr=FALSE, excludeChr="chrM", PET = FALSE, 
-    fragLen=200, binSize=200, capping=0 )
+    byChr=FALSE, useChrfile=FALSE, chrfile=NULL, excludeChr="chrM", 
+    PET = FALSE, fragLen=200, binSize=200, capping=0 )
 }
 }
 \keyword{models}

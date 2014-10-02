@@ -4,6 +4,10 @@
 .exportTXT <- function( peakList, filename )
 {
     outFormat <- peakList
+    
+    # Note (ver 1.5.5): chromStart 1-base & chromEnd inclusive.
+    outFormat[ outFormat[,2] == 0, 2 ] <- 1
+    	# first base should be 1, not 0, if we use 1-base system
         
     # variable names
     
@@ -28,10 +32,13 @@
 .exportGFF <- function( peakList, filename )
 {
     # GFF: seqname, source, feature, start, end, score, strand, frame, group
+    # Note (ver 1.5.5): chromStart 1-base & chromEnd inclusive.
     
     outFormat <- data.frame( peakList$chrID, "MOSAiCS", "MOSAiCS_peak",
         peakList$peakStart, peakList$peakStop, peakList$aveChipCount,
         ".", ".", ".", stringsAsFactors=FALSE )
+    outFormat[ outFormat[,4] <= 0, 4 ] <- 1
+    	# first base should be 1, not 0, if we use 1-base system
     
     line0 <- 'track name=mosaicsPeaks description=\"MOSAiCS peaks\"'
     cat( as.character(line0), "\n", file=filename )
@@ -52,11 +59,18 @@
     # BED: (required) chrom, chromStart, chromEnd
     # BED: (optional) name, score, strand, thickStart, thinkEnd, itemRgb,
     #                   blockCount, blockSizes, blockStarts
+    # Note (ver 1.5.5): chromStart 0-base & chromEnd NOT inclusive (i.e., 1-base).
+    
+    #outFormat <- data.frame( peakList$chrID,
+    #    peakList$peakStart, peakList$peakStop, "MOSAiCS_peak", 
+    #    peakList$aveChipCount, stringsAsFactors=FALSE )
     
     outFormat <- data.frame( peakList$chrID,
-        peakList$peakStart, peakList$peakStop, "MOSAiCS_peak", 
+        (peakList$peakStart-1), peakList$peakStop, "MOSAiCS_peak", 
         peakList$aveChipCount, stringsAsFactors=FALSE )
-    
+    outFormat[ outFormat[,2] < 0, 2 ] <- 0
+    	# first base becomes -1 by (peakList$peakStart-1)
+        
     line0 <- 'track name=mosaicsPeaks description=\"MOSAiCS peaks\" useScore=1'
     cat( as.character(line0), "\n", file=filename )
     for ( i in 1:nrow(outFormat) )

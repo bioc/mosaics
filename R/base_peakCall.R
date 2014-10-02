@@ -332,8 +332,9 @@
             
             #################### if peaks exist
             
-            bdBin <- data.frame( chrID, bd_bin, stringsAsFactors=FALSE )
-            colnames(bdBin) <- c("chrID","peak")
+            bdBin <- data.frame( chrID, coord, bd_bin, 
+            	stringsAsFactors=FALSE )
+			colnames(bdBin) <- c( "chrID", "coord", "peak" )
             
             return( list( peakSet=final_peakset, bdBin=bdBin, empFDR=empFDR ) )
         } else {
@@ -348,10 +349,12 @@
             #message( "Info: empirical FDR (after thresholding) = ", round(1000*empFDR_thres)/1000 )
             
             chrID <- dataSet$chrID
+            coord <- dataSet$coord
             Y <- dataSet$Y
             
-            bdBin <- data.frame( chrID, rep(0,length(Y)), stringsAsFactors=FALSE )
-            colnames(bdBin) <- c("chrID","peak")
+            bdBin <- data.frame( chrID, coord, rep(0,length(Y)), 
+            	stringsAsFactors=FALSE )
+        colnames(bdBin) <- c( "chrID", "coord", "peak" )
             
             return( list( peakSet=NULL, bdBin=bdBin, empFDR=0 ) )
         
@@ -361,10 +364,12 @@
         #################### if there is no peak
         
         chrID <- dataSet$chrID
+            coord <- dataSet$coord
         Y <- dataSet$Y
             
-        bdBin <- data.frame( chrID, rep(0,length(Y)), stringsAsFactors=FALSE )
-        colnames(bdBin) <- c("chrID","peak")
+        bdBin <- data.frame( chrID, coord, rep(0,length(Y)), 
+        	stringsAsFactors=FALSE )
+        colnames(bdBin) <- c( "chrID", "coord", "peak" )
         
         return( list( peakSet=NULL, bdBin=bdBin, empFDR=0 ) )  
     }

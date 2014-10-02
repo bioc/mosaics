@@ -1,5 +1,5 @@
 
-# obtained from importing bin-level data obtained from perl codes
+# bin-level data
 
 setClass( Class="BinData",
     representation=representation(
@@ -13,7 +13,7 @@ setClass( Class="BinData",
     )
 )
 
-# obtained from MOSAiCS Z0 & Z1 model fit
+# MOSAiCS model fit
 
 setClass( Class="MosaicsFitEst",
     representation=representation(
@@ -58,7 +58,7 @@ setClass( Class="MosaicsFit",
     )
 )
 
-# obtained from final MOSAiCS peak calling
+# MOSAiCS peak calling & HMM
 
 setClass( Class="MosaicsPeakParam",
     representation=representation(
@@ -67,7 +67,8 @@ setClass( Class="MosaicsPeakParam",
         FDR="numeric",
         maxgap="numeric",
         minsize="numeric",
-        thres="numeric"
+        thres="numeric",
+        decoding="character"
     )
 )
 
@@ -76,6 +77,22 @@ setClass( Class="MosaicsPeak",
         peakList="data.frame",
         peakParam="MosaicsPeakParam",
         bdBin="data.frame",
+        postProb="data.frame",
         empFDR="numeric"
+    )
+)
+
+setClass( Class="MosaicsHMM",
+    representation=representation(
+        HMMfit="list",
+        mosaicsEst="MosaicsFitEst",
+		inputdata="list",
+        init="character",
+        initPiMat="matrix",
+        peakParam="MosaicsPeakParam",
+        binsize="numeric",
+        nRatio="numeric",
+        bicMosaics="numeric",
+        bicMosaicsHMM="numeric"
     )
 )
