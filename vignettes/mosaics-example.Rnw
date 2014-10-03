@@ -55,6 +55,12 @@ modeling approach for detecting peaks, i.e., enriched regions, in one-sample
 (ChIP sample) or two-sample (ChIP and control samples) ChIP-seq data.
 It can account for mappability and GC content biases that arise in ChIP-seq data.
 
+Recently, we extended the MOSAiCS framework with a hidden Markov Model (HMM) architecture,
+named MOSAiCS-HMM \cite{mosaicsHMM}, to identify broad peaks.
+By considering the HMM architecture, MOSAiCS-HMM allows modeling of read counts
+in histone modifiation ChIP-seq experiments and
+accounts for the spatial dependence in their ChIP-seq profiles.
+
 The package can be loaded with the command:
 
 <<preliminaries,echo=FALSE,results=hide>>=
@@ -90,6 +96,8 @@ and provides command lines for each step.
 Sections \ref{two_sample_MGC} and \ref{one_sample} briefly explain
 the workflow and command lines for the two-sample analysis and the one-sample analysis
 with mappability and GC content, respectively.
+Section \ref{analysis_mosaicshmm} discusses steps of analyzing histone modification
+ChIP-seq experiments using MOSAiCS-HMM.
 
 We encourage  questions or requests regarding 
 `\texttt{mosaics}' package to be posted on our Google group
@@ -118,7 +126,7 @@ in a more convenient way, with the command:
          gofFile="/scratch/reports/mosaics_GOF.pdf",
          byChr=FALSE, useChrfile=FALSE, chrfile=NULL, excludeChr="chrM",
          PET=FALSE, FDR=0.05, fragLen=200, binSize=fragLen, capping=0,
-         bgEst="automatic", signalModel="BIC", parallel=TRUE, nCore=8 )
+         bgEst="rMOM", signalModel="BIC", parallel=TRUE, nCore=8 )
 @
 
 `\texttt{mosaicsRunAll}' method imports aligned read files, converts them to bin-level files (generated bin-level files will be saved in the directory 
@@ -362,16 +370,16 @@ We are now ready to fit a MOSAiCS model using the bin-level data above
 (\texttt{exampleBinData})   with the command:
 
 <<io-mosaicsfit>>=
-exampleFit <- mosaicsFit( exampleBinData, analysisType="IO", bgEst="automatic" )
+exampleFit <- mosaicsFit( exampleBinData, analysisType="IO", bgEst="rMOM" )
 @
 
 `\texttt{analysisType="IO"}' indicates implementation of the two-sample analysis.
 `\texttt{bgEst}' argument determines background estimation approach.
 `\texttt{bgEst="matchLow"}' estimates background distribution using only bins with low tag counts
 and it is appropriate for the data with relatively low sequencing depth. 
-`\texttt{bgEst="rMOM"}' estimates background distribution using robust method of moment (MOM) and
+`\texttt{bgEst="rMOM"}' estimates background distribution using robust method of moment (MOM) (default) and
 it is appropriate for the data with relatively high sequencing depth.
-If `\texttt{bgEst="automatic"}' (default), `\texttt{mosaicsFit}' tries its best guess 
+If `\texttt{bgEst="automatic"}', `\texttt{mosaicsFit}' tries its best guess 
 for the background estimation approach, based on the data provided.
 If the goodness of fit obtained using `\texttt{bgEst="automatic"}' is not satisfactory,
 we recommend to try `\texttt{bgEst="matchLow"}' and `\texttt{bgEst="rMOM"}' 
@@ -650,9 +658,55 @@ Peak identification can be done exactly in the same way as in the case
 of the two-sample analysis.
 
 <<os-mosaicspeak,eval=FALSE>>=
-exampleFit <- mosaicsPeak( exampleFit, signalModel="2S", FDR=0.05,
+examplePeak <- mosaicsPeak( exampleFit, signalModel="2S", FDR=0.05,
 maxgap=200, minsize=50, thres=10 )
 @
+
+\section{Identification of Broad Peaks using MOSAiCS-HMM}\label{analysis_mosaicshmm}
+
+In `\texttt{mosaics}' package, broad peaks can be identified with MOSAiCS-HMM model, using methods `\texttt{mosaicsFit}' and `\texttt{mosaicsPeakHMM}'. Although we have punctuated peaks for STAT1, we still use it for illustrative purpose. For computational efficiency, `\texttt{mosaicsFit}' utilizies MOSAiCS model fit as estimates of emission distribution of MOSAiCS-HMM model. In addition, it also considers MOSAiCS peak calling results at specified FDR level (`\texttt{init.FDR}') as initial values by default. By taking the MOSAiCS model fit from `\texttt{mosaicsFit}' as an input, users can fit MOSAiCS-HMM with the command:
+
+<<mosaicsFitHMM,eval=TRUE>>=
+exampleFitHMM <- mosaicsFitHMM( exampleFit, signalModel = "2S", 
+	init="mosaics", init.FDR = 0.05, parallel=FALSE, nCore=8 )
+@
+
+The following command prints out BIC values of MOSAiCS and MOSAiCS-HMM models
+so that users can determine whether it is beneficial to consider broad peaks using MOSAiCS-HMM. As before, a lower BIC value indicates a better model fit.
+
+<<mosaicshmmfit-show>>=
+exampleFitHMM
+@
+
+`\texttt{plot}' method also provides the GOF plot, which allows visual
+comparisons of the fits of the background, MOSAiCS, and MOSAiCS-HMM models with the actual data. Figure \ref{fig:mosaicshmmfit-plot} displays the GOF plot for our dataset. 
+
+<<mosaicshmmfit-plot,eval=FALSE>>=
+plot(exampleFitHMM)
+@
+
+\begin{figure}[tb]
+\begin{center}
+<<fig-mosaicshmmfit-plot,fig=TRUE,height=5,width=5,echo=FALSE>>=
+plot(exampleFitHMM)
+@
+\caption{\label{fig:mosaicshmmfit-plot} Goodness of Fit (GOF) plot. Depicted are
+actual data for ChIP and control samples with simulated data from the following
+fitted models: (Sim:Null): Background model; (Sim:MOSAiCS): MOSAiCS
+model; (Sim:MOSAiCS-HMM): MOSAiCS-HMM model. }
+\end{center}
+\end{figure}
+
+`\texttt{mosaicsPeakHMM}' calls peaks based on the MOSAiCS-HMM model fit. `\texttt{mosaicsPeakHMM}' allows two approaches, Viterbi algorithm (`\texttt{decoding="viterbi"}') and posterior decoding (`\texttt{decoding="posterior"}'), to call peaks. When posterior decoding is used, users can specify FDR level using `\texttt{FDR}'. `\texttt{mosaicsPeakHMM}' provides its output as `\texttt{MosaicsPeak}' class object, which `\texttt{mosaicsPeak}' also generates. Hence, all the methods used for the output of `\texttt{mosaicsPeak}' can also be used for the output of `\texttt{mosaicsPeakHMM}', e.g., `\texttt{export}', `\texttt{print}', and `\texttt{show}'. Users can call peaks based on the MOSAiCS-HMM model fit with the command:
+
+<<mosaicsPeakHMM,eval=TRUE>>=
+examplePeakHMM1 <- mosaicsPeakHMM( exampleFitHMM, decoding="viterbi",
+  parallel=FALSE, nCore=8 )
+examplePeakHMM2 <- mosaicsPeakHMM( exampleFitHMM, FDR = 0.05, decoding="posterior",
+  parallel=FALSE, nCore=8 )
+@
+
+Note that `\texttt{mosaicsFit}' fits MOSAiCS-HMM model and `\texttt{mosaicsPeakHMM}' calls peaks for each chromosome separately. Hence, whenever multiple cores are available, it is strongly recommended to utilize parallel processing by setting `\texttt{parallel=TRUE}' and specifying the number of cores to utilize in `\texttt{nCore}'.
          
 \section{Generating Wiggle Files to View on Genome Browsers}\label{generateWig}
 
@@ -812,7 +866,11 @@ R Bjornson, N Carriero, M Snyder, and M Gerstein (2009), ``PeakSeq enables
 systematic scoring of ChIP-Seq experiments relative to controls'',
 \textit{Nature Biotechnology}, 27, 66-75.
 \bibitem{bookchapter} Sun, G, D Chung, K Liang, S Kele\c{s} (2012), 
-``Statistical Analysis of ChIP-Seq Data with MOSAiCS'' (submitted).
+``Statistical Analysis of ChIP-Seq Data with MOSAiCS'',
+\textit{Methods in Molecular Biology}, 1038, 193-212.
+\bibitem{mosaicsHMM} Chung, D, Zhang Q, and Kele\c{s} S (2014), 
+``MOSAiCS-HMM: A model-based approach for detecting regions of histone modifications from ChIP-seq data'',
+Datta S and Nettleton D (eds.), \textit{Statistical Analysis of Next Generation Sequencing Data}, Springer.
 \end{thebibliography}
 
 \appendix

@@ -1,8 +1,12 @@
-Changes in version 2.0.0:
+Changes in version 1.99.2:
 
 SIGNIFICANT USER-VISIBLE CHANGES
+  
+    o mosaicsFit(): Sets bgEst="rMOM" as default.
 
-    o mosaicsFit(): Improve robustness of model fitting and allow more flexible parameter tuning.
+    o Help documents are polished and updated.
+
+    o Vignette is updated.
 	
 	
 Changes in version 1.99.1:
@@ -11,21 +15,21 @@ SIGNIFICANT USER-VISIBLE CHANGES
 
     o mosaicsFitHMM() & mosaicsPeakHMM(): Hidden-Markov-Model-based MOSAiCS model fitting & peak calling, respectively, to identify broad peaks such as histone modifications.
 	
-	o Add new class 'MosaicsHMM' with methods show(), plot(), & estimates().
+    o Add new class 'MosaicsHMM' with methods show(), plot(), & estimates().
 	
-	o mosaicsFit(): Introduces a new argument 'trans' & sets bgEst="rMOM" as default.
+    o mosaicsFit(): Introduces a new argument 'trans'.
 	
-	o mosaicsFit(): Stability & robustness of model fitting were improved.
+    o mosaicsFit(): Stability & robustness of model fitting were improved.
 
     o Polish help documents of constructBins(), generateWig(), and mosaicsRunAll().
 	
-	o Tested to work with >= R 3.0 properly.
+    o Tested to work with >= R 3.0 properly.
 
 BUG FIXES
 
     o constructBins() & export(): Use correct base for BED file (one base shift).
 	
-	o Reflect the changes in Rcpp packages that mosaics package depends on.
+    o Reflect the changes in Rcpp packages that mosaics package depends on.
     
 	
 Changes in version 1.5.3:

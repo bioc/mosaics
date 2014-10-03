@@ -4,8 +4,8 @@
 setMethod(
     f="mosaicsFit",
     signature="BinData",
-    definition=function( object, analysisType="automatic", bgEst="automatic",
-        k=3, meanThres=NA, s=2, d=0.25, trans="log", truncProb=0.999, 
+    definition=function( object, analysisType="automatic", bgEst="rMOM",
+        k=3, meanThres=NA, s=2, d=0.25, trans="power", truncProb=0.999, 
         parallel=FALSE, nCore=8 )
     {
         # Note: users can tune parameters only regarding MOSAiCS model fitting.
