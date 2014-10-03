@@ -9,8 +9,8 @@ Fit one-sample or two-sample MOSAiCS models with one signal component and two si
 }
 \usage{
 mosaicsFit( object, ... )
-\S4method{mosaicsFit}{BinData}( object, analysisType="automatic", bgEst="automatic",
-    k=3, meanThres=NA, s=2, d=0.25, trans="log", truncProb=0.999, parallel=FALSE, nCore=8 )
+\S4method{mosaicsFit}{BinData}( object, analysisType="automatic", bgEst="rMOM",
+    k=3, meanThres=NA, s=2, d=0.25, trans="power", truncProb=0.999, parallel=FALSE, nCore=8 )
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -28,7 +28,8 @@ mosaicsFit( object, ... )
         "rMOM" (estimation using robust method of moment (MOM)).
         If \code{bgEst="automatic"},
                 this method tries to make the best guess for \code{bgEst}, 
-                based on the data provided.}    
+                based on the data provided.
+		Default is \code{bgEst="rMOM"}. }    
     \item{k}{Parameter for estimating background distribution.
         It is not recommended for users to change this value. }    
     \item{meanThres}{Parameter for estimating background distribution.
@@ -43,7 +44,7 @@ mosaicsFit( object, ... )
         Possible values are "log" (logarithm transformation) and
         "power" (power transformation).
 		Relevant only when \code{analysisType="IO"}. 
-		Default is \code{trans="log"}. }  
+		Default is \code{trans="power"}. }  
     \item{truncProb}{Parameter for estimating background distribution.
     	Relevant only when \code{analysisType="IO"}. }  
     \item{parallel}{Utilize multiple CPUs for parallel computing 
