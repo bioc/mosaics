@@ -664,7 +664,7 @@ maxgap=200, minsize=50, thres=10 )
 
 \section{Identification of Broad Peaks using MOSAiCS-HMM}\label{analysis_mosaicshmm}
 
-In `\texttt{mosaics}' package, broad peaks can be identified with MOSAiCS-HMM model, using methods `\texttt{mosaicsFit}' and `\texttt{mosaicsPeakHMM}'. Although we have punctuated peaks for STAT1, we still use it for illustrative purpose. For computational efficiency, `\texttt{mosaicsFit}' utilizies MOSAiCS model fit as estimates of emission distribution of MOSAiCS-HMM model. In addition, it also considers MOSAiCS peak calling results at specified FDR level (`\texttt{init.FDR}') as initial values by default. By taking the MOSAiCS model fit from `\texttt{mosaicsFit}' as an input, users can fit MOSAiCS-HMM with the command:
+In `\texttt{mosaics}' package, broad peaks can be identified with MOSAiCS-HMM model, using methods `\texttt{mosaicsFitHMM}' and `\texttt{mosaicsPeakHMM}'. Although we have punctuated peaks for STAT1, we still use it for the illustrative purpose. For computational efficiency, `\texttt{mosaicsFitHMM}' utilizes MOSAiCS model fit as estimates of emission distribution of MOSAiCS-HMM model. In addition, it also considers MOSAiCS peak calling results at specified FDR level (`\texttt{init.FDR}') as initial values by default. By taking the MOSAiCS model fit from `\texttt{mosaicsFit}' as an input, users can fit MOSAiCS-HMM with the command:
 
 <<mosaicsFitHMM,eval=TRUE>>=
 exampleFitHMM <- mosaicsFitHMM( exampleFit, signalModel = "2S", 
@@ -697,7 +697,7 @@ model; (Sim:MOSAiCS-HMM): MOSAiCS-HMM model. }
 \end{center}
 \end{figure}
 
-`\texttt{mosaicsPeakHMM}' calls peaks based on the MOSAiCS-HMM model fit. `\texttt{mosaicsPeakHMM}' allows two approaches, Viterbi algorithm (`\texttt{decoding="viterbi"}') and posterior decoding (`\texttt{decoding="posterior"}'), to call peaks. When posterior decoding is used, users can specify FDR level using `\texttt{FDR}'. `\texttt{mosaicsPeakHMM}' provides its output as `\texttt{MosaicsPeak}' class object, which `\texttt{mosaicsPeak}' also generates. Hence, all the methods used for the output of `\texttt{mosaicsPeak}' can also be used for the output of `\texttt{mosaicsPeakHMM}', e.g., `\texttt{export}', `\texttt{print}', and `\texttt{show}'. Users can call peaks based on the MOSAiCS-HMM model fit with the command:
+`\texttt{mosaicsPeakHMM}' calls peaks based on the MOSAiCS-HMM model fit. `\texttt{mosaicsPeakHMM}' allows two approaches, Viterbi algorithm (`\texttt{decoding="viterbi"}') and posterior decoding (`\texttt{decoding="posterior"}'), to call peaks. When posterior decoding is used, users can specify FDR level for the posterior decoding in the argument `\texttt{FDR}'. `\texttt{mosaicsPeakHMM}' provides its output as `\texttt{MosaicsPeak}' class object, which `\texttt{mosaicsPeak}' also generates. Hence, all the methods used for the output of `\texttt{mosaicsPeak}' can also be used for the output of `\texttt{mosaicsPeakHMM}', e.g., `\texttt{export}', `\texttt{print}', and `\texttt{show}'. Users can call peaks based on the MOSAiCS-HMM model fit with the command:
 
 <<mosaicsPeakHMM,eval=TRUE>>=
 examplePeakHMM1 <- mosaicsPeakHMM( exampleFitHMM, decoding="viterbi",
@@ -706,7 +706,7 @@ examplePeakHMM2 <- mosaicsPeakHMM( exampleFitHMM, FDR = 0.05, decoding="posterio
   parallel=FALSE, nCore=8 )
 @
 
-Note that `\texttt{mosaicsFit}' fits MOSAiCS-HMM model and `\texttt{mosaicsPeakHMM}' calls peaks for each chromosome separately. Hence, whenever multiple cores are available, it is strongly recommended to utilize parallel processing by setting `\texttt{parallel=TRUE}' and specifying the number of cores to utilize in `\texttt{nCore}'.
+Note that `\texttt{mosaicsFit}' fits MOSAiCS-HMM model and `\texttt{mosaicsPeakHMM}' calls peaks for each chromosome separately. Hence, whenever multiple cores are available, it is strongly recommended to utilize parallel processing by setting `\texttt{parallel=TRUE}' and specifying the number of available cores in the argument `\texttt{nCore}'.
          
 \section{Generating Wiggle Files to View on Genome Browsers}\label{generateWig}
 
