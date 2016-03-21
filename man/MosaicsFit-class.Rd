@@ -5,7 +5,7 @@
 \alias{plot,MosaicsFit,ANY-method}
 \alias{print,MosaicsFit-method}
 \alias{show,MosaicsFit-method}
-
+\alias{seqDepth,MosaicsFit-method}
 \title{Class "MosaicsFit" }
 \description{
 This class represents MOSAiCS model fit.
@@ -25,10 +25,20 @@ Objects can be created by calls of the form \code{new("MosaicsFit", ...)}.
         a vector of genomic coordinates. }
     \item{\code{tagCount}:}{Object of class \code{"numeric"},
         a vector of tag counts of ChIP sample. }
+    \item{\code{mappability}:}{Object of class \code{"numeric"},
+        a vector of mappability score. }
+    \item{\code{gcContent}:}{Object of class \code{"numeric"},
+        a vector of GC content score. }
+    \item{\code{input}:}{Object of class \code{"numeric"},
+        a vector of tag counts of matched control sample. }
     \item{\code{bic1S}:}{Object of class \code{"numeric"},
         Bayesian Information Criterion (BIC) value of one-signal-component model. }
     \item{\code{bic2S}:}{Object of class \code{"numeric"},
         Bayesian Information Criterion (BIC) value of two-signal-component model. }
+    \item{\code{seqDepth}:}{Object of class \code{"numeric"}, 
+        a vector of sequencing depth of length 2, where the first and second elements
+        correpond to sequencing depths of ChIP and control samples, respectively.
+        If there is not control sample, the second element is set to NA.}
   }
 }
 \section{Methods}{
@@ -43,21 +53,27 @@ Objects can be created by calls of the form \code{new("MosaicsFit", ...)}.
         (not supported yet) }
     \item{show}{\code{signature(object = "MosaicsFit")}:
         provide brief summary of the object. }
-     }
+    \item{seqDepth}{\code{signature(object = "MosaicsFit")}: provide a vector of sequencing depth. }
+  }
 }
 \references{
-Kuan, PF, D Chung, JA Thomson, R Stewart, and S Keles (2010), "A Statistical Framework
-for the Analysis of ChIP-Seq Data", To appear in \emph{Journal of the American Statistical Association} (\url{http://pubs.amstat.org/doi/abs/10.1198/jasa.2011.ap09706}).
+Kuan, PF, D Chung, G Pan, JA Thomson, R Stewart, and S Keles (2011), 
+"A Statistical Framework for the Analysis of ChIP-Seq Data", 
+\emph{Journal of the American Statistical Association}, Vol. 106, pp. 891-903.
+
+Chung, D, Zhang Q, and Keles S (2014), "MOSAiCS-HMM: A model-based approach for detecting regions of histone modifications from ChIP-seq data", Datta S and Nettleton D (eds.), \emph{Statistical Analysis of Next Generation Sequencing Data}, Springer.
 }
-\author{ Dongjun Chung, Pei Fen Kuan, Sunduz Keles }
+\author{ Dongjun Chung, Pei Fen Kuan, Rene Welch, Sunduz Keles }
 \seealso{
-\code{\link{mosaicsFit}}, \code{\link{mosaicsPeak}}, \code{\link{estimates}}.
+\code{\link{mosaicsFit}}, \code{\link{mosaicsPeak}}, \code{\link{mosaicsFitHMM}}, \code{\link{estimates}}.
 }
 \examples{
 showClass("MosaicsFit")
 \dontrun{
 library(mosaicsExample)
-data(exampleFit)
+
+data(exampleBinData)
+exampleFit <- mosaicsFit( exampleBinData, analysisType="IO" )
 
 exampleFit
 plot(exampleFit)

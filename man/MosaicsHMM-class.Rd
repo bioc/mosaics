@@ -6,7 +6,7 @@
 \alias{plot,MosaicsHMM,missing-method}
 \alias{print,MosaicsHMM-method}
 \alias{show,MosaicsHMM-method}
-
+\alias{seqDepth,MosaicsHMM-method}
 \title{Class "MosaicsHMM" }
 \description{
 This class represents MOSAiCS-HMM model fit.
@@ -18,8 +18,22 @@ Objects can be created by calls of the form \code{new("MosaicsHMM", ...)}.
   \describe{
     \item{\code{HMMfit}:}{Object of class \code{"list"}, 
     	representing the fitted MOSAiCS-HMM model. }
-    \item{\code{mosaicsFit}:}{Object of class \code{"MosaicsFit"}, 
-    	representing the fitted MOSAiCS model. }
+    \item{\code{chrID}:}{Object of class \code{"character"},
+        a vector of chromosome IDs. }
+    \item{\code{coord}:}{Object of class \code{"numeric"},
+        a vector of genomic coordinates. }
+    \item{\code{tagCount}:}{Object of class \code{"numeric"},
+        a vector of tag counts of ChIP sample. }
+    \item{\code{mappability}:}{Object of class \code{"numeric"},
+        a vector of mappability score. }
+    \item{\code{gcContent}:}{Object of class \code{"numeric"},
+        a vector of GC content score. }
+    \item{\code{input}:}{Object of class \code{"numeric"},
+        a vector of tag counts of matched control sample. }
+    \item{\code{inputdata}:}{Object of class \code{"list"}, 
+      representing the bin-level data. }
+    \item{\code{mosaicsEst}:}{Object of class \code{"MosaicsFitEst"},
+        representing estimates of MOSAiCS model fit. }
     \item{\code{init}:}{Object of class \code{"character"}, 
     		representing the approach to initialize MOSAiCS-HMM. }
     \item{\code{initPiMat}:}{Object of class \code{"numeric"}, 
@@ -34,6 +48,10 @@ Objects can be created by calls of the form \code{new("MosaicsHMM", ...)}.
     		representing the BIC value of MOSAiCS fit. }
     \item{\code{bicMosaicsHMM}:}{Object of class \code{"numeric"}, 
     		representing the BIC value of MOSAiCS-HMM fit. }
+    \item{\code{seqDepth}:}{Object of class \code{"numeric"}, 
+        a vector of sequencing depth of length 2, where the first and second elements
+        correpond to sequencing depths of ChIP and control samples, respectively.
+        If there is not control sample, the second element is set to NA.}
   }
 }
 \section{Methods}{
@@ -48,7 +66,8 @@ Objects can be created by calls of the form \code{new("MosaicsHMM", ...)}.
     \item{print}{\code{signature(x = "MosaicsHMM")}: 
         (not supported yet) }
     \item{show}{\code{signature(object = "MosaicsHMM")}: provide brief summary of the object. }
-     }
+    \item{seqDepth}{\code{signature(object = "MosaicsHMM")}: provide a vector of sequencing depth. }
+  }
 }
 \references{
 Kuan, PF, D Chung, G Pan, JA Thomson, R Stewart, and S Keles (2011), 
@@ -57,7 +76,7 @@ Kuan, PF, D Chung, G Pan, JA Thomson, R Stewart, and S Keles (2011),
 
 Chung, D, Zhang Q, and Keles S (2014), "MOSAiCS-HMM: A model-based approach for detecting regions of histone modifications from ChIP-seq data", Datta S and Nettleton D (eds.), \emph{Statistical Analysis of Next Generation Sequencing Data}, Springer.
 }
-\author{ Dongjun Chung, Pei Fen Kuan, Sunduz Keles }
+\author{ Dongjun Chung, Pei Fen Kuan, Rene Welch, Sunduz Keles }
 \seealso{
 \code{\link{mosaicsFitHMM}}, \code{\link{mosaicsPeakHMM}}.
 }
@@ -65,18 +84,59 @@ Chung, D, Zhang Q, and Keles S (2014), "MOSAiCS-HMM: A model-based approach for 
 showClass("MosaicsHMM")
 \dontrun{
 library(mosaicsExample)
-data(exampleFit)
 
-exampleFitHMM <- mosaicsFitHMM( 
-	exampleFit, signalModel = "2S", init = "mosaics",
-	init.FDR=0.05, init.maxgap=200, init.minsize=50, init.thres=10,
-	parallel=TRUE, nCore=8 )
-exampleFitHMM
-plot( exampleFitHMM, parallel=TRUE, nCore=8 )
-estimates(exampleFitHMM)
+constructBins( infile=system.file( file.path("extdata","wgEncodeBroadHistoneGm12878H3k4me3StdAlnRep1_chr22_sorted.bam"), package="mosaicsExample"), 
+    fileFormat="bam", outfileLoc="~/", 
+    byChr=FALSE, useChrfile=FALSE, chrfile=NULL, excludeChr=NULL, 
+    PET=FALSE, fragLen=200, binSize=200, capping=0 )
+constructBins( infile=system.file( file.path("extdata","wgEncodeBroadHistoneGm12878ControlStdAlnRep1_chr22_sorted.bam"), package="mosaicsExample"), 
+    fileFormat="bam", outfileLoc="~/", 
+    byChr=FALSE, useChrfile=FALSE, chrfile=NULL, excludeChr=NULL, 
+    PET=FALSE, fragLen=200, binSize=200, capping=0 )
 
-examplePeakHMM1 <- mosaicsPeakHMM( exampleFitHMM, decoding="viterbi" )
-examplePeakHMM2 <- mosaicsPeakHMM( exampleFitHMM, FDR = 0.05, decoding="posterior" )
+binHM <- readBins( type=c("chip","input"),
+    fileName=c( "~/wgEncodeBroadHistoneGm12878H3k4me3StdAlnRep1_chr22_sorted.bam_fragL200_bin200.txt",
+    "~/wgEncodeBroadHistoneGm12878ControlStdAlnRep1_chr22_sorted.bam_fragL200_bin200.txt" ) )
+binHM
+plot(binHM)
+plot( binHM, plotType="input" )
+
+fitHM <- mosaicsFit( binHM, analysisType="IO", bgEst="rMOM" )
+fitHM
+plot(fitHM)
+
+hmmHM <- mosaicsFitHMM( fitHM, signalModel = "2S", 
+  init="mosaics", init.FDR = 0.05, parallel=TRUE, nCore=8 )
+hmmHM
+plot(hmmHM)
+
+peakHM <- mosaicsPeakHMM( hmmHM, FDR = 0.05, decoding="posterior",
+  thres=10, parallel=TRUE, nCore=8 )
+
+peakHM <- extractReads( peakHM,
+  chipFile=system.file( file.path("extdata","wgEncodeBroadHistoneGm12878H3k4me3StdAlnRep1_chr22_sorted.bam"), package="mosaicsExample"),
+  chipFileFormat="bam", chipPET=FALSE, chipFragLen=200,
+  controlFile=system.file( file.path("extdata","wgEncodeBroadHistoneGm12878ControlStdAlnRep1_chr22_sorted.bam"), package="mosaicsExample"), 
+  controlFileFormat="bam", controlPET=FALSE, controlFragLen=200, parallel=TRUE, nCore=8 )
+peakHM
+
+peakHM <- findSummit( peakHM, parallel=TRUE, nCore=8 )
+head(print(peakHM))
+plot( peakHM, filename="~/peakplot_HM.pdf" )
+
+peakHM <- adjustBoundary( peakHM, parallel=TRUE, nCore=8 )
+peakHM
+head(print(peakHM))
+
+peakHM <- filterPeak( peakHM, parallel=TRUE, nCore=8 )
+peakHM
+head(print(peakHM))
+
+export( peakHM, type = "txt", filename = "./peakHM.txt" )
+export( peakHM, type = "bed", filename = "./peakHM.bed" )
+export( peakHM, type = "gff", filename = "./peakHM.gff" )
+export( peakHM, type = "narrowPeak", filename = "./peakHM.narrowPeak" )
+export( peakHM, type = "broadPeak", filename = "./peakHM.broadPeak" )
 }
 }
 \keyword{classes}

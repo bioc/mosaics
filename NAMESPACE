@@ -1,13 +1,22 @@
 useDynLib(mosaics)
+exportPattern("^[[:alpha:]]+")
 
-import( methods, graphics, Rcpp, MASS, splines, lattice, IRanges )
+import( methods, graphics, Rcpp, MASS, splines, lattice )
+
+import( IRanges, GenomicRanges, GenomicAlignments, Rsamtools, GenomeInfoDb, S4Vectors )
 
 export( constructBins, readBins, mosaicsFit, mosaicsPeak, mosaicsRunAll, generateWig )
 
 export( mosaicsFitHMM, mosaicsPeakHMM )
+
+export( extractReads, findSummit, adjustBoundary, filterPeak )
 
 export( show, print, plot )
 
 export( estimates )
 
 export( export )
+
+export( bdBin, empFDR, readCoverage, read, seqDepth, postProb )
+
+export( chrID, coord, tagCount, input, mappability, gcContent )

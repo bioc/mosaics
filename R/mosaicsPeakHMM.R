@@ -4,7 +4,7 @@
 setMethod(
     f="mosaicsPeakHMM",
     signature="MosaicsHMM",
-    definition=function( object, FDR=0.05, decoding="viterbi",
+    definition=function( object, FDR=0.05, decoding="posterior",
     	binsize=NA, maxgap=0, minsize=0, thres=0,
     	parallel=FALSE, nCore=8 ) 
     {     	            
@@ -152,7 +152,7 @@ setMethod(
     		}
 	    }
     		
-		# binding bin, posterior probability, & empirical FDR
+		  # binding bin, posterior probability, & empirical FDR
     	
     	chrvec <- rep( names(bd_bin_chr), sapply(bd_bin_chr,length) )
     	coordvec <- unlist(lapply( object@inputdata, function(x) x[,1] ))
@@ -180,8 +180,16 @@ setMethod(
 	        signalModel=object@peakParam@signalModel, 
 	        FDR=FDR, maxgap=maxgap, minsize=minsize, thres=thres,
 	        decoding=decoding )
-	    new( "MosaicsPeak",         
-	        peakList=peakList, peakParam=peakParam, 
-	        bdBin=bdBin, postProb=postProb, empFDR=empFDR )
+	    
+      tagDataEmpty <- new( "TagData", 
+          read=list(), coverage=list() )   
+      
+      new( "MosaicsPeak",         
+	        peakList=peakList, 
+          chrID=object@chrID, coord=object@coord, 
+          tagCount=object@tagCount, input=object@input, 
+          mappability=object@mappability, gcContent=object@gcContent,
+          peakParam=peakParam, bdBin=bdBin, postProb=postProb, empFDR=empFDR,
+          tagLoaded=FALSE, tagData=tagDataEmpty, seqDepth=object@seqDepth )
 	}
 )

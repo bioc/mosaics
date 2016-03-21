@@ -1,9 +1,159 @@
+ 
+Changes in version 2.9.9:
 
+BUG FIXES
+
+    o generateWig(): fix the error specific to the BAM file format, which generated unnecessary lines in the output WIG file.
+	
+Changes in version 2.9.8:
+
+BUG FIXES
+
+    o construtBins(), generateWig(), extractReads(): 'readGAlignments' replaces the defunct 'readGAlignmentsFromBam'.
+	
+	o extractReads(), findSummit(), adjustBoundary(), filterPeak(): more safeguards added.
+	
+	o constructBins(): fix typo.
+	
+Changes in version 2.9.7:
+
+BUG FIXES
+
+    o mosaicsPeak(): fix the error that chrID is missing.
+
+    o adjustBoundary(): fix the error that chrID is incorrectly processed.
+
+    o constructBins(), generateWig(), extractReads(): fix the error for the processing of BAM files for PET data.
+	
+	
+Changes in version 2.9.6:
+
+SIGNIFICANT USER-VISIBLE CHANGES
+	
+	o export(): aveLogP is report as column 9 for 'narrowPeak' and 'broadPeak' file formats.
+	
+
+Changes in version 2.9.5:
+
+SIGNIFICANT USER-VISIBLE CHANGES
+	
+	o extractReads(): Users can now choose whether to keep read-level data with the argument 'keepReads'.
+	
+	o Object sizes are significantly decreased for the output of extractReads(), findSummit(), adjustBoundary(), and filterPeak().
+	
+	o MosaicsPeak class definition is modified to reflect the changes above.
+	
+	o In the peak lists, now, logMinP and logAveP (i.e., -log10 transformation of minP and aveP, respectively) are reported instead of minP and aveP, respectively.
+	
+	o show() method becomes significantly faster.
+
+	
+Changes in version 2.9.4:
+
+SIGNIFICANT USER-VISIBLE CHANGES
+	
+	o Peak list now incorporates mean(-log10(PP)), summitSignal, and summit.
+	
+	o In the peak list, the counts of control samples and the log ratio of ChIP over control counts are adjusted by the ratio of sequencing depth, instead of the ratio of sum of ChIP and control counts.
+	
+	o postProb(): Return posterior probabilities for arbitrary peak regions.
+
+    o export() becomes significantly faster.
+
+    o construtBins(): calculate sequencing depth and keep this information in the first line (commented) of bin-level files.
+	
+	o seqDepth(): returns sequencing depth information, which can be applied to all of BinData, MosaicsFit, MosaicsHMM, MosaicsPeak class objects.
+	
+	o Name of method coverage() is changed to readCoverage().
+
+BUG FIXES
+
+    o findSummit() & adjustBoundary(): fix the error that an average point of multiple apart summit ties is reported as a summit. Now, the first summit block is chosen first and then an average point of the first summit block is reported as a summit. Also, fix some minor numerical issues regarding the calculation of summit locations.
+	
+	o filterPeak(): fix the error that the improvement of ChIP over control samples is set to zero when there is no control signal at the position. Now, in this case, control signal is set to zero.
+	
+	o adjustBoundary(): fix the error "multiple methods tables found for ‘coverage’" in R CMD check.
+	
+	
+Changes in version 2.9.3:
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o The vignette and the help documents are updated and polished.
+
+BUG FIXES
+
+    o generateWig(): fix the error that values in the exported files are written in scientific notation.
+	
+	o constructBins(): fix the error that values in the exported files are written in scientific notation.
+	
+	
+Changes in version 2.9.2:
+
+BUG FIXES
+
+    o extractReads(): fix the error that strands are incorrectly handle when loading read-level data.
+	
+	o export(): fix the error to incorrectly ask to run exportReads() when it is not needed.
+	
+	
+Changes in version 2.9.1:
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o The vignette and the help documents are updated and polished.
+
+BUG FIXES
+
+    o adjustBoundary(): fix the error that boundaries are incorrectly adjusted.
+
+	
+Changes in version 2.9.0:
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o extractReads(): Load read-level data and extract reads corresponding to each peak region.
+
+    o findSummit(): Find a summit within each peak, based on local ChIP profile.
+
+    o adjustBoundary(): Adjust peak boundaries (designed for histone modification peaks).
+
+    o filterPeak(): Filter peaks based on their peak lengths and signal strengths.
+    
+    o mosaicsPeakHMM: Posterior decoding is set to default (decoding="posterior").
+
+    o mosaics package now additionally depends on GenomicRanges, GenomicAlignments, Rsamtools, GenomeInfoDb, and S4Vectors packages.  
+
+BUG FIXES
+
+    o export(): fix the error that values in the exported files are written in scientific notation.
+
+
+Changes in version 2.0.2:
+
+BUG FIXES
+
+    o generateWig(): fix final coordinates when useChrfile=TRUE and chrfile is provided (not affect PET data).
+	
+	
+Changes in version 2.0.1:
+
+BUG FIXES
+
+    o constructBins() & generateWig(): the new error in version 2.0.0 fixed.
+    
+	
+Changes in version 2.0.0:
+
+   o BioConductor release 3.0.
+   
+   
 Changes in version 1.99.4:
 
 SIGNIFICANT USER-VISIBLE CHANGES
   
     o Typos in the vignette are fixed.
+	
 	
 Changes in version 1.99.3:
 
