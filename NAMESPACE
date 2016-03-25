@@ -1,4 +1,5 @@
 useDynLib(mosaics)
+exportPattern("^[[:alpha:]]+")
 
 import( methods, graphics, Rcpp, MASS, splines, lattice, IRanges )
 
