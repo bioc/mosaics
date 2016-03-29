@@ -18,8 +18,10 @@ Objects can be created by calls of the form \code{new("MosaicsHMM", ...)}.
   \describe{
     \item{\code{HMMfit}:}{Object of class \code{"list"}, 
     	representing the fitted MOSAiCS-HMM model. }
-    \item{\code{mosaicsFit}:}{Object of class \code{"MosaicsFit"}, 
-    	representing the fitted MOSAiCS model. }
+    \item{\code{inputdata}:}{Object of class \code{"list"}, 
+      representing the bin-level data. }
+    \item{\code{mosaicsEst}:}{Object of class \code{"MosaicsFitEst"},
+        representing estimates of MOSAiCS model fit. }
     \item{\code{init}:}{Object of class \code{"character"}, 
     		representing the approach to initialize MOSAiCS-HMM. }
     \item{\code{initPiMat}:}{Object of class \code{"numeric"}, 

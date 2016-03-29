@@ -24,6 +24,8 @@ Objects can be created by calls of the form \code{new("MosaicsPeak", ...)}.
     		representing a vector of bounded bins. }
     \item{\code{empFDR}:}{Object of class \code{"numeric"}, 
     		representing empirical FDR. }
+    \item{\code{postProb}:}{Object of class \code{"numeric"}, 
+      	representing posterior probability that a bin belongs to background. }
   }
 }
 \section{Methods}{
@@ -36,7 +38,7 @@ Objects can be created by calls of the form \code{new("MosaicsPeak", ...)}.
 \references{
 Kuan, PF, D Chung, G Pan, JA Thomson, R Stewart, and S Keles (2011), 
 "A Statistical Framework for the Analysis of ChIP-Seq Data", 
-\emph{Journal of the American Statistical Association}, Vol. 106, pp. 891-903.
+\emph{Journal of the American Statistical Association}, Vol. 106, pp. 891-903.  
 }
 \author{ Dongjun Chung, Pei Fen Kuan, Sunduz Keles }
 \seealso{

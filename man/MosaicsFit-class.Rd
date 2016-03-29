@@ -25,6 +25,12 @@ Objects can be created by calls of the form \code{new("MosaicsFit", ...)}.
         a vector of genomic coordinates. }
     \item{\code{tagCount}:}{Object of class \code{"numeric"},
         a vector of tag counts of ChIP sample. }
+    \item{\code{mappability}:}{Object of class \code{"numeric"},
+        a vector of mappability score. }
+    \item{\code{gcContent}:}{Object of class \code{"numeric"},
+        a vector of GC content score. }
+    \item{\code{input}:}{Object of class \code{"numeric"},
+        a vector of tag counts of matched control sample. }
     \item{\code{bic1S}:}{Object of class \code{"numeric"},
         Bayesian Information Criterion (BIC) value of one-signal-component model. }
     \item{\code{bic2S}:}{Object of class \code{"numeric"},
