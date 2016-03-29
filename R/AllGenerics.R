@@ -62,11 +62,6 @@ setGeneric( "mosaicsPeakHMM",
 
 # generic methods for "MosaicsPeak" class
 
-setGeneric( "peakList",
-    function( object, ... )
-    standardGeneric("peakList")
-)
-
 setGeneric( "export",
     function( object, ... )
     standardGeneric("export")

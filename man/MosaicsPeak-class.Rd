@@ -7,6 +7,8 @@
 %\alias{export,MosaicsPeak-method}
 \alias{print,MosaicsPeak-method}
 \alias{show,MosaicsPeak-method}
+\alias{bdBin}
+\alias{empFDR}
 
 \title{Class "MosaicsPeak" }
 \description{
@@ -33,6 +35,9 @@ Objects can be created by calls of the form \code{new("MosaicsPeak", ...)}.
     \item{export}{\code{signature(object = "MosaicsPeak")}: export peak list into text files. }
     \item{print}{\code{signature(x = "MosaicsPeak")}: return peak list in data frame format. }
     \item{show}{\code{signature(object = "MosaicsPeak")}: provide brief summary of the object. }
+    \item{empFDR}{\code{signature(object = "MosaicsPeak")}: return estimated empirical false discovery rate. }
+    \item{bdBin}{\code{signature(object = "MosaicsPeak")}: return a vector of bin-level binary indicator of peak calling,
+      where each element is 1 if the corresponding bin belongs to a peak and zero otherwise. }
      }
 }
 \references{
