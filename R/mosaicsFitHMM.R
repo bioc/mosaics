@@ -169,7 +169,7 @@ setMethod(
         # HMM estimation & prediction
     
 	    if ( parallel ) {
-	        out <- mclapply( dataSet_chr, 
+	        out <- parallel::mclapply( dataSet_chr, 
 	            function(x) .fitHMM( inputHMM=x, 
 	            	analysisType=analysisType, init=init, init.piMat=init.piMat,
 	            	nstate=2, binsize=binsize, max.iter=max.iter, eps=eps ),

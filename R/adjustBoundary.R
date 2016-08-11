@@ -44,7 +44,7 @@ setMethod(
       }
       
       if ( parallel == TRUE ) {        
-        out <- mclapply( 1:nrow(peakList), 
+        out <- parallel::mclapply( 1:nrow(peakList), 
           function(j) .trimExtend( 
             chipExist=chipExist[j], inputProvided=inputProvided, inputExist=inputExist[j],
             chrID=peakList[ j, 1 ], peakStart=peakList[ j, 2 ], peakEnd=peakList[ j, 3 ], 

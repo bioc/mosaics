@@ -79,7 +79,7 @@
 	    message( "Info: simulating ChIP tags for MOSAiCS-HMM..." )
 	    
 		if ( parallel ) {
-	        Ysim_HMM <- mclapply( mosaicsHMMEst, 
+	        Ysim_HMM <- parallel::mclapply( mosaicsHMMEst, 
 				function(x) .simulateHMM_1S( 
 					mosaicsHMMEst_chr=x, a=a, bEst=bEst, 
 					b=b, c=c, k=k, seed=seed ),
@@ -122,7 +122,7 @@
 	    message( "Info: simulating ChIP tags for MOSAiCS-HMM..." )
 	    
 		if ( parallel ) {			
-			Ysim_HMM <- mclapply( mosaicsHMMEst, 
+			Ysim_HMM <- parallel::mclapply( mosaicsHMMEst, 
 				function(x) .simulateHMM_2S( 
 					mosaicsHMMEst_chr=x, a=a, bEst=bEst, 
 					p1=p1, b1=b1, c1=c1, b2=b2, c2=c2, k=k, seed=seed ),

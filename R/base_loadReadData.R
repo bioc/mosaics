@@ -124,7 +124,7 @@
     # (using parallel computing, if parallel exists)
     
     if ( parallel == TRUE ) {        
-      greads <- mclapply( chrCommon, 
+      greads <- parallel::mclapply( chrCommon, 
         function(x) .extread2GRanges( chr=x, 
           outfileName=paste(tempfileName[1],"_",x,sep=""), 
           nRow=summaryInfo[ summaryInfo[,1]==x, 2 ], PET=PET ), 
@@ -193,11 +193,11 @@
 			#  strand = Rle( "*", length(greads) ) )
 			#)
       
-      suppressWarnings( greads <- readGAlignmentPairsFromBam( readfile, param = param ) )
+      suppressWarnings( greads <- readGAlignmentPairs( readfile, param = param ) )
 
       snms = seqnames(greads)
-      starts = start(left(greads))
-      ends = end(right(greads))
+      starts = start(first(greads))
+      ends = end(last(greads))
       
       # remove reads with negative widths         
       idx = (starts >= ends)
@@ -225,7 +225,7 @@
   message( "Info: Processing and combining peak list and reads..." )    
   
   if ( parallel == TRUE ) {        
-    fragSetOrg <- mclapply( chrCommon, function(chr) {
+    fragSetOrg <- parallel::mclapply( chrCommon, function(chr) {
       suppressWarnings( greads[[chr]] <- trim(greads[[chr]]) )
       #suppressWarnings( midp <- resize( shift( greads[[chr]], width(greads[[chr]])/2 ), 1 ) )
       midp <- shift( greads[[chr]], width(greads[[chr]])/2 )
@@ -264,7 +264,7 @@
   # flatten reads to match them to peak list for easier processing in later steps
 
   if ( parallel == TRUE ) {
-    fragSet <- mclapply( as.list(1:nPeak), function(i) {
+    fragSet <- parallel::mclapply( as.list(1:nPeak), function(i) {
       return(fragSetOrg[[ peakList[i,1] ]][[ nameVecAll[i] ]])
     }, mc.cores = nCore )
   } else {
@@ -287,7 +287,7 @@
   message( "Info: Calculating coverage..." )    
   
   if ( parallel == TRUE ) {
-    stackedFragment <- mclapply( fragSet, function(fragEach) {
+    stackedFragment <- parallel::mclapply( fragSet, function(fragEach) {
       outmat <- vector( "list", 3 )
       
       if ( length(fragEach) > 0 ) {

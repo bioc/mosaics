@@ -17,7 +17,7 @@
   # calculate summary statistics of posterior probabilities
   
   if ( parallel == TRUE ) {
-    out <- mclapply( chrCommon, function(chrID) {      
+    out <- parallel::mclapply( chrCommon, function(chrID) {      
       peakSel <- peakRegionChr[[ chrID ]]
       ppSel <- postProbChr[[ chrID ]]
       

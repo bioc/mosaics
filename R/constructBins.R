@@ -178,11 +178,11 @@ constructBins <- function( infile=NULL, fileFormat=NULL, outfileLoc="./",
     			#  strand = Rle( "*", length(greads) ) )
     			#)
       
-          suppressWarnings( greads <- readGAlignmentPairsFromBam( readfile, param = param ) )
+          suppressWarnings( greads <- readGAlignmentPairs( infile, param = param ) )
     
           snms = seqnames(greads)
-          starts = start(left(greads))
-          ends = end(right(greads))
+          starts = start(first(greads))
+          ends = end(last(greads))
           
           # remove reads with negative widths         
           idx = (starts >= ends)

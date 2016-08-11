@@ -40,7 +40,7 @@
     # calculate strata-specific parameters
     
     if ( parallel ) {
-        yParamList <- mclapply( ySubList, 
+        yParamList <- parallel::mclapply( ySubList, 
             function(x) .getParamZ0( x, bgEst=bgEst, Y_freq=Y_freq ),
             mc.cores=nCore )    
     } else {

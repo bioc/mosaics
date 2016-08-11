@@ -85,15 +85,15 @@ Chung, D, Zhang Q, and Keles S (2014), "MOSAiCS-HMM: A model-based approach for 
 library(mosaicsExample)
 
 constructBins( infile=system.file( file.path("extdata","wgEncodeSydhTfbsGm12878Stat1StdAlnRep1_chr22_sorted.bam"), package="mosaicsExample"), 
-    fileFormat="bam", outfileLoc="~/", 
+    fileFormat="bam", outfileLoc="./", 
     PET=FALSE, fragLen=200, binSize=200, capping=0 )
 constructBins( infile=system.file( file.path("extdata","wgEncodeSydhTfbsGm12878InputStdAlnRep1_chr22_sorted.bam"), package="mosaicsExample"), 
-    fileFormat="bam", outfileLoc="~/", 
+    fileFormat="bam", outfileLoc="./", 
     PET=FALSE, fragLen=200, binSize=200, capping=0 )
     
 binTFBS <- readBins( type=c("chip","input"),
-    fileName=c( "~/wgEncodeSydhTfbsGm12878Stat1StdAlnRep1_chr22_sorted.bam_fragL200_bin200.txt",
-    "~/wgEncodeSydhTfbsGm12878InputStdAlnRep1_chr22_sorted.bam_fragL200_bin200.txt" ) )
+    fileName=c( "wgEncodeSydhTfbsGm12878Stat1StdAlnRep1_chr22_sorted.bam_fragL200_bin200.txt",
+    "wgEncodeSydhTfbsGm12878InputStdAlnRep1_chr22_sorted.bam_fragL200_bin200.txt" ) )
 }
 }
 \keyword{models}

@@ -72,7 +72,7 @@ mosaicsRunAll <- function(
     if ( parallel == TRUE ) {
         # if "parallel" package exists, utilize parallel computing with "mclapply"
         
-        mclapply( processSet, function(x) {
+        parallel::mclapply( processSet, function(x) {
             constructBins( 
                 infile = x[1], fileFormat = x[2], outfileLoc = binfileDir, 
                 byChr = byChr, useChrfile = useChrfile, chrfile = chrfile, excludeChr = excludeChr,
@@ -149,7 +149,7 @@ mosaicsRunAll <- function(
         if ( parallel == TRUE ) {
             # if "parallel" package exists, utilize parallel computing with "mclapply"
             
-            out <- mclapply( index_list, function(x) {    
+            out <- parallel::mclapply( index_list, function(x) {    
                 # read in bin-level file
                 
                 chip_file <- list_chip[ x[1] ]

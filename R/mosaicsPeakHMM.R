@@ -36,7 +36,7 @@ setMethod(
         # posterior probability: P( Z_i=0 | Y )  
     
 	    if ( parallel ) {
-	        betapH_chr <- mclapply( object@HMMfit, 
+	        betapH_chr <- parallel::mclapply( object@HMMfit, 
 	            function(x) {    
 				    #pp0_org <- ( x$aMat[1,] * x$bMat[1,] ) / x$px
 				    #pp1_org <- ( x$aMat[2,] * x$bMat[2,] ) / x$px
@@ -68,7 +68,7 @@ setMethod(
     		# decoding using Viterbi algorithm
     		
 		    if ( parallel ) {
-		        bd_bin_chr <- mclapply( object@HMMfit, 
+		        bd_bin_chr <- parallel::mclapply( object@HMMfit, 
 		            function(x) .ff_viterbi( x$piMat, x$gMat_chr, x$pi0Vec ),
 		            mc.cores=nCore )    
 		    } else {
@@ -112,7 +112,7 @@ setMethod(
     	names(ann.input) <- names(object@inputdata)
     
 	    if ( parallel ) {
-	        out <- mclapply( ann.input, 
+	        out <- parallel::mclapply( ann.input, 
 	            function(x) .annotateHMM( 
 	            	object=x, analysisType=object@peakParam@analysisType,
 	            	maxgap=maxgap, minsize=minsize, thres=thres, 

@@ -31,7 +31,7 @@ setMethod(
     summit <- peakList[ , ncol(peakList) ]
     
     if ( parallel == TRUE ) {    
-      summitSignalOrg <- mclapply( 1:nrow(peakList), function(j) {
+      summitSignalOrg <- parallel::mclapply( 1:nrow(peakList), function(j) {
         
         coverageChIP <- object@tagData@coverage[[j]]$ChIP
         

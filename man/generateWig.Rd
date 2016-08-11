@@ -123,7 +123,7 @@ Chung, D, Zhang Q, and Keles S (2014), "MOSAiCS-HMM: A model-based approach for 
 library(mosaicsExample)
 
 generateWig( infile=system.file( file.path("extdata","wgEncodeSydhTfbsGm12878Stat1StdAlnRep1_chr22_sorted.bam"), package="mosaicsExample"), 
-    fileFormat="bam", outfileLoc="~/", 
+    fileFormat="bam", outfileLoc="./", 
     PET=FALSE, fragLen=200, span=200, capping=0, normConst=1 )
 }
 }

@@ -1,5 +1,13 @@
 useDynLib(mosaics)
+
 exportPattern("^[[:alpha:]]+")
+
+importFrom("grDevices", "dev.off", "pdf")
+
+importFrom("stats", "coef", "density", "dnbinom", "loess.smooth",
+           "rnbinom")
+
+importFrom("utils", "read.table", "write.table")
 
 import( methods, graphics, Rcpp, MASS, splines, lattice )
 

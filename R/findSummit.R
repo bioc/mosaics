@@ -18,7 +18,7 @@ setMethod(
     peakEnd <- peakList[,3]
     
     if ( parallel == TRUE ) {        
-      summits <- mclapply( as.list(1:nrow(peakList)), function(j) {
+      summits <- parallel::mclapply( as.list(1:nrow(peakList)), function(j) {
           
         if ( !is.na(object@tagData@coverage[[j]]$ChIP[[1]]) ) {
           

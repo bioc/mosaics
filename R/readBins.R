@@ -153,10 +153,10 @@ readBins <- function( type=c("chip","input"), fileName=NULL,
                     # processing (using parallel computing, if multicore exists)
                     
                     if ( parallel == TRUE ) {
-                        # if "multicore" package exists, utilize parallel computing with "mclapply"
+                        # if "multicore" package exists, utilize parallel computing with "parallel::mclapply"
                         #require(multicore)
                         
-                        out <- mclapply( dataList, function(x) { 
+                        out <- parallel::mclapply( dataList, function(x) { 
                             .processBin_MGCX( chip=x$chip, input=x$input,
                                 mapScore=x$mapScore, gcScore=x$gcScore, nNuc=x$nNuc, 
                                 dataType=dataType, rounding=rounding )
@@ -276,10 +276,10 @@ readBins <- function( type=c("chip","input"), fileName=NULL,
                     # processing (using parallel computing, if multicore exists)
                     
                     if ( parallel == TRUE ) {
-                        # if "multicore" package exists, utilize parallel computing with "mclapply"
+                        # if "multicore" package exists, utilize parallel computing with "parallel::mclapply"
                         #require(multicore)
                         
-                        out <- mclapply( dataList, function(x) { 
+                        out <- parallel::mclapply( dataList, function(x) { 
                             .processBin_XN( chip=x$chip, input=x$input, nNuc=x$nNuc, 
                                 dataType=dataType )
                             }, mc.cores = nCore )
@@ -390,10 +390,10 @@ readBins <- function( type=c("chip","input"), fileName=NULL,
                 # processing (using parallel computing, if multicore exists)
                 
                 if ( parallel == TRUE ) {
-                    # if "multicore" package exists, utilize parallel computing with "mclapply"
+                    # if "multicore" package exists, utilize parallel computing with "parallel::mclapply"
                     #require(multicore)
                     
-                    out <- mclapply( dataList, function(x) { 
+                    out <- parallel::mclapply( dataList, function(x) { 
                         .processBin_X( chip=x$chip, input=x$input, dataType=dataType ) 
                         }, mc.cores = nCore )
                 } else {
@@ -504,10 +504,10 @@ readBins <- function( type=c("chip","input"), fileName=NULL,
                     # processing (using parallel computing, if multicore exists)
                     
                     if ( parallel == TRUE ) {
-                        # if "multicore" package exists, utilize parallel computing with "mclapply"
+                        # if "multicore" package exists, utilize parallel computing with "parallel::mclapply"
                         #require(multicore)
                         
-                        out <- mclapply( dataList, function(x) { 
+                        out <- parallel::mclapply( dataList, function(x) { 
                             .processBin_MGC( chip=x$chip,
                                 mapScore=x$mapScore, gcScore=x$gcScore, nNuc=x$nNuc, 
                                 dataType=dataType, rounding=rounding )

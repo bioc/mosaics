@@ -109,19 +109,19 @@ library(mosaicsExample)
 # (STAT1 factor binding in GM12878 cell line, from ENCODE database)
 
 generateWig( infile=system.file( file.path("extdata","wgEncodeSydhTfbsGm12878Stat1StdAlnRep1_chr22_sorted.bam"), package="mosaicsExample"), 
-    fileFormat="bam", outfileLoc="~/", 
+    fileFormat="bam", outfileLoc="./", 
     PET=FALSE, fragLen=200, span=200, capping=0, normConst=1 )
 
 constructBins( infile=system.file( file.path("extdata","wgEncodeSydhTfbsGm12878Stat1StdAlnRep1_chr22_sorted.bam"), package="mosaicsExample"), 
-    fileFormat="bam", outfileLoc="~/", 
+    fileFormat="bam", outfileLoc="./", 
     PET=FALSE, fragLen=200, binSize=200, capping=0 )
 constructBins( infile=system.file( file.path("extdata","wgEncodeSydhTfbsGm12878InputStdAlnRep1_chr22_sorted.bam"), package="mosaicsExample"), 
-    fileFormat="bam", outfileLoc="~/", 
+    fileFormat="bam", outfileLoc="./", 
     PET=FALSE, fragLen=200, binSize=200, capping=0 )
     
 binTFBS <- readBins( type=c("chip","input"),
-    fileName=c( "~/wgEncodeSydhTfbsGm12878Stat1StdAlnRep1_chr22_sorted.bam_fragL200_bin200.txt",
-    "~/wgEncodeSydhTfbsGm12878InputStdAlnRep1_chr22_sorted.bam_fragL200_bin200.txt" ) )
+    fileName=c( "./wgEncodeSydhTfbsGm12878Stat1StdAlnRep1_chr22_sorted.bam_fragL200_bin200.txt",
+    "./wgEncodeSydhTfbsGm12878InputStdAlnRep1_chr22_sorted.bam_fragL200_bin200.txt" ) )
 binTFBS
 head(print(binTFBS))
 plot(binTFBS)
@@ -154,17 +154,17 @@ export( peakTFBS, type = "narrowPeak", filename = "./peakTFBS.narrowPeak" )
 # (H3K4me3 modification in GM12878 cell line, from ENCODE database)
 
 constructBins( infile=system.file( file.path("extdata","wgEncodeBroadHistoneGm12878H3k4me3StdAlnRep1_chr22_sorted.bam"), package="mosaicsExample"), 
-    fileFormat="bam", outfileLoc="~/", 
+    fileFormat="bam", outfileLoc="./", 
     byChr=FALSE, useChrfile=FALSE, chrfile=NULL, excludeChr=NULL, 
     PET=FALSE, fragLen=200, binSize=200, capping=0 )
 constructBins( infile=system.file( file.path("extdata","wgEncodeBroadHistoneGm12878ControlStdAlnRep1_chr22_sorted.bam"), package="mosaicsExample"), 
-    fileFormat="bam", outfileLoc="~/", 
+    fileFormat="bam", outfileLoc="./", 
     byChr=FALSE, useChrfile=FALSE, chrfile=NULL, excludeChr=NULL, 
     PET=FALSE, fragLen=200, binSize=200, capping=0 )
 
 binHM <- readBins( type=c("chip","input"),
-    fileName=c( "~/wgEncodeBroadHistoneGm12878H3k4me3StdAlnRep1_chr22_sorted.bam_fragL200_bin200.txt",
-    "~/wgEncodeBroadHistoneGm12878ControlStdAlnRep1_chr22_sorted.bam_fragL200_bin200.txt" ) )
+    fileName=c( "./wgEncodeBroadHistoneGm12878H3k4me3StdAlnRep1_chr22_sorted.bam_fragL200_bin200.txt",
+    "./wgEncodeBroadHistoneGm12878ControlStdAlnRep1_chr22_sorted.bam_fragL200_bin200.txt" ) )
 binHM
 plot(binHM)
 plot( binHM, plotType="input" )
@@ -190,7 +190,7 @@ peakHM
 
 peakHM <- findSummit( peakHM, parallel=TRUE, nCore=8 )
 head(print(peakHM))
-plot( peakHM, filename="~/peakplot_HM.pdf" )
+plot( peakHM, filename="./peakplot_HM.pdf" )
 
 peakHM <- adjustBoundary( peakHM, parallel=TRUE, nCore=8 )
 peakHM

@@ -86,17 +86,17 @@ showClass("MosaicsHMM")
 library(mosaicsExample)
 
 constructBins( infile=system.file( file.path("extdata","wgEncodeBroadHistoneGm12878H3k4me3StdAlnRep1_chr22_sorted.bam"), package="mosaicsExample"), 
-    fileFormat="bam", outfileLoc="~/", 
+    fileFormat="bam", outfileLoc="./", 
     byChr=FALSE, useChrfile=FALSE, chrfile=NULL, excludeChr=NULL, 
     PET=FALSE, fragLen=200, binSize=200, capping=0 )
 constructBins( infile=system.file( file.path("extdata","wgEncodeBroadHistoneGm12878ControlStdAlnRep1_chr22_sorted.bam"), package="mosaicsExample"), 
-    fileFormat="bam", outfileLoc="~/", 
+    fileFormat="bam", outfileLoc="./", 
     byChr=FALSE, useChrfile=FALSE, chrfile=NULL, excludeChr=NULL, 
     PET=FALSE, fragLen=200, binSize=200, capping=0 )
 
 binHM <- readBins( type=c("chip","input"),
-    fileName=c( "~/wgEncodeBroadHistoneGm12878H3k4me3StdAlnRep1_chr22_sorted.bam_fragL200_bin200.txt",
-    "~/wgEncodeBroadHistoneGm12878ControlStdAlnRep1_chr22_sorted.bam_fragL200_bin200.txt" ) )
+    fileName=c( "./wgEncodeBroadHistoneGm12878H3k4me3StdAlnRep1_chr22_sorted.bam_fragL200_bin200.txt",
+    "./wgEncodeBroadHistoneGm12878ControlStdAlnRep1_chr22_sorted.bam_fragL200_bin200.txt" ) )
 binHM
 plot(binHM)
 plot( binHM, plotType="input" )
@@ -122,7 +122,7 @@ peakHM
 
 peakHM <- findSummit( peakHM, parallel=TRUE, nCore=8 )
 head(print(peakHM))
-plot( peakHM, filename="~/peakplot_HM.pdf" )
+plot( peakHM, filename="./peakplot_HM.pdf" )
 
 peakHM <- adjustBoundary( peakHM, parallel=TRUE, nCore=8 )
 peakHM
