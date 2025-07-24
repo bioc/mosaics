@@ -122,7 +122,7 @@ SIGNIFICANT USER-VISIBLE CHANGES
     
     o mosaicsPeakHMM: Posterior decoding is set to default (decoding="posterior").
 
-    o mosaics package now additionally depends on GenomicRanges, GenomicAlignments, Rsamtools, GenomeInfoDb, and S4Vectors packages.  
+    o mosaics package now additionally depends on GenomicRanges, GenomicAlignments, Rsamtools, Seqinfo, and S4Vectors packages.  
 
 BUG FIXES
 
